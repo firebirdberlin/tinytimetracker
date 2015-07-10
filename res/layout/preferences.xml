@@ -1,0 +1,85 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/pref_worktime_settings"
+        android:key="pref_key_worktime_settings">
+
+        <EditTextPreference
+            android:key="pref_key_wifi_ssid"
+            android:summary="@string/pref_summary_wifi_ssid"
+            android:title="@string/pref_title_wifi_ssid" />
+
+        <EditTextPreference
+            android:key="pref_key_seconds_connection_lost"
+            android:summary="@string/pref_summary_seconds_connection_lost"
+            android:title="@string/pref_title_seconds_connection_lost"             
+            android:defaultValue="300"
+            android:inputType="number"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_worktime_settings"
+        android:key="pref_key_worktime_settings">
+
+        <EditTextPreference
+            android:key="pref_key_working_hours"
+            android:summary="@string/pref_summary_working_hours"
+            android:title="@string/pref_title_working_hours" 
+            android:defaultValue="8"
+            android:inputType="numberDecimal"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_notification_settings"
+        android:key="pref_key_notification_settings">
+
+        <CheckBoxPreference
+            android:title="@string/pref_title_show_notifications"
+            android:defaultValue="true"
+            android:summary="@string/pref_summary_show_notifications"
+            android:key="pref_key_show_notifications"
+            android:disableDependentsState="false" />
+
+        <firebirdberlin.com.tinytimetracker.SeekBarPreference
+            android:defaultValue="60"
+            android:dialogMessage="@string/pref_dialog_notification_interval_minutes"
+            android:key="pref_key_notification_interval_minutes"
+            android:max="360"
+            android:summary="@string/pref_summary_notification_interval_minutes"
+            android:text="@string/pref_unit_notification_interval_minutes"
+            android:title="@string/pref_title_notification_interval_minutes" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_credits"
+        android:key="pref_key_credits">
+        <Preference
+            android:key="pref_static_credits"
+            android:selectable="false"
+            android:title="Stefan Fruhner (2015)" />
+        <Preference
+            android:key="pref_static_credits2"
+            android:title="SeekBarPreference"
+            android:summary="Matthew Wiggins">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://android.hlidskialf.com/blog/code/android-seekbar-preference" />
+        </Preference>
+        <Preference
+            android:key="pref_static_icon_1"
+            android:title="Icon: hourglass"
+            android:summary="RRZEicons">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://commons.wikimedia.org/wiki/File:Hourglass_2.svg" />
+        </Preference>
+        <Preference
+            android:key="pref_static_icon_2"
+            android:title="Icon: settings"
+            android:summary="dtafalonso">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://www.iconarchive.com/show/android-l-icons-by-dtafalonso/Settings-L-icon.html" />
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>
