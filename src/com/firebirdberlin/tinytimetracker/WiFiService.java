@@ -20,10 +20,14 @@ import android.util.Log;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
+import com.getpebble.android.kit.PebbleKit;
+import com.getpebble.android.kit.util.PebbleDictionary;
 
 public class WiFiService extends Service {
 	private static String TAG = TinyTimeTracker.TAG + ".WiFiService";
+    private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
     private NotificationManager notificationManager = null;
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
@@ -71,7 +75,7 @@ public class WiFiService extends Service {
         if (! success){
             stopSelf();
         }
-		return Service.START_NOT_STICKY;
+        return Service.START_NOT_STICKY;
 	}
 
 	@Override
@@ -191,6 +195,9 @@ public class WiFiService extends Service {
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 
+                    if ( isPebbleConnected() ) {
+                        sendDataToPebble(format_seconds(seconds_today.intValue()));
+                    }
                 }
                 Log.w (TAG, "'"+network.SSID+"'");
                 // Calendar cal = Calendar.getInstance();
@@ -223,5 +230,19 @@ public class WiFiService extends Service {
 
         //return String.format("%02d:%02d:%02d", hours, minutes, sec);
         return String.format("%02d:%02d", hours, minutes);
+    }
+
+
+    private boolean isPebbleConnected() {
+        boolean connected = PebbleKit.isWatchConnected(mContext);
+        Log.i(TAG, "Pebble is " + (connected ? "connected" : "not connected"));
+        return connected;
+    }
+
+
+    private void sendDataToPebble(String formattedWorktime) {
+        PebbleDictionary data = new PebbleDictionary();
+        data.addString(2, formattedWorktime);
+        PebbleKit.sendDataToPebble(mContext, PEBBLE_APP_UUID, data);
     }
 }
