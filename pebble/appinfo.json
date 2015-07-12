@@ -1,0 +1,45 @@
+{
+  "uuid": "7100dca9-2d97-4ea9-a1a9-f27aae08d144",
+  "shortName": "TinyTimeTracker",
+  "longName": "TinyTimeTracker",
+  "companyName": "firebirdberlin",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt"],
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "KEY_TEMPERATURE": 0,
+    "KEY_CONDITIONS": 1
+  },
+  "resources": {
+      "media": [
+        {
+          "type": "font",
+          "name": "FONT_PERFECT_DOS_48",
+          "file": "fonts/perfect-dos-vga.ttf",
+          "compatibility":"2.7"
+        },
+        {
+          "type": "font",
+          "name": "FONT_PERFECT_DOS_30",
+          "file": "fonts/perfect-dos-vga.ttf",
+          "compatibility":"2.7"
+        },
+        {
+          "type": "font",
+          "name": "FONT_PERFECT_DOS_20",
+          "file": "fonts/perfect-dos-vga.ttf",
+          "compatibility":"2.7"
+        },
+        {
+          "type": "png",
+          "name": "IMAGE_BACKGROUND",
+          "file": "images/background.png"
+        }
+      ]
+  },
+  "capabilities": 
+      [ "location" ]
+}
