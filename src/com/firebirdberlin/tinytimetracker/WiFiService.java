@@ -169,17 +169,18 @@ public class WiFiService extends Service {
                     Long date_now = start_of_day(now); 
                     Log.w(TAG, "now: " + String.valueOf(date_now));
                     Log.w(TAG, "last_seen: " + String.valueOf(date_last_seen));
+
+                    SharedPreferences.Editor editor = settings.edit();
+
                     Long delta = now - last_seen;
                     if ( ! date_now.equals(date_last_seen)) {
                         Log.w(TAG, "date changed");
                         seconds_today = 0L;
+                        editor.putLong("last_notification", 0L);
                     } else if (delta < SECONDS_CONNECTION_LOST) {
                         seconds_today += delta;
                         Log.d(TAG, "seconds update: " + String.valueOf(delta));
                     }
-
-
-                    SharedPreferences.Editor editor = settings.edit();
 
                     if (seconds_today - last_notification >= notificationInterval){ 
                         editor.putLong("last_notification", seconds_today);
