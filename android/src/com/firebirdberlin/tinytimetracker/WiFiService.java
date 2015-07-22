@@ -27,17 +27,17 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 public class WiFiService extends Service {
-	private static String TAG = TinyTimeTracker.TAG + ".WiFiService";
+    private static String TAG = TinyTimeTracker.TAG + ".WiFiService";
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
     private NotificationManager notificationManager = null;
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
-	private Context mContext = null;
-	private Notification note;
-	private int NOTIFICATION_ID = 1337;
-	private int NOTIFICATION_ID_WIFI = 1338;
-	private int NOTIFICATION_ID_ERROR = 1339;
-	private PendingIntent pendingIntent;
+    private Context mContext = null;
+    private Notification note;
+    private int NOTIFICATION_ID = 1337;
+    private int NOTIFICATION_ID_WIFI = 1338;
+    private int NOTIFICATION_ID_ERROR = 1339;
+    private PendingIntent pendingIntent;
     private SharedPreferences settings = null;
 
     private Long SECONDS_CONNECTION_LOST = 300L;
@@ -46,25 +46,27 @@ public class WiFiService extends Service {
     private int notificationInterval = 60 * 60;
 
 
-	@Override
-	public void onCreate(){
-		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    @Override
+    public void onCreate(){
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-	}
+    }
 
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
 
-		mContext = this;
+        mContext = this;
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
         if ( ! wifiLock.isHeld()) {
             wifiLock.acquire();
         }
-		showNotification();
+        showNotification();
 
-		settings = PreferenceManager.getDefaultSharedPreferences(this);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
         showNotifications = Settings.showNotifications(mContext);
         notificationInterval = 60 * Settings.getNotificationInterval(mContext);
+
+        Log.e(TAG, settings.getString("pref_key_wifi_ssid_select", ""));
 
         TRACKED_SSID = settings.getString("pref_key_wifi_ssid", "");
         SECONDS_CONNECTION_LOST = Long.parseLong(settings.getString("pref_key_seconds_connection_lost", "300"));
@@ -74,25 +76,28 @@ public class WiFiService extends Service {
         registerReceiver(wifiReceiver, filter);
         boolean success = wifiManager.startScan();
         if (! success){
+            if ( isPebbleConnected()) {
+                sendDataToPebble("");
+             }
             stopSelf();
         }
         return Service.START_NOT_STICKY;
-	}
+    }
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
-	}
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
-	@Override
-	public void onDestroy(){
+    @Override
+    public void onDestroy(){
         unregisterReceiver(wifiReceiver);
 
         if (wifiLock.isHeld()) {
             wifiLock.release();
         }
         wifiLock = null;
-	}
+    }
 
 
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver(){
@@ -101,46 +106,47 @@ public class WiFiService extends Service {
         }
     };
 
-	private Notification buildNotification(String title, String text) {
-	 	note  = new Notification.Builder(this)
-			.setContentTitle(title)
-			.setContentText(text)
-			.setSmallIcon(R.drawable.ic_launcher)
-			.setContentIntent(pendingIntent)
-			.setAutoCancel(true).build();
-//			.addAction(R.drawable.ic_launcher, "unmute", pIntentUnmute).build();
-//			.addAction(R.drawable.icon, "More", pIntent)
-//			.addAction(R.drawable.icon, "And more", pIntent).build();
-		return note;
-	}
 
-	public void showNotification(){
+    private Notification buildNotification(String title, String text) {
+         note  = new Notification.Builder(this)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true).build();
+//            .addAction(R.drawable.ic_launcher, "unmute", pIntentUnmute).build();
+//            .addAction(R.drawable.icon, "More", pIntent)
+//            .addAction(R.drawable.icon, "And more", pIntent).build();
+        return note;
+    }
 
-		Intent intent = new Intent(this, WiFiService.class);
-		intent.putExtra("action", "click");
-		pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+    public void showNotification(){
 
-		note = buildNotification("TinyTimeTracker", "... is running.");
-		note.setLatestEventInfo(this, "TinyTimeTracker", "... is running", pendingIntent);
-		note.flags|=Notification.FLAG_FOREGROUND_SERVICE;
-		note.flags|=Notification.FLAG_NO_CLEAR;
-		startForeground(1337, note);
-	}
+        Intent intent = new Intent(this, WiFiService.class);
+        intent.putExtra("action", "click");
+        pendingIntent = PendingIntent.getService(this, 0, intent, 0);
 
-	public void updateNotification(String title, String text){
+        note = buildNotification("TinyTimeTracker", "... is running.");
+        note.setLatestEventInfo(this, "TinyTimeTracker", "... is running", pendingIntent);
+        note.flags|=Notification.FLAG_FOREGROUND_SERVICE;
+        note.flags|=Notification.FLAG_NO_CLEAR;
+        startForeground(1337, note);
+    }
+
+    public void updateNotification(String title, String text){
         if (! showNotifications) {
             return;
         }
 
-		note = buildNotification(title, text);
-		notificationManager.notify(NOTIFICATION_ID_WIFI, note);
-	}
+        note = buildNotification(title, text);
+        notificationManager.notify(NOTIFICATION_ID_WIFI, note);
+    }
 
 
-	public void showNotificationError(String title, String text){
-		note = buildNotification(title, text);
-		notificationManager.notify(NOTIFICATION_ID_ERROR, note);
-	}
+    public void showNotificationError(String title, String text){
+        note = buildNotification(title, text);
+        notificationManager.notify(NOTIFICATION_ID_ERROR, note);
+    }
 
 
     private void getWiFiNetworks(){
@@ -156,12 +162,13 @@ public class WiFiService extends Service {
         }
 
         String formattedWorkTime = "";
+        boolean network_found = false;
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
                 if (TRACKED_SSID.equals(network.SSID)) {
-
-                    Log.w (TAG, network.SSID + " " + network.capabilities);
+                    network_found = true;
+                    Log.w (TAG, network.SSID);
 
                     Long seconds_today = settings.getLong("seconds_today", 0L);
                     Long last_seen = settings.getLong("last_seen", 0L);
@@ -189,26 +196,31 @@ public class WiFiService extends Service {
                     }
 
                     if (seconds_today - last_notification >= notificationInterval){
+                        updateNotification(formatAsHours(seconds_today.intValue()), network.SSID);
                         editor.putLong("last_notification", seconds_today);
-                        updateNotification(format_seconds(seconds_today.intValue()), network.SSID);
                     }
 
                     editor.putLong("last_seen", now);
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 
-                    formattedWorkTime = format_seconds(seconds_today.intValue());
+                    formattedWorkTime = formatAsHours(seconds_today.intValue());
                 }
-                Log.w (TAG, "'"+network.SSID+"'");
-                // Calendar cal = Calendar.getInstance();
-                // cal.setTimeInMillis(network.timestamp / 1000L);
-                // Log.i(TAG, cal.toString());
-                // Long seconds = network.timestamp / 1000L / 1000L;
-                // showNotificationError("WIFI", format_seconds(seconds.intValue()));
             }
-        } else {
-            // showNotificationError("WIFI", "no networks  found");
         }
+
+        if ( !network_found) {
+            // user has left the office for less than 90 mins
+            Long seconds_today = settings.getLong("seconds_today", 0L);
+            Long last_seen = settings.getLong("last_seen", 0L);
+            Long now = System.currentTimeMillis() / 1000;
+            Long delta = now - last_seen;
+            Long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
+            if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
+                formattedWorkTime = formatAsMinutes(delta.intValue());
+            }
+        }
+
         if ( isPebbleConnected()) {
             sendDataToPebble(formattedWorkTime);
         }
@@ -226,7 +238,15 @@ public class WiFiService extends Service {
         return cal.getTimeInMillis() / 1000;
     }
 
-    public static String format_seconds(int seconds){
+
+    public static String formatAsMinutes(int seconds){
+        int min = seconds / 60;
+
+        return String.format("%dmin", min);
+    }
+
+
+    public static String formatAsHours(int seconds){
         int hours = seconds / 3600;
         int minutes = (seconds % 3600) / 60;
         int sec = seconds % 60;
@@ -255,11 +275,10 @@ public class WiFiService extends Service {
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        // Error checking that probably isn't needed but I added just in case.
         if(level == -1 || scale == -1) {
             return 50;
         }
 
-        return (int) (((float)level / (float)scale) * 100.0f);
+        return (int) ((float)level / (float)scale * 100.0f);
     }
 }
