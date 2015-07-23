@@ -15,6 +15,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.IBinder;
+import android.os.BatteryManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -39,8 +40,8 @@ public class WiFiService extends Service {
 	private PendingIntent pendingIntent;
     private SharedPreferences settings = null;
 
-    private Long SECONDS_CONNECTION_LOST = 300L; 
-    private String TRACKED_SSID = ""; 
+    private Long SECONDS_CONNECTION_LOST = 300L;
+    private String TRACKED_SSID = "";
     private boolean showNotifications = false;
     private int notificationInterval = 60 * 60;
 
@@ -154,13 +155,14 @@ public class WiFiService extends Service {
             }
         }
 
+        String formattedWorkTime = "";
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
                 if (TRACKED_SSID.equals(network.SSID)) {
 
                     Log.w (TAG, network.SSID + " " + network.capabilities);
-                    
+
                     Long seconds_today = settings.getLong("seconds_today", 0L);
                     Long last_seen = settings.getLong("last_seen", 0L);
                     Long last_notification = settings.getLong("last_notification", 0L);
@@ -169,8 +171,8 @@ public class WiFiService extends Service {
                     Log.w(TAG, "now: " + String.valueOf(now));
                     Log.w(TAG, "last_seen: " + String.valueOf(last_seen));
 
-                    Long date_last_seen = start_of_day(last_seen); 
-                    Long date_now = start_of_day(now); 
+                    Long date_last_seen = start_of_day(last_seen);
+                    Long date_now = start_of_day(now);
                     Log.w(TAG, "now: " + String.valueOf(date_now));
                     Log.w(TAG, "last_seen: " + String.valueOf(date_last_seen));
 
@@ -186,7 +188,7 @@ public class WiFiService extends Service {
                         Log.d(TAG, "seconds update: " + String.valueOf(delta));
                     }
 
-                    if (seconds_today - last_notification >= notificationInterval){ 
+                    if (seconds_today - last_notification >= notificationInterval){
                         editor.putLong("last_notification", seconds_today);
                         updateNotification(format_seconds(seconds_today.intValue()), network.SSID);
                     }
@@ -195,9 +197,7 @@ public class WiFiService extends Service {
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 
-                    if ( isPebbleConnected() ) {
-                        sendDataToPebble(format_seconds(seconds_today.intValue()));
-                    }
+                    formattedWorkTime = format_seconds(seconds_today.intValue());
                 }
                 Log.w (TAG, "'"+network.SSID+"'");
                 // Calendar cal = Calendar.getInstance();
@@ -209,8 +209,11 @@ public class WiFiService extends Service {
         } else {
             // showNotificationError("WIFI", "no networks  found");
         }
+        if ( isPebbleConnected()) {
+            sendDataToPebble(formattedWorkTime);
+        }
         stopSelf();
-    } 
+    }
 
 
     private Long start_of_day(Long timestamp){
@@ -243,6 +246,20 @@ public class WiFiService extends Service {
     private void sendDataToPebble(String formattedWorktime) {
         PebbleDictionary data = new PebbleDictionary();
         data.addString(2, formattedWorktime);
+        data.addInt32(3, getBatteryLevel());
         PebbleKit.sendDataToPebble(mContext, PEBBLE_APP_UUID, data);
+    }
+
+    public int getBatteryLevel() {
+        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        // Error checking that probably isn't needed but I added just in case.
+        if(level == -1 || scale == -1) {
+            return 50;
+        }
+
+        return (int) (((float)level / (float)scale) * 100.0f);
     }
 }
