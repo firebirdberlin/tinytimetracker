@@ -3,7 +3,7 @@
   "shortName": "TinyTimeTracker",
   "longName": "TinyTimeTracker",
   "companyName": "firebirdberlin",
-  "versionLabel": "1.0",
+  "versionLabel": "1.1",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
   "watchapp": {
@@ -40,6 +40,6 @@
         }
       ]
   },
-  "capabilities": 
+  "capabilities":
       [ "location" ]
 }
