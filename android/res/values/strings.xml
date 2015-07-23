@@ -8,7 +8,8 @@
     <string name="pref_notification_settings">Notifications</string>
     <string name="pref_credits">Credits</string>
     <string name="pref_title_wifi_ssid">WiFi SSID</string>
-    <string name="pref_summary_wifi_ssid">The name of the WiFi networki.</string>
+    <string name="pref_title_wifi_ssid_manual">Current WiFi SSID</string>
+    <string name="pref_summary_wifi_ssid">The name of the WiFi network.</string>
     <string name="pref_title_seconds_connection_lost">Inactivity time in seconds</string>
     <string name="pref_summary_seconds_connection_lost">Time after which the network is regarded as inactive.</string>
     <string name="pref_dialog_notification_interval_minutes">Time in minutes after which the notification will reappear.</string>
