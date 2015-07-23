@@ -3,21 +3,150 @@
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
 #define KEY_WORKTIME 2
+#define KEY_BATTERY_PERCENT 3
 
 static Window *window;
+static Layer *s_clock_layer;
+static Layer *s_worktime_layer;
 static TextLayer *text_layer;
 static TextLayer *s_weather_layer;
-static TextLayer *s_worktime_layer;
+static TextLayer *s_condition_layer;
+static TextLayer *s_worktime_text_layer;
+static GFont s_font;
 static GFont s_time_font;
-static GFont s_weather_font;
-static GFont s_worktime_font;
+static GFont s_font_18;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
+
+static PropertyAnimation *s_property_animation;
+
+static int angle_45 = TRIG_MAX_ANGLE / 8;
+static int angle_90 = TRIG_MAX_ANGLE / 4;
+static int angle_180 = TRIG_MAX_ANGLE / 2;
+static int angle_270 = 3 * TRIG_MAX_ANGLE / 4;
+
+int phone_battery_percent = 0;
+/*\
+|*| DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
+\*/
+static void graphics_draw_arc(GContext *ctx, GPoint center, int radius, int thickness, int start_angle, int end_angle, GColor c) {
+    int32_t xmin = 65535000, xmax = -65535000, ymin = 65535000, ymax = -65535000;
+    int32_t cosStart, sinStart, cosEnd, sinEnd;
+    int32_t r, t;
+
+    while (start_angle < 0) start_angle += TRIG_MAX_ANGLE;
+    while (end_angle < 0) end_angle += TRIG_MAX_ANGLE;
+
+    start_angle %= TRIG_MAX_ANGLE;
+    end_angle %= TRIG_MAX_ANGLE;
+
+    if (end_angle == 0) end_angle = TRIG_MAX_ANGLE;
+
+    if (start_angle > end_angle) {
+        graphics_draw_arc(ctx, center, radius, thickness, start_angle, TRIG_MAX_ANGLE, c);
+        graphics_draw_arc(ctx, center, radius, thickness, 0, end_angle, c);
+    } else {
+        // Calculate bounding box for the arc to be drawn
+        cosStart = cos_lookup(start_angle);
+        sinStart = sin_lookup(start_angle);
+        cosEnd = cos_lookup(end_angle);
+        sinEnd = sin_lookup(end_angle);
+
+        r = radius;
+        // Point 1: radius & start_angle
+        t = r * cosStart;
+        if (t < xmin) xmin = t;
+        if (t > xmax) xmax = t;
+        t = r * sinStart;
+        if (t < ymin) ymin = t;
+        if (t > ymax) ymax = t;
+
+        // Point 2: radius & end_angle
+        t = r * cosEnd;
+        if (t < xmin) xmin = t;
+        if (t > xmax) xmax = t;
+        t = r * sinEnd;
+        if (t < ymin) ymin = t;
+        if (t > ymax) ymax = t;
+
+        r = radius - thickness;
+        // Point 3: radius-thickness & start_angle
+        t = r * cosStart;
+        if (t < xmin) xmin = t;
+        if (t > xmax) xmax = t;
+        t = r * sinStart;
+        if (t < ymin) ymin = t;
+        if (t > ymax) ymax = t;
+
+        // Point 4: radius-thickness & end_angle
+        t = r * cosEnd;
+        if (t < xmin) xmin = t;
+        if (t > xmax) xmax = t;
+        t = r * sinEnd;
+        if (t < ymin) ymin = t;
+        if (t > ymax) ymax = t;
+
+        // Normalization
+        xmin /= TRIG_MAX_RATIO;
+        xmax /= TRIG_MAX_RATIO;
+        ymin /= TRIG_MAX_RATIO;
+        ymax /= TRIG_MAX_RATIO;
+
+        // Corrections if arc crosses X or Y axis
+        if ((start_angle < angle_90) && (end_angle > angle_90)) {
+            ymax = radius;
+        }
+
+        if ((start_angle < angle_180) && (end_angle > angle_180)) {
+            xmin = -radius;
+        }
+
+        if ((start_angle < angle_270) && (end_angle > angle_270)) {
+            ymin = -radius;
+        }
+
+        // Slopes for the two sides of the arc
+        float sslope = (float)cosStart/ (float)sinStart;
+        float eslope = (float)cosEnd / (float)sinEnd;
+
+        if (end_angle == TRIG_MAX_ANGLE) eslope = -1000000;
+
+        int ir2 = (radius - thickness) * (radius - thickness);
+        int or2 = radius * radius;
+
+        graphics_context_set_stroke_color(ctx, c);
+
+        for (int x = xmin; x <= xmax; x++) {
+            for (int y = ymin; y <= ymax; y++)
+            {
+                int x2 = x * x;
+                int y2 = y * y;
+
+                if (
+                    (x2 + y2 < or2 && x2 + y2 >= ir2) && (
+                        (y > 0 && start_angle < angle_180 && x <= y * sslope) ||
+                        (y < 0 && start_angle > angle_180 && x >= y * sslope) ||
+                        (y < 0 && start_angle <= angle_180) ||
+                        (y == 0 && start_angle <= angle_180 && x < 0) ||
+                        (y == 0 && start_angle == 0 && x > 0)
+                    ) && (
+                        (y > 0 && end_angle < angle_180 && x >= y * eslope) ||
+                        (y < 0 && end_angle > angle_180 && x <= y * eslope) ||
+                        (y > 0 && end_angle >= angle_180) ||
+                        (y == 0 && end_angle >= angle_180 && x < 0) ||
+                        (y == 0 && start_angle == 0 && x > 0)
+                    )
+                )
+                graphics_draw_pixel(ctx, GPoint(center.x+x, center.y+y));
+            }
+        }
+    }
+}
 
 
 static void update_time() {
     // Get a tm structure
-    time_t temp = time(NULL); 
+    time_t temp = time(NULL);
     struct tm *tick_time = localtime(&temp);
 
     // Create a long-lived buffer
@@ -53,6 +182,68 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     }
 }
 
+static void anim_stopped_handler(Animation *animation, bool finished, void *context) {
+    property_animation_destroy(s_property_animation);
+    s_property_animation = NULL;
+}
+
+static void trigger_slide_animation_to(Layer *layer, GRect to_frame) {
+    if (s_property_animation) return;
+    GRect from_frame = layer_get_frame(layer);
+
+    if ( grect_equal(&from_frame, &to_frame) ) {
+        return;
+    }
+
+    s_property_animation = property_animation_create_layer_frame(layer, &from_frame, &to_frame);
+    animation_set_handlers((Animation*) s_property_animation, (AnimationHandlers) {
+        .stopped = anim_stopped_handler
+        }, NULL);
+    animation_schedule((Animation*) s_property_animation);
+}
+
+
+static void worktime_layer_draw(Layer *layer, GContext *ctx) {
+    GRect bounds = layer_get_bounds(layer);
+    graphics_context_set_fill_color(ctx, GColorWhite);
+
+    GSize textSize = text_layer_get_content_size(s_worktime_text_layer);
+    if (textSize.w > 0) {
+        graphics_fill_rect(ctx, bounds, 10, GCornersAll);
+        trigger_slide_animation_to(s_clock_layer, GRect(12, 34, 120, 120));
+    } else {
+        trigger_slide_animation_to(s_clock_layer, GRect(12, 24, 120, 120));
+    }
+    layer_mark_dirty(text_layer_get_layer(s_worktime_text_layer));
+}
+
+
+static void clock_layer_draw(Layer *layer, GContext *ctx) {
+    GRect bounds = layer_get_frame(layer);
+
+    // Draw a black filled rectangle with sharp corners
+    graphics_context_set_fill_color(ctx, GColorBlack);
+    graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+
+    // Draw a white filled circle a radius of half the layer height
+    graphics_context_set_fill_color(ctx, GColorWhite);
+    const int16_t half_h = (bounds.size.h) / 2;
+    const int16_t half_w = (bounds.size.w) / 2;
+    GPoint center = {half_w, half_h};
+    graphics_fill_circle(ctx, center, half_h - 10);
+
+    BatteryChargeState charge_state = battery_state_service_peek();
+    int battery_percent = charge_state.charge_percent;
+    if (battery_percent > 0) {
+        int angle = angle_180 + angle_180 * battery_percent/100;
+        graphics_draw_arc(ctx, center, half_h - 3, 3, angle_180, angle, GColorWhite);
+    }
+    if (phone_battery_percent > 0) {
+        int angle = angle_180 * phone_battery_percent/100;
+        graphics_draw_arc(ctx, center, half_h - 3, 3, 0, angle, GColorWhite);
+    }
+}
+
 
 static void window_load(Window *window) {
     // Create GBitmap, then set to created BitmapLayer
@@ -61,39 +252,55 @@ static void window_load(Window *window) {
     bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
 
+    s_font         = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_BOLD_28));
+    s_time_font    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_BOLD_36));
+    s_font_18      = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_18));
 
-    // Create time TextLayer
-    text_layer = text_layer_create(GRect(5, 53, 139, 50));
-    text_layer_set_background_color(text_layer, GColorClear);
-    text_layer_set_text_color(text_layer, GColorBlack);
+    s_clock_layer = layer_create(GRect(12, 24, 120, 120));
+    layer_set_update_proc(s_clock_layer, clock_layer_draw);
 
-    s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
-    text_layer_set_font(text_layer, s_time_font);
+    s_worktime_layer = layer_create(GRect(22, 0, 100, 30));
+    layer_set_update_proc(s_worktime_layer, worktime_layer_draw);
 
-    text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-
-    // Create temperature Layer
-    s_weather_layer = text_layer_create(GRect(0, 130, 144, 25));
-    text_layer_set_background_color(s_weather_layer, GColorClear);
-    text_layer_set_text_color(s_weather_layer, GColorWhite);
-
-    s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
-    text_layer_set_font(s_weather_layer, s_weather_font);
-
-    text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_weather_layer, "Loading...");
-
-    s_worktime_layer = text_layer_create(GRect(0, 10, 144, 40));
-    text_layer_set_background_color(s_worktime_layer, GColorClear);
-    text_layer_set_text_color(s_worktime_layer, GColorWhite);
-    s_worktime_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_30));
-    text_layer_set_font(s_worktime_layer, s_worktime_font);
-    text_layer_set_text_alignment(s_worktime_layer, GTextAlignmentCenter);
+    s_condition_layer = text_layer_create(GRect(72, 143, 72, 25));
+    text_layer_set_background_color(s_condition_layer, GColorClear);
+    text_layer_set_text_color(s_condition_layer, GColorWhite);
+    text_layer_set_font(s_condition_layer, s_font_18);
+    text_layer_set_text_alignment(s_condition_layer, GTextAlignmentRight);
+    text_layer_set_text(s_condition_layer, "");
 
     // Add it as a child layer to the Window's root layer
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(text_layer));
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_worktime_layer));
+    Layer *rootLayer = window_get_root_layer(window);
+    layer_add_child(rootLayer, s_clock_layer);
+    layer_add_child(rootLayer, text_layer_get_layer(s_condition_layer));
+    layer_add_child(rootLayer, s_worktime_layer);
+
+    // sub-layers
+    s_worktime_text_layer = text_layer_create(GRect(0, -4, 100, 30));
+    text_layer_set_background_color(s_worktime_text_layer, GColorClear);
+    text_layer_set_text_color(s_worktime_text_layer, GColorBlack);
+    text_layer_set_font(s_worktime_text_layer, s_font);
+    text_layer_set_text_alignment(s_worktime_text_layer, GTextAlignmentCenter);
+    // text_layer_set_text(s_worktime_text_layer, "00:00");
+
+    layer_add_child(s_worktime_layer, text_layer_get_layer(s_worktime_text_layer));
+
+    // Create time TextLayer
+    text_layer = text_layer_create(GRect(0, 35, 120, 50));
+    text_layer_set_background_color(text_layer, GColorClear);
+    text_layer_set_text_color(text_layer, GColorBlack);
+    text_layer_set_font(text_layer, s_time_font);
+    text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+
+    // temperature Layer
+    s_weather_layer = text_layer_create(GRect(0, 80, 120, 25));
+    text_layer_set_background_color(s_weather_layer, GColorClear);
+    text_layer_set_text_color(s_weather_layer, GColorBlack);
+    text_layer_set_font(s_weather_layer, s_font_18);
+    text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+
+    layer_add_child(s_clock_layer, text_layer_get_layer(text_layer));
+    layer_add_child(s_clock_layer, text_layer_get_layer(s_weather_layer));
 }
 
 static void window_unload(Window *window) {
@@ -102,14 +309,18 @@ static void window_unload(Window *window) {
 
     // Destroy BitmapLayer
     bitmap_layer_destroy(s_background_layer);
-    
+
     // Unload GFont
+    fonts_unload_custom_font(s_font);
     fonts_unload_custom_font(s_time_font);
-    fonts_unload_custom_font(s_weather_font);
-    fonts_unload_custom_font(s_worktime_font);
+    fonts_unload_custom_font(s_font_18);
+
+    layer_destroy(s_clock_layer);
     text_layer_destroy(text_layer);
     text_layer_destroy(s_weather_layer);
-    text_layer_destroy(s_worktime_layer);
+    text_layer_destroy(s_condition_layer);
+    text_layer_destroy(s_worktime_text_layer);
+    layer_destroy(s_worktime_layer);
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -126,13 +337,19 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Which key was received?
         switch(t->key) {
             case KEY_TEMPERATURE:
-                snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);
+                snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°C", (int)t->value->int32);
+                text_layer_set_text(s_weather_layer, temperature_buffer);
                 break;
             case KEY_CONDITIONS:
                 snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
+                text_layer_set_text(s_condition_layer, conditions_buffer);
                 break;
             case KEY_WORKTIME:
                 snprintf(worktime_buffer, sizeof(worktime_buffer), "%s", t->value->cstring);
+                text_layer_set_text(s_worktime_text_layer, worktime_buffer);
+                break;
+            case KEY_BATTERY_PERCENT:
+                phone_battery_percent = (int) t->value->int32;
                 break;
             default:
                 APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -142,10 +359,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Look for next item
         t = dict_read_next(iterator);
     }
-    // Assemble full string and display
-    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-    text_layer_set_text(s_weather_layer, weather_layer_buffer);
-    text_layer_set_text(s_worktime_layer, worktime_buffer);
 }
 
 
@@ -170,7 +383,7 @@ static void init(void) {
 
     const bool animated = true;
     window_stack_push(window, animated);
-    
+
     // Register with TickTimerService
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     app_message_register_inbox_received(inbox_received_callback);

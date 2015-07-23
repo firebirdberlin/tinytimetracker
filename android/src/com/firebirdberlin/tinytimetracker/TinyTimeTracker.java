@@ -39,12 +39,12 @@ public class TinyTimeTracker extends Activity {
         //setContentView(R.layout.main);
         timeView = new MyView(this);
         setContentView(timeView);
-		
+
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
@@ -66,34 +66,34 @@ public class TinyTimeTracker extends Activity {
         }
     };
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu items for use in the action bar
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main_activity_actions, menu);
-		return super.onCreateOptionsMenu(menu);
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle presses on the action bar items
-		switch (item.getItemId()) {
-			case R.id.action_settings:
-				Settings.openSettings(this);
-				return true;
-			case R.id.action_donate:
-				openDonationPage();
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
-		}
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Settings.openSettings(this);
+                return true;
+            case R.id.action_donate:
+                openDonationPage();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     private void openDonationPage() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, 
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
-        startActivity(browserIntent); 
-    }   
+        startActivity(browserIntent);
+    }
 
     public class MyView extends View {
          private Context mContext;
@@ -109,7 +109,7 @@ public class TinyTimeTracker extends Activity {
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
             Long seconds_today = settings.getLong("seconds_today", 0L);
-            int angle = 360 * seconds_today.intValue() / workingHoursInSeconds; 
+            int angle = 360 * seconds_today.intValue() / workingHoursInSeconds;
 
             int x = getWidth();
             int y = getHeight();
@@ -121,7 +121,7 @@ public class TinyTimeTracker extends Activity {
             paint.setStrokeCap(Paint.Cap.ROUND);
 
             final RectF rect = new RectF();
-            rect.set(x/2 - radius, y/2 - radius, x/2 + radius, y/2 + radius); 
+            rect.set(x/2 - radius, y/2 - radius, x/2 + radius, y/2 + radius);
             paint.setColor(Color.parseColor("#AA6AB4D7"));
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
             canvas.drawArc(rect, -90, angle, true, paint);
@@ -134,7 +134,7 @@ public class TinyTimeTracker extends Activity {
             paint.setTextSize(150);
             paint.setStrokeWidth(1);
             Rect bounds = new Rect();
-            String text = WiFiService.format_seconds(seconds_today.intValue());
+            String text = WiFiService.formatAsHours(seconds_today.intValue());
             paint.getTextBounds(text, 0, text.length(), bounds);
             int height = bounds.height();
             int width = bounds.width();
@@ -154,11 +154,11 @@ public class TinyTimeTracker extends Activity {
         Intent intent = new Intent(context, AlarmReceiver.class);
 
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
-                        
+
         AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 120000, sender);
     }
-                        
+
 
     public void enableBootReceiver(Context context){
         ComponentName receiver = new ComponentName(context, BootReceiver.class);

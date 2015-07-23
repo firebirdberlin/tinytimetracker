@@ -3,7 +3,7 @@
   "shortName": "TinyTimeTracker",
   "longName": "TinyTimeTracker",
   "companyName": "firebirdberlin",
-  "versionLabel": "1.0",
+  "versionLabel": "1.1",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
   "watchapp": {
@@ -17,20 +17,20 @@
       "media": [
         {
           "type": "font",
-          "name": "FONT_PERFECT_DOS_48",
-          "file": "fonts/perfect-dos-vga.ttf",
+          "name": "FONT_AUDIMAT_MONO_BOLD_36",
+          "file": "fonts/AudimatMB.ttf",
           "compatibility":"2.7"
         },
         {
           "type": "font",
-          "name": "FONT_PERFECT_DOS_30",
-          "file": "fonts/perfect-dos-vga.ttf",
+          "name": "FONT_AUDIMAT_MONO_BOLD_28",
+          "file": "fonts/AudimatMB.ttf",
           "compatibility":"2.7"
         },
         {
           "type": "font",
-          "name": "FONT_PERFECT_DOS_20",
-          "file": "fonts/perfect-dos-vga.ttf",
+          "name": "FONT_AUDIMAT_MONO_18",
+          "file": "fonts/AudimatM.ttf",
           "compatibility":"2.7"
         },
         {
@@ -40,6 +40,6 @@
         }
       ]
   },
-  "capabilities": 
+  "capabilities":
       [ "location" ]
 }

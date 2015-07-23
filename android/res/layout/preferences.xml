@@ -3,15 +3,21 @@
         android:title="@string/pref_worktime_settings"
         android:key="pref_key_worktime_settings">
 
+        <ListPreference
+            android:key="pref_key_wifi_ssid_select"
+            android:summary="@string/pref_summary_wifi_ssid"
+            android:title="@string/pref_title_wifi_ssid"
+            android:entries="@array/empty_array"
+            android:entryValues="@array/empty_array"
+        />
         <EditTextPreference
             android:key="pref_key_wifi_ssid"
             android:summary="@string/pref_summary_wifi_ssid"
-            android:title="@string/pref_title_wifi_ssid" />
-
+            android:title="@string/pref_title_wifi_ssid_manual" />
         <EditTextPreference
             android:key="pref_key_seconds_connection_lost"
             android:summary="@string/pref_summary_seconds_connection_lost"
-            android:title="@string/pref_title_seconds_connection_lost"             
+            android:title="@string/pref_title_seconds_connection_lost"
             android:defaultValue="300"
             android:inputType="number"
             />
@@ -25,7 +31,7 @@
         <EditTextPreference
             android:key="pref_key_working_hours"
             android:summary="@string/pref_summary_working_hours"
-            android:title="@string/pref_title_working_hours" 
+            android:title="@string/pref_title_working_hours"
             android:defaultValue="8"
             android:inputType="numberDecimal"
             />
@@ -49,8 +55,8 @@
             android:max="360"
             android:summary="@string/pref_summary_notification_interval_minutes"
             android:text="@string/pref_unit_notification_interval_minutes"
-            android:title="@string/pref_title_notification_interval_minutes" />
-
+            android:title="@string/pref_title_notification_interval_minutes"
+            android:dependency="pref_key_show_notifications"/>
     </PreferenceCategory>
 
     <PreferenceCategory
