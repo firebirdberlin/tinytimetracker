@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="@string/pref_worktime_settings"
+        android:title="@string/pref_wifi_settings"
         android:key="pref_key_worktime_settings">
 
         <ListPreference

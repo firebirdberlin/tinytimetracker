@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tiny Time Tracker</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="action_donate">Spenden</string>
+    <string name="action_pebble_app_store">Öffne Pebble App Store</string>
+    <string name="action_open_github">Beitragen</string>
+    <string name="pref_wifi_settings">WLAN</string>
+    <string name="pref_worktime_settings">Arbeitszeit</string>
+    <string name="pref_notification_settings">Benachrichtigungen</string>
+    <string name="pref_credits">Über</string>
+    <string name="pref_title_wifi_ssid">WLAN SSID</string>
+    <string name="pref_title_wifi_ssid_manual">Eingestellte WLAN SSID</string>
+    <string name="pref_summary_wifi_ssid">Der Name des überwachten WLAN Netzwerkes.</string>
+    <string name="pref_title_seconds_connection_lost">Inaktivitätszeit in Sekunden</string>
+    <string name="pref_summary_seconds_connection_lost">Zeit in Sekunden bis Abwesenheit erkannt wird.</string>
+    <string name="pref_dialog_notification_interval_minutes">Zeit nach der eine Benachrichtigung angezeigt werden soll.</string>
+    <string name="pref_title_notification_interval_minutes">Benachrichtigungsinterval</string>
+    <string name="pref_summary_notification_interval_minutes">Wie oft möchten Sie benachrichtigt werden ?</string>
+    <string name="pref_unit_notification_interval_minutes">min</string>
+    <string name="pref_title_show_notifications">Benachrichtigungen</string>
+    <string name="pref_summary_show_notifications">Send wiederkehrende Benachrichtigungen.</string>
+    <string name="pref_title_working_hours">Arbeitsstunden</string>
+    <string name="pref_summary_working_hours">Ihre tägliche Arbeitszeit in Stunden.</string>
+    <string-array name="empty_array"/>
+</resources>
