@@ -84,6 +84,12 @@ public class TinyTimeTracker extends Activity {
             case R.id.action_donate:
                 openDonationPage();
                 return true;
+            case R.id.action_pebble_app_store:
+                openPebbleAppStore();
+                return true;
+            case R.id.action_open_github:
+                openGitHub();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -94,6 +100,19 @@ public class TinyTimeTracker extends Activity {
                 Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
         startActivity(browserIntent);
     }
+
+
+    private void openPebbleAppStore() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
+        startActivity(intent);
+    }
+
+
+    private void openGitHub() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/firebirdberlin/tinytimetracker"));
+        startActivity(intent);
+    }
+
 
     public class MyView extends View {
          private Context mContext;
