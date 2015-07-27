@@ -10,13 +10,14 @@ static Layer *s_clock_layer;
 static Layer *s_worktime_layer;
 static TextLayer *text_layer;
 static TextLayer *s_weather_layer;
-static TextLayer *s_condition_layer;
 static TextLayer *s_worktime_text_layer;
 static GFont s_font;
 static GFont s_time_font;
-static GFont s_font_18;
+static GFont s_font_22;
 static BitmapLayer *s_background_layer;
+static BitmapLayer *s_icon_layer;
 static GBitmap *s_background_bitmap;
+static GBitmap *s_icon_bitmap = NULL;
 
 static PropertyAnimation *s_property_animation;
 
@@ -210,9 +211,9 @@ static void worktime_layer_draw(Layer *layer, GContext *ctx) {
     GSize textSize = text_layer_get_content_size(s_worktime_text_layer);
     if (textSize.w > 0) {
         graphics_fill_rect(ctx, bounds, 10, GCornersAll);
-        trigger_slide_animation_to(s_clock_layer, GRect(12, 34, 120, 120));
+        trigger_slide_animation_to(s_clock_layer, GRect(5, 34, 134, 134));
     } else {
-        trigger_slide_animation_to(s_clock_layer, GRect(12, 24, 120, 120));
+        trigger_slide_animation_to(s_clock_layer, GRect(5, 17, 134, 134));
     }
     layer_mark_dirty(text_layer_get_layer(s_worktime_text_layer));
 }
@@ -253,26 +254,18 @@ static void window_load(Window *window) {
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
 
     s_font         = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_BOLD_28));
-    s_time_font    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_BOLD_36));
-    s_font_18      = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_18));
+    s_time_font    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_BOLD_40));
+    s_font_22      = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_AUDIMAT_MONO_22));
 
-    s_clock_layer = layer_create(GRect(12, 24, 120, 120));
+    s_clock_layer = layer_create(GRect(5, 17, 134, 134));
     layer_set_update_proc(s_clock_layer, clock_layer_draw);
 
     s_worktime_layer = layer_create(GRect(22, 0, 100, 30));
     layer_set_update_proc(s_worktime_layer, worktime_layer_draw);
 
-    s_condition_layer = text_layer_create(GRect(72, 143, 72, 25));
-    text_layer_set_background_color(s_condition_layer, GColorClear);
-    text_layer_set_text_color(s_condition_layer, GColorWhite);
-    text_layer_set_font(s_condition_layer, s_font_18);
-    text_layer_set_text_alignment(s_condition_layer, GTextAlignmentRight);
-    text_layer_set_text(s_condition_layer, "");
-
     // Add it as a child layer to the Window's root layer
     Layer *rootLayer = window_get_root_layer(window);
     layer_add_child(rootLayer, s_clock_layer);
-    layer_add_child(rootLayer, text_layer_get_layer(s_condition_layer));
     layer_add_child(rootLayer, s_worktime_layer);
 
     // sub-layers
@@ -286,41 +279,93 @@ static void window_load(Window *window) {
     layer_add_child(s_worktime_layer, text_layer_get_layer(s_worktime_text_layer));
 
     // Create time TextLayer
-    text_layer = text_layer_create(GRect(0, 35, 120, 50));
+    text_layer = text_layer_create(GRect(0, 42, 134, 50));
     text_layer_set_background_color(text_layer, GColorClear);
     text_layer_set_text_color(text_layer, GColorBlack);
     text_layer_set_font(text_layer, s_time_font);
     text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 
     // temperature Layer
-    s_weather_layer = text_layer_create(GRect(0, 80, 120, 25));
+    s_weather_layer = text_layer_create(GRect(0, 87, 134, 25));
     text_layer_set_background_color(s_weather_layer, GColorClear);
     text_layer_set_text_color(s_weather_layer, GColorBlack);
-    text_layer_set_font(s_weather_layer, s_font_18);
+    text_layer_set_font(s_weather_layer, s_font_22);
     text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+
+    s_icon_layer = bitmap_layer_create(GRect(45, 11, 45, 45));
 
     layer_add_child(s_clock_layer, text_layer_get_layer(text_layer));
     layer_add_child(s_clock_layer, text_layer_get_layer(s_weather_layer));
+    layer_add_child(s_clock_layer, bitmap_layer_get_layer(s_icon_layer));
 }
 
 static void window_unload(Window *window) {
     // Destroy GBitmap
     gbitmap_destroy(s_background_bitmap);
+    gbitmap_destroy(s_icon_bitmap);
 
     // Destroy BitmapLayer
     bitmap_layer_destroy(s_background_layer);
+    bitmap_layer_destroy(s_icon_layer);
 
     // Unload GFont
     fonts_unload_custom_font(s_font);
     fonts_unload_custom_font(s_time_font);
-    fonts_unload_custom_font(s_font_18);
+    fonts_unload_custom_font(s_font_22);
 
     layer_destroy(s_clock_layer);
     text_layer_destroy(text_layer);
     text_layer_destroy(s_weather_layer);
-    text_layer_destroy(s_condition_layer);
     text_layer_destroy(s_worktime_text_layer);
     layer_destroy(s_worktime_layer);
+}
+
+static void assign_weather_icon(char* conditions_buffer){
+    if (s_icon_bitmap) {
+        gbitmap_destroy(s_icon_bitmap);
+        s_icon_bitmap = NULL;
+    }
+    if (strcmp(conditions_buffer, "01d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_01d);
+    } else if (strcmp(conditions_buffer, "01n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_01n);
+    } else if (strcmp(conditions_buffer, "02d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_02d);
+    } else if (strcmp(conditions_buffer, "02n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_02n);
+    } else if (strcmp(conditions_buffer, "03d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_03d);
+    } else if (strcmp(conditions_buffer, "03n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_03d);
+    } else if (strcmp(conditions_buffer, "04d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_04d);
+    } else if (strcmp(conditions_buffer, "04n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_04d);
+    } else if (strcmp(conditions_buffer, "09d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_09d);
+    } else if (strcmp(conditions_buffer, "09n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_09d);
+    } else if (strcmp(conditions_buffer, "10d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_10d);
+    } else if (strcmp(conditions_buffer, "10n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_10d);
+    } else if (strcmp(conditions_buffer, "11d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_11d);
+    } else if (strcmp(conditions_buffer, "11n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_11d);
+    } else if (strcmp(conditions_buffer, "13d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_13d);
+    } else if (strcmp(conditions_buffer, "13n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_13d);
+    } else if (strcmp(conditions_buffer, "50d") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_50d);
+    } else if (strcmp(conditions_buffer, "50n") == 0) {
+        s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_50d);
+    }
+    if (s_icon_bitmap) {
+        bitmap_layer_set_bitmap(s_icon_layer, s_icon_bitmap);
+        update_time();
+    }
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -342,7 +387,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
                 break;
             case KEY_CONDITIONS:
                 snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
-                text_layer_set_text(s_condition_layer, conditions_buffer);
+                assign_weather_icon(conditions_buffer);
+                APP_LOG(APP_LOG_LEVEL_DEBUG, "Loaded weather icon: '%s'", conditions_buffer);
                 break;
             case KEY_WORKTIME:
                 snprintf(worktime_buffer, sizeof(worktime_buffer), "%s", t->value->cstring);
