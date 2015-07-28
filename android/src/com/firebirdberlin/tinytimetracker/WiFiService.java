@@ -44,12 +44,15 @@ public class WiFiService extends Service {
     private String TRACKED_SSID = "";
     private boolean showNotifications = false;
     private int notificationInterval = 60 * 60;
+    private LogDataSource datasource;
 
 
     @Override
     public void onCreate(){
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        datasource = new LogDataSource(this);
+        datasource.open();
     }
 
     @Override
@@ -91,6 +94,7 @@ public class WiFiService extends Service {
 
     @Override
     public void onDestroy(){
+        datasource.close();
         unregisterReceiver(wifiReceiver);
 
         if (wifiLock.isHeld()) {
@@ -193,6 +197,10 @@ public class WiFiService extends Service {
                     } else if (delta < SECONDS_CONNECTION_LOST) {
                         seconds_today += delta;
                         Log.d(TAG, "seconds update: " + String.valueOf(delta));
+                        long tracker_id = datasource.getOrCreateTrackerID(network.SSID);
+                        Log.i(TAG, "TRACKER_ID : " + String.valueOf(tracker_id));
+                        long insertID = datasource.createLogEntry(tracker_id, now);
+                        Log.i(TAG, "insertID : " + String.valueOf(insertID));
                     }
 
                     if (seconds_today - last_notification >= notificationInterval){
