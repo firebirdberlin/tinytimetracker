@@ -177,19 +177,19 @@ public class WiFiService extends Service {
                     Long seconds_today = settings.getLong("seconds_today", 0L);
                     Long last_seen = settings.getLong("last_seen", 0L);
                     Long last_notification = settings.getLong("last_notification", 0L);
-                    Long now = System.currentTimeMillis() / 1000;
-
-                    Log.w(TAG, "now: " + String.valueOf(now));
+                    Long now = System.currentTimeMillis();
+                    Long now_s = now / 1000;
+                    Log.w(TAG, "now: " + String.valueOf(now_s));
                     Log.w(TAG, "last_seen: " + String.valueOf(last_seen));
 
                     Long date_last_seen = start_of_day(last_seen);
-                    Long date_now = start_of_day(now);
+                    Long date_now = start_of_day(now_s);
                     Log.w(TAG, "now: " + String.valueOf(date_now));
                     Log.w(TAG, "last_seen: " + String.valueOf(date_last_seen));
 
                     SharedPreferences.Editor editor = settings.edit();
 
-                    Long delta = now - last_seen;
+                    Long delta = now_s - last_seen;
                     if ( ! date_now.equals(date_last_seen)) {
                         Log.w(TAG, "date changed");
                         seconds_today = 0L;
@@ -197,9 +197,12 @@ public class WiFiService extends Service {
                     } else if (delta < SECONDS_CONNECTION_LOST) {
                         seconds_today += delta;
                         Log.d(TAG, "seconds update: " + String.valueOf(delta));
-                        long tracker_id = datasource.getOrCreateTrackerID(network.SSID);
+                        long tracker_id = datasource.getOrCreateTrackerID(network.SSID, "WLAN");
                         Log.i(TAG, "TRACKER_ID : " + String.valueOf(tracker_id));
-                        long insertID = datasource.createLogEntry(tracker_id, now);
+                        long insertID = datasource.addTimeStamp(tracker_id, now,
+                                                                SECONDS_CONNECTION_LOST);
+                        //LogEntry log = datasource.getLatestLogEntry(tracker_id);
+                        //seconds_today = log.getTimeDiffSeconds();
                         Log.i(TAG, "insertID : " + String.valueOf(insertID));
                     }
 
@@ -208,7 +211,7 @@ public class WiFiService extends Service {
                         editor.putLong("last_notification", seconds_today);
                     }
 
-                    editor.putLong("last_seen", now);
+                    editor.putLong("last_seen", now_s);
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 

@@ -5,9 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-
+import android.util.Log;
 
 public class LogDataSource {
+    private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
     private SQLiteDatabase database;
     private SQLiteHandler dbHelper;
 
@@ -24,22 +25,24 @@ public class LogDataSource {
         dbHelper.close();
     }
 
-    public long createTrackerEntry(String ssid) {
+    public long createTrackerEntry(String name, String method) {
         ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_SSID, ssid);
+        values.put(SQLiteHandler.COLUMN_NAME, name);
+        values.put(SQLiteHandler.COLUMN_METHOD, method);
         long insertId = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
         return insertId;
     }
 
-    public long getTrackerID(String ssid) {
+    public long getTrackerID(String name, String method) {
         Cursor cursor = null;
         long tracker_id = -1L;
         try{
-            cursor = database.rawQuery("SELECT _id FROM trackers WHERE ssid=?", new String[] {ssid + ""});
+            cursor = database.rawQuery("SELECT _id FROM trackers WHERE name=? AND method=?",
+                                       new String[] {name, method});
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
-                tracker_id  = cursor.getLong(cursor.getColumnIndex("_id"));
+                tracker_id  = cursor.getLong(cursor.getColumnIndex(SQLiteHandler.COLUMN_ID));
             }
         }finally {
             cursor.close();
@@ -47,19 +50,67 @@ public class LogDataSource {
         return tracker_id;
     }
 
-    public long getOrCreateTrackerID(String ssid) {
-        long tracker_id = getTrackerID(ssid);
+    public long getOrCreateTrackerID(String name, String method) {
+        long tracker_id = getTrackerID(name, method);
         if (tracker_id == -1L) {
-            tracker_id = createTrackerEntry(ssid);
+            tracker_id = createTrackerEntry(name, method);
         }
         return tracker_id;
     }
 
-    public long createLogEntry(long tracker_id, long timestamp) {
+    public long createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, tracker_id);
-        values.put(SQLiteHandler.COLUMN_TIMESTAMP, timestamp);
+        values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, timestamp_start);
+        values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, timestamp_end);
         long insertId = database.insert(SQLiteHandler.TABLE_LOGS, null, values);
         return insertId;
+    }
+
+    public long replaceLogEntry(LogEntry log_entry) {
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
+        values.put(SQLiteHandler.COLUMN_TRACKER_ID, log_entry.getTrackerID());
+        values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, log_entry.getTimestampStart());
+        values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
+        long log_id = database.replace(SQLiteHandler.TABLE_LOGS, null, values);
+        return log_id;
+    }
+
+    public LogEntry getLatestLogEntry(long tracker_id) {
+        Cursor cursor = null;
+        LogEntry log = null;
+        try{
+            cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                       + "WHERE tracker_id=? ORDER BY _id DESC LIMIT 1",
+                                       new String[] {String.valueOf(tracker_id)});
+
+            Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                long log_id = cursor.getLong(0);
+                long time_start = cursor.getLong(1);
+                long time_end = cursor.getLong(2);
+                log = new LogEntry(log_id, tracker_id, time_start, time_end);
+            }
+        }finally {
+            cursor.close();
+        }
+        return log;
+    }
+
+    public long addTimeStamp(long tracker_id, long timestamp, long seconds_connection_lost){
+        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker_id) + ", " + String.valueOf(timestamp) + ", " + String.valueOf(seconds_connection_lost) + ")");
+        LogEntry log = getLatestLogEntry(tracker_id);
+        if (log != null) {
+            long cmp_time = timestamp - 1000 * seconds_connection_lost;
+            if (log.getTimestampEnd() >= cmp_time) {
+                log.setTimestampEnd(timestamp);
+                return replaceLogEntry(log);
+            }
+        }
+
+        // make a new entry
+        return createLogEntry(tracker_id, timestamp, timestamp);
     }
 }
