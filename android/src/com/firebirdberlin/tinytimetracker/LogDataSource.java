@@ -99,6 +99,27 @@ public class LogDataSource {
         return log;
     }
 
+    public long getTotalDurationSince(long timestamp, long tracker_id) {
+        Cursor cursor = null;
+        long duration_seconds = 0;
+        try{
+            cursor = database.rawQuery("SELECT SUM(timestamp_end - timestamp_start) FROM logs "
+                                       + "WHERE tracker_id=? and timestamp_start>=?",
+                                       new String[] {String.valueOf(tracker_id),
+                                                     String.valueOf(timestamp)});
+
+            Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                Log.d(TAG, String.valueOf(cursor.getLong(0)) + " ms");
+                duration_seconds = cursor.getLong(0) / 1000L;
+            }
+        }finally {
+            cursor.close();
+        }
+        return duration_seconds;
+    }
+
     public long addTimeStamp(long tracker_id, long timestamp, long seconds_connection_lost){
         Log.i(TAG, "addTimestamp(" + String.valueOf(tracker_id) + ", " + String.valueOf(timestamp) + ", " + String.valueOf(seconds_connection_lost) + ")");
         LogEntry log = getLatestLogEntry(tracker_id);

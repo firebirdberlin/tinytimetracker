@@ -167,68 +167,51 @@ public class WiFiService extends Service {
 
         String formattedWorkTime = "";
         boolean network_found = false;
+        long now = System.currentTimeMillis();
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
                 if (TRACKED_SSID.equals(network.SSID)) {
                     network_found = true;
-                    Log.w (TAG, network.SSID);
+                    Log.d(TAG, network.SSID);
 
-                    Long seconds_today = settings.getLong("seconds_today", 0L);
-                    Long last_seen = settings.getLong("last_seen", 0L);
-                    Long last_notification = settings.getLong("last_notification", 0L);
-                    Long now = System.currentTimeMillis();
-                    Long now_s = now / 1000;
-                    Log.w(TAG, "now: " + String.valueOf(now_s));
-                    Log.w(TAG, "last_seen: " + String.valueOf(last_seen));
+                    long tracker_id = datasource.getOrCreateTrackerID(network.SSID, "WLAN");
+                    long log_id = datasource.addTimeStamp(tracker_id, now, SECONDS_CONNECTION_LOST);
 
-                    Long date_last_seen = start_of_day(last_seen);
-                    Long date_now = start_of_day(now_s);
-                    Log.w(TAG, "now: " + String.valueOf(date_now));
-                    Log.w(TAG, "last_seen: " + String.valueOf(date_last_seen));
+                    long date_now = start_of_day(now);
+                    long seconds_today = datasource.getTotalDurationSince(date_now, tracker_id);
 
+                    long last_notification = settings.getLong("last_notification", 0L);
                     SharedPreferences.Editor editor = settings.edit();
 
-                    Long delta = now_s - last_seen;
-                    if ( ! date_now.equals(date_last_seen)) {
+                    if (seconds_today < last_notification) {
                         Log.w(TAG, "date changed");
-                        seconds_today = 0L;
+                        last_notification = 0L;
                         editor.putLong("last_notification", 0L);
-                    } else if (delta < SECONDS_CONNECTION_LOST) {
-                        seconds_today += delta;
-                        Log.d(TAG, "seconds update: " + String.valueOf(delta));
-                        long tracker_id = datasource.getOrCreateTrackerID(network.SSID, "WLAN");
-                        Log.i(TAG, "TRACKER_ID : " + String.valueOf(tracker_id));
-                        long insertID = datasource.addTimeStamp(tracker_id, now,
-                                                                SECONDS_CONNECTION_LOST);
-                        //LogEntry log = datasource.getLatestLogEntry(tracker_id);
-                        //seconds_today = log.getTimeDiffSeconds();
-                        Log.i(TAG, "insertID : " + String.valueOf(insertID));
                     }
 
                     if (seconds_today - last_notification >= notificationInterval){
-                        updateNotification(formatAsHours(seconds_today.intValue()), network.SSID);
+                        updateNotification(formatAsHours((int) seconds_today), network.SSID);
                         editor.putLong("last_notification", seconds_today);
                     }
 
-                    editor.putLong("last_seen", now_s);
+                    editor.putLong("last_seen", now);
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 
-                    formattedWorkTime = formatAsHours(seconds_today.intValue());
+                    formattedWorkTime = formatAsHours((int) seconds_today);
                 }
             }
         }
 
         if ( !network_found) {
             // user has left the office for less than 90 mins
-            Long seconds_today = settings.getLong("seconds_today", 0L);
-            Long last_seen = settings.getLong("last_seen", 0L);
-            Long now = System.currentTimeMillis() / 1000;
-            Long delta = now - last_seen;
-            Long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
+            long seconds_today = settings.getLong("seconds_today", 0L);
+            long last_seen = settings.getLong("last_seen", 0L);
+            long delta = (now - last_seen)/1000L;
+            long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
             if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
-                formattedWorkTime = formatAsMinutes(delta.intValue());
+                formattedWorkTime = formatAsMinutes((int) delta);
             }
         }
 
@@ -239,14 +222,14 @@ public class WiFiService extends Service {
     }
 
 
-    private Long start_of_day(Long timestamp){
+    private long start_of_day(long timestamp){
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(timestamp * 1000L);
+        cal.setTimeInMillis(timestamp);
         cal.set(Calendar.MILLISECOND, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.HOUR_OF_DAY, 0);
-        return cal.getTimeInMillis() / 1000;
+        return cal.getTimeInMillis();
     }
 
 
