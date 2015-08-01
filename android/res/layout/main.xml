@@ -4,10 +4,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:text="Hello World, TinyTimeTrackerActivity"
-    />
+
+    <com.firebirdberlin.tinytimetracker.MainView
+        android:id="@+id/main_time_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        />
 </LinearLayout>
 
