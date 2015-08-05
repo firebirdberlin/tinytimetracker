@@ -10,21 +10,21 @@ import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 
 
-import java.lang.Runnable;
-
-public class TinyTimeTracker extends Activity {
+public class TinyTimeTracker extends FragmentActivity {
     public static final String TAG = "TinyTimeTracker";
-    private Handler viewHandler = new Handler();
-    private MainView timeView = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -32,32 +32,47 @@ public class TinyTimeTracker extends Activity {
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        timeView = (MainView) findViewById(R.id.main_time_view);
+
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
 
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
     }
 
+    private class MyPagerAdapter extends FragmentPagerAdapter {
+
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int pos) {
+            switch(pos) {
+
+            case 0: return new MainFragment();
+            case 1: return new StatsFragment();
+            default: return new MainFragment();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        viewHandler.post(updateView);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        viewHandler.removeCallbacks(updateView);
+        //viewHandler.removeCallbacks(updateView);
     }
-
-    Runnable updateView = new Runnable(){
-        @Override
-        public void run(){
-            timeView.invalidate();
-            viewHandler.postDelayed(updateView, 20000);
-        }
-    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
