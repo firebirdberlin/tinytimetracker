@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
@@ -75,6 +77,30 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
         long log_id = database.replace(SQLiteHandler.TABLE_LOGS, null, values);
         return log_id;
+    }
+
+    public List<LogEntry> getAllEntries(long tracker_id) {
+        List<LogEntry> entries = new ArrayList<LogEntry>();
+        Cursor cursor = null;
+
+        cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                   + "WHERE tracker_id=? ORDER BY _id DESC",
+                                   new String[] {String.valueOf(tracker_id)});
+
+        Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            long log_id = cursor.getLong(0);
+            long time_start = cursor.getLong(1);
+            long time_end = cursor.getLong(2);
+            LogEntry logEntry = new LogEntry(log_id, tracker_id, time_start, time_end);
+            entries.add(logEntry);
+
+            cursor.moveToNext();
+        }
+        // make sure to close the cursor
+        cursor.close();
+        return entries;
     }
 
     public LogEntry getLatestLogEntry(long tracker_id) {

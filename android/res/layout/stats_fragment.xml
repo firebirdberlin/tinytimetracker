@@ -4,11 +4,15 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-    <TextView
-        android:id="@+id/stats_view"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="stats goes here"
-        />
+    <ListView android:id="@id/android:list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:drawSelectorOnTop="false"/>
+
+    <TextView android:id="@id/android:empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="No data"/>
 </LinearLayout>
 

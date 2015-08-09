@@ -1,6 +1,10 @@
 package com.firebirdberlin.tinytimetracker;
 
 import android.util.Log;
+import android.text.format.DateFormat;
+import java.util.Locale;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 
 public class LogEntry {
@@ -45,5 +49,34 @@ public class LogEntry {
 
     public long getTimeDiffSeconds() {
         return (timestamp_end - timestamp_start)/1000;
+    }
+
+    // Will be used by the ArrayAdapter in the ListView
+    @Override
+    public String toString() {
+        return timestampToTimeString(timestamp_start) + " - " + timestampToTimeString(timestamp_end);
+        //return String.valueOf(timestamp_start) + " - " + String.valueOf(timestamp_end);
+    }
+
+    public String startAsDateString() {
+        return timestampToDateString(timestamp_start);
+    }
+
+    public String timestampToDateTimeString(long timestamp){
+        return timestampToString(timestamp, "YYYYMMddHHmm");
+    }
+
+    public String timestampToDateString(long timestamp){
+        return timestampToString(timestamp, "YYYYMMdd");
+    }
+
+    public String timestampToTimeString(long timestamp){
+        return timestampToString(timestamp, "HHmm");
+    }
+
+    public String timestampToString(long timestamp, String skeleton){
+        Date date = new Date(timestamp);
+        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return new SimpleDateFormat(pattern).format(date);
     }
 }
