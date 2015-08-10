@@ -84,7 +84,7 @@ public class LogDataSource {
         Cursor cursor = null;
 
         cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                   + "WHERE tracker_id=? ORDER BY _id DESC",
+                                   + "WHERE tracker_id=? ORDER BY timestamp_start DESC",
                                    new String[] {String.valueOf(tracker_id)});
 
         Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
@@ -108,7 +108,7 @@ public class LogDataSource {
         LogEntry log = null;
         try{
             cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                       + "WHERE tracker_id=? ORDER BY _id DESC LIMIT 1",
+                                       + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 1",
                                        new String[] {String.valueOf(tracker_id)});
 
             Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
