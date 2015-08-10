@@ -13,18 +13,31 @@ import java.util.List;
 import android.support.v4.app.ListFragment;
 
 public class StatsFragment extends ListFragment {
-    private LogDataSource datasource;
+    List<String> svalues = new ArrayList<String>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
 
-        datasource = new LogDataSource(getActivity());
+
+        refresh();
+        // use the SimpleCursorAdapter to show the
+        // elements in a ListView
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_list_item_1, svalues);
+        setListAdapter(adapter);
+        return v;
+    }
+
+    public void refresh() {
+        ArrayAdapter adapter = (ArrayAdapter) getListAdapter();
+        if (adapter != null) {
+            adapter.clear();
+        }
+
+        LogDataSource datasource = new LogDataSource(getActivity());
         datasource.open();
-
-        List<LogEntry> values = datasource.getAllEntries(2L);
-        List<String> svalues = new ArrayList<String>();
-
+        List<LogEntry> values = datasource.getAllEntries(3L);
         String lastDate = "";
         for (LogEntry e : values) {
             String curDate = e.startAsDateString();
@@ -34,13 +47,10 @@ public class StatsFragment extends ListFragment {
             }
             svalues.add("\t\t" + e.toString());
         }
-        // use the SimpleCursorAdapter to show the
-        // elements in a ListView
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, svalues);
-        setListAdapter(adapter);
-        datasource.close();
-        return v;
-    }
 
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+        datasource.close();
+    }
 }

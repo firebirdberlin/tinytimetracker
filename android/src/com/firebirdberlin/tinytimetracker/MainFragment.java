@@ -13,20 +13,14 @@ public class MainFragment extends Fragment {
     private Handler viewHandler = new Handler();
     private MainView timeView = null;
 
-    Runnable updateView = new Runnable(){
-        @Override
-        public void run(){
-            timeView.invalidate();
-            viewHandler.postDelayed(updateView, 20000);
-        }
-    };
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         timeView = (MainView) v.findViewById(R.id.main_time_view);
-        updateView.run();
         return v;
     }
 
+    public void refresh() {
+        timeView.invalidate();
+    }
 }

@@ -3,9 +3,11 @@ package com.firebirdberlin.tinytimetracker;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -20,11 +22,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 
 
 public class TinyTimeTracker extends FragmentActivity {
     public static final String TAG = "TinyTimeTracker";
+    private MainFragment mainFragment = null;
+    private StatsFragment statsFragment = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -32,7 +37,8 @@ public class TinyTimeTracker extends FragmentActivity {
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
+        mainFragment = new MainFragment();
+        statsFragment = new StatsFragment();
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
 
@@ -50,10 +56,9 @@ public class TinyTimeTracker extends FragmentActivity {
         @Override
         public Fragment getItem(int pos) {
             switch(pos) {
-
-            case 0: return new MainFragment();
-            case 1: return new StatsFragment();
-            default: return new MainFragment();
+                case 0: return mainFragment;
+                case 1: return statsFragment;
+                default: return mainFragment;
             }
         }
 
@@ -66,6 +71,8 @@ public class TinyTimeTracker extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("WiFiServiceUpdates"));
     }
 
     @Override
@@ -158,6 +165,18 @@ public class TinyTimeTracker extends FragmentActivity {
                 PackageManager.DONT_KILL_APP);
     }
 
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("Status");
+            if (message != null ) {
+                Log.d(TAG, "WiFi update received");
+                mainFragment.refresh();
+                statsFragment.refresh();
+            }
 
+        }
+    };
 
 }

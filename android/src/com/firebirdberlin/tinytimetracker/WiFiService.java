@@ -14,11 +14,11 @@ import android.content.SharedPreferences.Editor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
-import android.os.IBinder;
 import android.os.BatteryManager;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
@@ -214,7 +214,7 @@ public class WiFiService extends Service {
                 formattedWorkTime = formatAsMinutes((int) delta);
             }
         }
-
+        sendMessageToActivity("WiFiService Update completed");
         if ( isPebbleConnected()) {
             sendDataToPebble(formattedWorkTime);
         }
@@ -274,5 +274,12 @@ public class WiFiService extends Service {
         }
 
         return (int) ((float)level / (float)scale * 100.0f);
+    }
+
+
+    private void sendMessageToActivity(String msg) {
+        Intent intent = new Intent("WiFiServiceUpdates");
+        intent.putExtra("Status", msg);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 }
