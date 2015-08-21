@@ -1,6 +1,7 @@
 package com.firebirdberlin.tinytimetracker;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
@@ -13,8 +14,9 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class SettingsFragment extends PreferenceFragment {
     public static final String TAG = TinyTimeTracker.TAG + ".SettingsFragment";
@@ -45,6 +47,7 @@ public class SettingsFragment extends PreferenceFragment {
 
                     ssid_name.setText(new_ssid);
                     ssid_name.setSummary(new_ssid);
+                    sendMessageToActivity("settings changed");
                 }
                 return true;
             }
@@ -54,22 +57,37 @@ public class SettingsFragment extends PreferenceFragment {
 
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 ssid_name.setSummary(newValue.toString());
+                sendMessageToActivity("settings changed");
                 return true;
             }
         });
 
+        LinkedHashSet<String> ssids = new LinkedHashSet<String>();
+
+        String tracked_ssid = Settings.getTrackedSSID(getActivity());
+        if ( ! tracked_ssid.isEmpty()) {
+            ssids.add(tracked_ssid);
+        }
+
         wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
-            ArrayList<String> ssids = new ArrayList<String>();
             for (ScanResult network : networkList) {
                 ssids.add(network.SSID);
             }
+        }
+        if (ssids.size() > 0) {
             CharSequence[] ssid_seq = ssids.toArray(new CharSequence[ssids.size()]);
-
             ssid_select.setEntries(ssid_seq);
             ssid_select.setEntryValues(ssid_seq);
-
+            ssid_select.setValueIndex(0);
         }
+
+    }
+
+    private void sendMessageToActivity(String msg) {
+        Intent intent = new Intent("WiFiServiceUpdates");
+        intent.putExtra("Status", msg);
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(intent);
     }
 }

@@ -68,11 +68,15 @@ public class WiFiService extends Service {
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         showNotifications = Settings.showNotifications(mContext);
         notificationInterval = 60 * Settings.getNotificationInterval(mContext);
+        TRACKED_SSID = Settings.getTrackedSSID(this);
 
-        Log.e(TAG, settings.getString("pref_key_wifi_ssid_select", ""));
-
-        TRACKED_SSID = settings.getString("pref_key_wifi_ssid", "");
         SECONDS_CONNECTION_LOST = Long.parseLong(settings.getString("pref_key_seconds_connection_lost", "300"));
+
+        if ( ! wifiManager.isWifiEnabled() ){
+            Log.d(TAG, "WIFI disabled");
+            stopSelf();
+            return Service.START_NOT_STICKY;
+        }
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
@@ -154,16 +158,6 @@ public class WiFiService extends Service {
 
 
     private void getWiFiNetworks(){
-
-        if ( ! wifiManager.isWifiEnabled() ){
-            Log.d(TAG, "WIFI disabled");
-            showNotificationError("WIFI disabled", "... enabling WIFi.");
-            boolean success = wifiManager.setWifiEnabled(true);
-            if (! success){
-                stopSelf();
-                return;
-            }
-        }
 
         String formattedWorkTime = "";
         boolean network_found = false;

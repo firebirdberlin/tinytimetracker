@@ -11,10 +11,12 @@ import java.util.List;
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
-    private SQLiteDatabase database;
+    private Context mContext = null;
+    private SQLiteDatabase database = null;
     private SQLiteHandler dbHelper;
 
     public LogDataSource(Context context) {
+        mContext = context;
         dbHelper = new SQLiteHandler(context);
     }
 
@@ -36,6 +38,9 @@ public class LogDataSource {
     }
 
     public long getTrackerID(String name, String method) {
+        if (database == null) {
+            open();
+        }
         Cursor cursor = null;
         long tracker_id = -1L;
         try{
@@ -77,6 +82,11 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
         long log_id = database.replace(SQLiteHandler.TABLE_LOGS, null, values);
         return log_id;
+    }
+
+    public List<LogEntry> getAllEntries(String name) {
+        long tracker_id = getTrackerID(name, "WLAN");
+        return getAllEntries(tracker_id);
     }
 
     public List<LogEntry> getAllEntries(long tracker_id) {

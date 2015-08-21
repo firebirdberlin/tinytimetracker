@@ -36,8 +36,9 @@ public class StatsFragment extends ListFragment {
         }
 
         LogDataSource datasource = new LogDataSource(getActivity());
-        datasource.open();
-        List<LogEntry> values = datasource.getAllEntries(3L);
+        //datasource.open();
+        String ssid = Settings.getTrackedSSID(getActivity());
+        List<LogEntry> values = datasource.getAllEntries(ssid);
         String lastDate = "";
         for (LogEntry e : values) {
             String curDate = e.startAsDateString();
