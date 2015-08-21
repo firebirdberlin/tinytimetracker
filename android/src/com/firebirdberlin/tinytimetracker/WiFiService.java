@@ -72,8 +72,23 @@ public class WiFiService extends Service {
 
         SECONDS_CONNECTION_LOST = Long.parseLong(settings.getString("pref_key_seconds_connection_lost", "300"));
 
+        if ( TinyTimeTracker.isAirplaneModeOn(mContext) ){
+            Log.d(TAG, "Airplane mode enabled");
+            stopSelf();
+            return Service.START_NOT_STICKY;
+        }
+
         if ( ! wifiManager.isWifiEnabled() ){
             Log.d(TAG, "WIFI disabled");
+            stopSelf();
+            return Service.START_NOT_STICKY;
+        }
+
+        boolean success = wifiManager.startScan();
+        if (! success){
+            if ( isPebbleConnected()) {
+                sendDataToPebble("");
+             }
             stopSelf();
             return Service.START_NOT_STICKY;
         }
@@ -81,13 +96,6 @@ public class WiFiService extends Service {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
-        boolean success = wifiManager.startScan();
-        if (! success){
-            if ( isPebbleConnected()) {
-                sendDataToPebble("");
-             }
-            stopSelf();
-        }
         return Service.START_NOT_STICKY;
     }
 
@@ -99,7 +107,11 @@ public class WiFiService extends Service {
     @Override
     public void onDestroy(){
         datasource.close();
-        unregisterReceiver(wifiReceiver);
+        try {
+            unregisterReceiver(wifiReceiver);
+        } catch(IllegalArgumentException e) {
+            // receiver was not registered
+        }
 
         if (wifiLock.isHeld()) {
             wifiLock.release();

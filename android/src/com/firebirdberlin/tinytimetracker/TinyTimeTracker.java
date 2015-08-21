@@ -13,17 +13,18 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
+import android.provider.Settings.Global;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 
 
 public class TinyTimeTracker extends FragmentActivity {
@@ -178,5 +179,11 @@ public class TinyTimeTracker extends FragmentActivity {
 
         }
     };
+
+
+    public static boolean isAirplaneModeOn(Context context) {
+       return Global.getInt(context.getContentResolver(),
+               Global.AIRPLANE_MODE_ON, 0) != 0;
+    }
 
 }
