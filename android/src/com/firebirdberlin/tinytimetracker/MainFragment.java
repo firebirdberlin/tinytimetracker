@@ -21,6 +21,9 @@ public class MainFragment extends Fragment {
     }
 
     public void refresh() {
+        if (timeView == null) {
+            return;
+        }
         timeView.invalidate();
     }
 }
