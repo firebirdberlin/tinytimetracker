@@ -58,8 +58,9 @@ public class MainView extends View {
         paint.setColor(Color.WHITE);
         paint.setTextSize(150);
         paint.setStrokeWidth(1);
+        UnixTimestamp duration = new UnixTimestamp(1000L * seconds_today.longValue());
+        String text = duration.durationAsHours();
         Rect bounds = new Rect();
-        String text = WiFiService.formatAsHours(seconds_today.longValue());
         paint.getTextBounds(text, 0, text.length(), bounds);
         int height = bounds.height();
         int width = bounds.width();

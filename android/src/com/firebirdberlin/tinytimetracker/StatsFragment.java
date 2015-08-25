@@ -60,8 +60,6 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
-        svalues1.clear();
-        svalues2.clear();
         LogDataSource datasource = new LogDataSource(mContext);
         datasource.open();
         String ssid = Settings.getTrackedSSID(mContext);
@@ -71,16 +69,15 @@ public class StatsFragment extends ListFragment {
             UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
             UnixTimestamp duration = new UnixTimestamp(e.second.longValue());
             String hours = duration.durationAsHours();
-            svalues2.add(hours);
+            two_column_adapter.addRight(hours);
             switch (aggregation_type){
                 case LogDataSource.AGGRETATION_DAY:
-                    svalues1.add(timestamp.toDateString()); break;
-                case LogDataSource.AGGRETATION_WEEK:
-                    svalues1.add(timestamp.toWeekString()); break;
-                case LogDataSource.AGGRETATION_YEAR:
-                    svalues1.add(timestamp.toYearString()); break;
                 default:
-                    svalues1.add(timestamp.toDateString()); break;
+                    two_column_adapter.add(timestamp.toDateString()); break;
+                case LogDataSource.AGGRETATION_WEEK:
+                    two_column_adapter.add(timestamp.toWeekString()); break;
+                case LogDataSource.AGGRETATION_YEAR:
+                    two_column_adapter.add(timestamp.toYearString()); break;
             }
         }
         datasource.close();
@@ -97,8 +94,6 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
-        svalues1.clear();
-        svalues2.clear();
         LogDataSource datasource = new LogDataSource(mContext);
         datasource.open();
         String ssid = Settings.getTrackedSSID(mContext);
@@ -108,11 +103,11 @@ public class StatsFragment extends ListFragment {
             String curDate = e.startAsDateString();
             if (! curDate.equals(lastDate)) {
                 lastDate = curDate;
-                svalues1.add(curDate);
+                two_column_adapter.add(curDate);
             } else {
-                svalues1.add("");
+                two_column_adapter.add("");
             }
-            svalues2.add(e.toString());
+            two_column_adapter.addRight(e.toString());
         }
         datasource.close();
         two_column_adapter.notifyDataSetChanged();

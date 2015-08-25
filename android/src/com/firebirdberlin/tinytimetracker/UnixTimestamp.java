@@ -26,11 +26,11 @@ public class UnixTimestamp {
     }
 
     public String toDateTimeString(){
-        return toString("YYYYMMddHHmm");
+        return toString("yyyyMMddHHmm");
     }
 
     public String toDateString(){
-        return toString("YYYYMMdd");
+        return toString("yyyyMMdd");
     }
 
     public String toWeekString(){
@@ -38,7 +38,7 @@ public class UnixTimestamp {
     }
 
     public String toYearString(){
-        return toString("YYYY");
+        return toString("yyyy");
     }
 
     public String toTimeString(){
@@ -56,7 +56,6 @@ public class UnixTimestamp {
 
         return String.format("%dmin", min);
     }
-
 
     public String durationAsHours(){
         long seconds = timestamp / 1000;

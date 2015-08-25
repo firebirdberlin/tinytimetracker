@@ -2,12 +2,12 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.app.Activity;
 import android.content.Context;
-import android.widget.ArrayAdapter;
-import java.util.List;
 import android.view.LayoutInflater;
-import android.widget.TextView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
+import java.util.List;
 
 public class TwoColumnListAdapter extends ArrayAdapter<String> {
     private Context mContext = null;
@@ -34,7 +34,16 @@ public class TwoColumnListAdapter extends ArrayAdapter<String> {
         }
 
         return v;
-
     }
 
+    @Override
+    public void clear() {
+        super.clear();
+        values1.clear();
+        values2.clear();
+    }
+
+    public void addRight(String value) {
+        values2.add(value);
+    }
 }

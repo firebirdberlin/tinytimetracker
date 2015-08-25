@@ -3,6 +3,7 @@ package com.firebirdberlin.tinytimetracker;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,7 +34,6 @@ public class TinyTimeTracker extends FragmentActivity {
     private MainFragment mainFragment = null;
     private StatsFragment statsFragment = null;
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -80,7 +80,6 @@ public class TinyTimeTracker extends FragmentActivity {
     @Override
     public void onPause() {
         super.onPause();
-        //viewHandler.removeCallbacks(updateView);
     }
 
 
@@ -132,8 +131,12 @@ public class TinyTimeTracker extends FragmentActivity {
 
 
     private void openPebbleAppStore() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
-        startActivity(intent);
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
+            startActivity(intent);
+        } catch ( ActivityNotFoundException e) {
+
+        }
     }
 
 

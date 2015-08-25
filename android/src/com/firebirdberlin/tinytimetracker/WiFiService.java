@@ -185,9 +185,8 @@ public class WiFiService extends Service {
                     long log_id = datasource.addTimeStamp(tracker_id, now, SECONDS_CONNECTION_LOST);
 
                     long date_now = start_of_day(now);
-                    long seconds_today = datasource.getTotalDurationSince(date_now, tracker_id);
-                    datasource.getTotalDurationAggregated(tracker_id, 1);
-
+                    UnixTimestamp duration_today = datasource.getTotalDurationSince(date_now, tracker_id);
+                    long seconds_today = duration_today.getTimestamp() / 1000L;
                     long last_notification = settings.getLong("last_notification", 0L);
                     SharedPreferences.Editor editor = settings.edit();
 
@@ -198,7 +197,7 @@ public class WiFiService extends Service {
                     }
 
                     if (seconds_today - last_notification >= notificationInterval){
-                        updateNotification(formatAsHours(seconds_today), network.SSID);
+                        updateNotification(duration_today.durationAsHours(), network.SSID);
                         editor.putLong("last_notification", seconds_today);
                     }
 
@@ -206,7 +205,7 @@ public class WiFiService extends Service {
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 
-                    formattedWorkTime = formatAsHours(seconds_today);
+                    formattedWorkTime = duration_today.durationAsHours();
                 }
             }
         }
@@ -218,7 +217,7 @@ public class WiFiService extends Service {
             long delta = (now - last_seen)/1000L;
             long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
             if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
-                formattedWorkTime = formatAsMinutes((int) delta);
+                formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
             }
         }
         sendMessageToActivity("WiFiService Update completed");
@@ -237,23 +236,6 @@ public class WiFiService extends Service {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         return cal.getTimeInMillis();
-    }
-
-
-    public static String formatAsMinutes(int seconds){
-        int min = seconds / 60;
-
-        return String.format("%dmin", min);
-    }
-
-
-    public static String formatAsHours(long seconds){
-        long hours = seconds / 3600;
-        long minutes = (seconds % 3600) / 60;
-        long sec = seconds % 60;
-
-        //return String.format("%02d:%02d:%02d", hours, minutes, sec);
-        return String.format("%02d:%02d", hours, minutes);
     }
 
 
