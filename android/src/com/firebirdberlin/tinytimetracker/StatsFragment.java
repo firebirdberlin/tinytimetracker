@@ -54,20 +54,14 @@ public class StatsFragment extends ListFragment {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch(checkedId){
                     case R.id.radio_aggregation_detail:
-                        refresh();
-                        break;
-                    case R.id.radio_aggregation_day:
-                        refresh(LogDataSource.AGGRETATION_DAY);
-                        break;
-                    case R.id.radio_aggregation_week:
-                        refresh(LogDataSource.AGGRETATION_WEEK);
-                        break;
-                    case R.id.radio_aggregation_year:
-                        refresh(LogDataSource.AGGRETATION_YEAR);
-                        break;
                     default:
-                        refresh();
-                        break;
+                        refresh(); break;
+                    case R.id.radio_aggregation_day:
+                        refresh(LogDataSource.AGGRETATION_DAY); break;
+                    case R.id.radio_aggregation_week:
+                        refresh(LogDataSource.AGGRETATION_WEEK); break;
+                    case R.id.radio_aggregation_year:
+                        refresh(LogDataSource.AGGRETATION_YEAR); break;
                 }
             }
         });

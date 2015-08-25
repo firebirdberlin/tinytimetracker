@@ -143,6 +143,7 @@ public class LogDataSource {
         String group_by = "";
         switch (aggregation_type) {
             case AGGRETATION_DAY:
+            default:
                 group_by = "strftime('%Y-%m-%d', timestamp_start/1000, 'unixepoch', 'localtime')";
                 break;
             case AGGRETATION_WEEK:
@@ -150,9 +151,6 @@ public class LogDataSource {
                 break;
             case AGGRETATION_YEAR:
                 group_by = "strftime('%Y', timestamp_start/1000, 'unixepoch', 'localtime')";
-                break;
-            default:
-                group_by = "strftime('%d', timestamp_start/1000, 'unixepoch', 'localtime')";
                 break;
         }
 
