@@ -59,7 +59,7 @@ public class MainView extends View {
         paint.setTextSize(150);
         paint.setStrokeWidth(1);
         Rect bounds = new Rect();
-        String text = WiFiService.formatAsHours(seconds_today.intValue());
+        String text = WiFiService.formatAsHours(seconds_today.longValue());
         paint.getTextBounds(text, 0, text.length(), bounds);
         int height = bounds.height();
         int width = bounds.width();

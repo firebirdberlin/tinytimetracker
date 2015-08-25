@@ -6,11 +6,15 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
+    public static final int AGGRETATION_DAY = 0;
+    public static final int AGGRETATION_WEEK = 1;
+    public static final int AGGRETATION_YEAR = 2;
     private Context mContext = null;
     private SQLiteDatabase database = null;
     private SQLiteHandler dbHelper;
@@ -94,7 +98,7 @@ public class LogDataSource {
         Cursor cursor = null;
 
         cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                   + "WHERE tracker_id=? ORDER BY timestamp_start DESC",
+                                   + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
                                    new String[] {String.valueOf(tracker_id)});
 
         Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
@@ -133,6 +137,48 @@ public class LogDataSource {
             cursor.close();
         }
         return log;
+    }
+
+    public List< Pair<Long,Long> > getTotalDurationAggregated(long tracker_id, int aggregation_type) {
+        String group_by = "";
+        switch (aggregation_type) {
+            case AGGRETATION_DAY:
+                group_by = "strftime('%Y-%m-%d', timestamp_start/1000, 'unixepoch', 'localtime')";
+                break;
+            case AGGRETATION_WEEK:
+                group_by = "strftime('%Y-%W', timestamp_start/1000, 'unixepoch', 'localtime')";
+                break;
+            case AGGRETATION_YEAR:
+                group_by = "strftime('%Y', timestamp_start/1000, 'unixepoch', 'localtime')";
+                break;
+            default:
+                group_by = "strftime('%d', timestamp_start/1000, 'unixepoch', 'localtime')";
+                break;
+        }
+
+        Cursor cursor = null;
+        List< Pair<Long,Long> > results = new ArrayList< Pair<Long, Long> >();
+        try{
+            cursor = database.rawQuery("SELECT timestamp_start, "
+                                       + "SUM(timestamp_end - timestamp_start) FROM logs "
+                                       + "WHERE tracker_id=? GROUP BY " + group_by
+                                       + " ORDER BY timestamp_start DESC",
+                                       new String[] {String.valueOf(tracker_id)});
+
+            Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                long timestamp = cursor.getLong(0);
+                long duration_millis = cursor.getLong(1);
+                Log.d(TAG, String.valueOf(timestamp) + " : " + String.valueOf(duration_millis) + " s");
+                results.add(new Pair(timestamp, duration_millis));
+
+                cursor.moveToNext();
+            }
+        }finally {
+            cursor.close();
+        }
+        return results;
     }
 
     public long getTotalDurationSince(long timestamp, long tracker_id) {

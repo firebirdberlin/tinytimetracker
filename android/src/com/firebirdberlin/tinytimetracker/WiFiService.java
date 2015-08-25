@@ -186,6 +186,7 @@ public class WiFiService extends Service {
 
                     long date_now = start_of_day(now);
                     long seconds_today = datasource.getTotalDurationSince(date_now, tracker_id);
+                    datasource.getTotalDurationAggregated(tracker_id, 1);
 
                     long last_notification = settings.getLong("last_notification", 0L);
                     SharedPreferences.Editor editor = settings.edit();
@@ -197,7 +198,7 @@ public class WiFiService extends Service {
                     }
 
                     if (seconds_today - last_notification >= notificationInterval){
-                        updateNotification(formatAsHours((int) seconds_today), network.SSID);
+                        updateNotification(formatAsHours(seconds_today), network.SSID);
                         editor.putLong("last_notification", seconds_today);
                     }
 
@@ -205,7 +206,7 @@ public class WiFiService extends Service {
                     editor.putLong("seconds_today", seconds_today);
                     editor.commit();
 
-                    formattedWorkTime = formatAsHours((int) seconds_today);
+                    formattedWorkTime = formatAsHours(seconds_today);
                 }
             }
         }
@@ -246,10 +247,10 @@ public class WiFiService extends Service {
     }
 
 
-    public static String formatAsHours(int seconds){
-        int hours = seconds / 3600;
-        int minutes = (seconds % 3600) / 60;
-        int sec = seconds % 60;
+    public static String formatAsHours(long seconds){
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long sec = seconds % 60;
 
         //return String.format("%02d:%02d:%02d", hours, minutes, sec);
         return String.format("%02d:%02d", hours, minutes);

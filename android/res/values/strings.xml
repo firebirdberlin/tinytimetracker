@@ -5,6 +5,10 @@
     <string name="action_donate">Donate</string>
     <string name="action_pebble_app_store">Open Pebble App Store</string>
     <string name="action_open_github">Contribute</string>
+    <string name="aggregation_detail">Detail</string>
+    <string name="aggregation_day">Day</string>
+    <string name="aggregation_week">Week</string>
+    <string name="aggregation_year">Year</string>
     <string name="pref_wifi_settings">Wifi</string>
     <string name="pref_worktime_settings">Worktime</string>
     <string name="pref_notification_settings">Notifications</string>
