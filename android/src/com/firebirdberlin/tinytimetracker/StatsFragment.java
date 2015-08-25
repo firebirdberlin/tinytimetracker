@@ -19,7 +19,7 @@ import java.util.List;
 public class StatsFragment extends ListFragment {
     final List<String> svalues1 = new ArrayList<String>();
     final List<String> svalues2 = new ArrayList<String>();
-    ArrayAdapter<String> two_column_adapter = null;
+    TwoColumnListAdapter two_column_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Context mContext = null;
 
@@ -27,24 +27,7 @@ public class StatsFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContext = getActivity();
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
-
-        two_column_adapter = new ArrayAdapter<String>(mContext, R.layout.list_2_columns, R.id.text1, svalues1) {
-            public View getView( int position, View convertView, ViewGroup parent ) {
-                super.getView(position, convertView, parent);
-                LayoutInflater inflater = getActivity().getLayoutInflater();
-                View v = inflater.inflate(R.layout.list_2_columns, parent, false);
-                TextView text1 = ( TextView ) v.findViewById ( R.id.text1 );
-                TextView text2 = ( TextView ) v.findViewById ( R.id.text2 );
-                if (position < svalues1.size()){
-                    text1.setText(svalues1.get(position));
-                    text2.setText(svalues2.get(position));
-                }
-
-                return v;
-
-            }
-
-        };
+        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1, svalues2);
         setListAdapter(two_column_adapter);
         refresh();
 
