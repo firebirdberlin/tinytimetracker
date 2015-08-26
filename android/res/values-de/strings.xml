@@ -12,8 +12,8 @@
     <string name="pref_title_wifi_ssid">WLAN SSID</string>
     <string name="pref_title_wifi_ssid_manual">Eingestellte WLAN SSID</string>
     <string name="pref_summary_wifi_ssid">Der Name des überwachten WLAN Netzwerkes.</string>
-    <string name="pref_title_seconds_connection_lost">Inaktivitätszeit in Sekunden</string>
-    <string name="pref_summary_seconds_connection_lost">Zeit in Sekunden bis Abwesenheit erkannt wird.</string>
+    <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
+    <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
     <string name="pref_dialog_notification_interval_minutes">Zeit nach der eine Benachrichtigung angezeigt werden soll.</string>
     <string name="pref_title_notification_interval_minutes">Benachrichtigungsinterval</string>
     <string name="pref_summary_notification_interval_minutes">Wie oft möchten Sie benachrichtigt werden ?</string>

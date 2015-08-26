@@ -16,8 +16,8 @@
     <string name="pref_title_wifi_ssid">WiFi SSID</string>
     <string name="pref_title_wifi_ssid_manual">Current WiFi SSID</string>
     <string name="pref_summary_wifi_ssid">The name of the WiFi network.</string>
-    <string name="pref_title_seconds_connection_lost">Inactivity time in seconds</string>
-    <string name="pref_summary_seconds_connection_lost">Time after which the network is regarded as inactive.</string>
+    <string name="pref_title_seconds_connection_lost">Absence time</string>
+    <string name="pref_summary_seconds_connection_lost">Time after which absence is detected.</string>
     <string name="pref_dialog_notification_interval_minutes">Time in minutes after which the notification will reappear.</string>
     <string name="pref_title_notification_interval_minutes">Notification interval</string>
     <string name="pref_summary_notification_interval_minutes">How often do you want to be notified ?</string>

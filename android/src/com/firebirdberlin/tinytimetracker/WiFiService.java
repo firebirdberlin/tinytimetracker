@@ -40,7 +40,7 @@ public class WiFiService extends Service {
     private PendingIntent pendingIntent;
     private SharedPreferences settings = null;
 
-    private Long SECONDS_CONNECTION_LOST = 300L;
+    private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private String TRACKED_SSID = "";
     private boolean showNotifications = false;
     private int notificationInterval = 60 * 60;
@@ -70,7 +70,7 @@ public class WiFiService extends Service {
         notificationInterval = 60 * Settings.getNotificationInterval(mContext);
         TRACKED_SSID = Settings.getTrackedSSID(this);
 
-        SECONDS_CONNECTION_LOST = Long.parseLong(settings.getString("pref_key_seconds_connection_lost", "300"));
+        SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
         if ( TinyTimeTracker.isAirplaneModeOn(mContext) ){
             Log.d(TAG, "Airplane mode enabled");
