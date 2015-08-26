@@ -26,32 +26,25 @@ public class StatsFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContext = getActivity();
-        View v = inflater.inflate(R.layout.stats_fragment, container, false);
-        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1, svalues2);
-        setListAdapter(two_column_adapter);
-        refresh();
 
+        View v = inflater.inflate(R.layout.stats_fragment, container, false);
         radio_group_aggregation = (RadioGroup) v.findViewById(R.id.radio_group_aggregation);
         radio_group_aggregation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch(checkedId){
-                    case R.id.radio_aggregation_detail:
-                    default:
-                        refresh(); break;
-                    case R.id.radio_aggregation_day:
-                        refresh(LogDataSource.AGGRETATION_DAY); break;
-                    case R.id.radio_aggregation_week:
-                        refresh(LogDataSource.AGGRETATION_WEEK); break;
-                    case R.id.radio_aggregation_year:
-                        refresh(LogDataSource.AGGRETATION_YEAR); break;
-                }
+                refresh(checkedId);
             }
         });
+
+        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1, svalues2);
+        setListAdapter(two_column_adapter);
+        radio_group_aggregation.check(R.id.radio_aggregation_detail);
+        refresh_detail();
+
         return v;
     }
 
-    public void refresh(int aggregation_type) {
+    public void refresh_aggregated(int aggregation_type) {
         if (mContext == null) {
             return;
         }
@@ -84,8 +77,7 @@ public class StatsFragment extends ListFragment {
         two_column_adapter.notifyDataSetChanged();
     }
 
-
-    public void refresh() {
+    public void refresh_detail() {
         if (mContext == null) {
             return;
         }
@@ -111,5 +103,27 @@ public class StatsFragment extends ListFragment {
         }
         datasource.close();
         two_column_adapter.notifyDataSetChanged();
+    }
+
+    public void refresh(int checkedId) {
+        switch(checkedId){
+            case R.id.radio_aggregation_detail:
+            default:
+                refresh_detail(); break;
+            case R.id.radio_aggregation_day:
+                refresh_aggregated(LogDataSource.AGGRETATION_DAY); break;
+            case R.id.radio_aggregation_week:
+                refresh_aggregated(LogDataSource.AGGRETATION_WEEK); break;
+            case R.id.radio_aggregation_year:
+                refresh_aggregated(LogDataSource.AGGRETATION_YEAR); break;
+        }
+    }
+
+    public void refresh() {
+        if (radio_group_aggregation == null) {
+            return;
+        }
+        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
+        refresh(checkedId);
     }
 }
