@@ -189,7 +189,7 @@ public class TinyTimeTracker extends FragmentActivity {
             String message = intent.getStringExtra("Status");
             if (message != null ) {
                 Log.d(TAG, "WiFi update received");
-                mainFragment.refresh();
+                mainFragment.refresh(context);
                 statsFragment.refresh();
             }
 

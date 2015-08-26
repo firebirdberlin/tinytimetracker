@@ -38,7 +38,7 @@ public class MainView extends View {
 
         int x = getWidth();
         int y = getHeight();
-        int radius = 8 * x / 20;
+        int radius = x < y ? 8 * x / 20 : 8 * y / 20;
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setColor(Color.TRANSPARENT);
