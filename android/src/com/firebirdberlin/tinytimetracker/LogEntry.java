@@ -16,10 +16,6 @@ public class LogEntry {
 
 
     public LogEntry(long id, long tracker_id, long timestamp_start, long timestamp_end){
-        Log.i(TAG, "LOG ENTRY : " + String.valueOf(id) + ", "
-                + String.valueOf(tracker_id) + ", "
-                + String.valueOf(timestamp_start) + ", "
-                + String.valueOf(timestamp_end));
         this.id = id;
         this.tracker_id = tracker_id;
         this.timestamp_start = new UnixTimestamp(timestamp_start);

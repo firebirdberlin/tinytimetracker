@@ -47,6 +47,8 @@ public class SettingsFragment extends PreferenceFragment {
 
                     ssid_name.setText(new_ssid);
                     ssid_name.setSummary(new_ssid);
+
+                    saveNewSSID(new_ssid);
                     sendMessageToActivity("settings changed");
                 }
                 return true;
@@ -57,6 +59,7 @@ public class SettingsFragment extends PreferenceFragment {
 
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 ssid_name.setSummary(newValue.toString());
+                saveNewSSID(newValue.toString());
                 sendMessageToActivity("settings changed");
                 return true;
             }
@@ -83,6 +86,13 @@ public class SettingsFragment extends PreferenceFragment {
             ssid_select.setValueIndex(0);
         }
 
+    }
+
+    private void saveNewSSID(String new_ssid) {
+        LogDataSource datasource = new LogDataSource(getActivity());
+        datasource.open();
+        datasource.getOrCreateTrackerID(new_ssid, "WLAN");
+        datasource.close();
     }
 
     private void sendMessageToActivity(String msg) {

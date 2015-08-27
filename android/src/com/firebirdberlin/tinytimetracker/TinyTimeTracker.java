@@ -31,16 +31,16 @@ import android.view.View;
 
 public class TinyTimeTracker extends FragmentActivity {
     public static final String TAG = "TinyTimeTracker";
-    private MainFragment mainFragment = null;
-    private StatsFragment statsFragment = null;
+    private static MainFragment mainFragment = null;
+    private static StatsFragment statsFragment = null;
+    private TrackerEntry currentTracker = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mainFragment = new MainFragment();
-        statsFragment = new StatsFragment();
+        if (mainFragment == null) mainFragment = new MainFragment();
+        if (statsFragment == null) statsFragment = new StatsFragment();
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
 
@@ -202,4 +202,14 @@ public class TinyTimeTracker extends FragmentActivity {
                Global.AIRPLANE_MODE_ON, 0) != 0;
     }
 
+    public void setCurrentTracker(TrackerEntry tracker) {
+        Log.d(TAG, "currentTracker: " + tracker.toString());
+        currentTracker = tracker;
+        mainFragment.refresh(this);
+        statsFragment.refresh();
+    }
+
+    public TrackerEntry getCurrentTracker() {
+        return currentTracker;
+    }
 }

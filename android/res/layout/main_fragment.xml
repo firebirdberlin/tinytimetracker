@@ -5,17 +5,9 @@
     android:layout_height="match_parent"
     >
 
-    <TextView android:id="@+id/textview_current_tracker"
+    <Spinner android:id="@+id/spinner_trackers"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:paddingTop="10dip"
-        android:paddingBottom="10dip"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="?android:attr/colorActivatedHighlight"
-        android:singleLine="true"
-        android:ellipsize="marquee" />
+        android:layout_height="80dip"/>
 
     <com.firebirdberlin.tinytimetracker.MainView
         android:id="@+id/main_time_view"

@@ -65,6 +65,55 @@ public class LogDataSource {
         return names;
     }
 
+    public List<TrackerEntry> getTrackers() {
+        if (database == null) {
+            open();
+        }
+        Cursor cursor = null;
+        List<TrackerEntry> entries = new ArrayList<TrackerEntry>();
+        try{
+            cursor = database.rawQuery("SELECT _id, name FROM trackers",
+                                       new String[] {});
+
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                TrackerEntry entry = new TrackerEntry();
+                entry.setID(cursor.getLong(0));
+                entry.setSSID(cursor.getString(1));
+
+                entries.add(entry);
+
+                cursor.moveToNext();
+            }
+        }finally {
+            cursor.close();
+        }
+        return entries;
+
+    }
+
+    public TrackerEntry getTracker(String name) {
+        if (database == null) {
+            open();
+        }
+        Cursor cursor = null;
+        TrackerEntry entry = new TrackerEntry();
+        try{
+            cursor = database.rawQuery("SELECT _id, name FROM trackers WHERE name=?",
+                                       new String[] {name});
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                entry.setID(cursor.getLong(0));
+                entry.setSSID(cursor.getString(1));
+            }
+        }finally {
+            cursor.close();
+        }
+        return entry;
+
+    }
+
     public long getTrackerID(String name, String method) {
         if (database == null) {
             open();
