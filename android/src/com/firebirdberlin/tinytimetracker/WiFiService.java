@@ -167,7 +167,6 @@ public class WiFiService extends Service {
         notificationManager.notify(NOTIFICATION_ID_ERROR, note);
     }
 
-
     private void getWiFiNetworks(){
 
         Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
@@ -184,8 +183,8 @@ public class WiFiService extends Service {
                     long tracker_id = datasource.getOrCreateTrackerID(network.SSID, "WLAN");
                     long log_id = datasource.addTimeStamp(tracker_id, now, SECONDS_CONNECTION_LOST);
 
-                    long date_now = start_of_day(now);
-                    UnixTimestamp duration_today = datasource.getTotalDurationSince(date_now, tracker_id);
+                    UnixTimestamp today = UnixTimestamp.startOfToday();
+                    UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
                     long seconds_today = duration_today.getTimestamp() / 1000L;
                     long last_notification = settings.getLong("last_notification", 0L);
                     SharedPreferences.Editor editor = settings.edit();
@@ -227,24 +226,11 @@ public class WiFiService extends Service {
         stopSelf();
     }
 
-
-    private long start_of_day(long timestamp){
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(timestamp);
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        return cal.getTimeInMillis();
-    }
-
-
     private boolean isPebbleConnected() {
         boolean connected = PebbleKit.isWatchConnected(mContext);
         Log.i(TAG, "Pebble is " + (connected ? "connected" : "not connected"));
         return connected;
     }
-
 
     private void sendDataToPebble(String formattedWorktime) {
         PebbleDictionary data = new PebbleDictionary();
@@ -264,7 +250,6 @@ public class WiFiService extends Service {
 
         return (int) ((float)level / (float)scale * 100.0f);
     }
-
 
     private void sendMessageToActivity(String msg) {
         Intent intent = new Intent("WiFiServiceUpdates");
