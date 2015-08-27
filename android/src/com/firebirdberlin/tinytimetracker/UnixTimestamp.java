@@ -3,6 +3,7 @@ package com.firebirdberlin.tinytimetracker;
 import android.util.Log;
 import android.text.format.DateFormat;
 import java.util.Locale;
+import java.util.Calendar;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -67,5 +68,15 @@ public class UnixTimestamp {
         return String.format("%02d:%02d", hours, minutes);
     }
 
+    public static UnixTimestamp startOfToday(){
+        long now = System.currentTimeMillis();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(now);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
 
 }

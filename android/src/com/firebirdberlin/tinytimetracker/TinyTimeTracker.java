@@ -34,11 +34,13 @@ public class TinyTimeTracker extends FragmentActivity {
     private static MainFragment mainFragment = null;
     private static StatsFragment statsFragment = null;
     private TrackerEntry currentTracker = null;
+    private static LogDataSource datasource = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        if (datasource == null) datasource = new LogDataSource(this);
         if (mainFragment == null) mainFragment = new MainFragment();
         if (statsFragment == null) statsFragment = new StatsFragment();
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
@@ -79,6 +81,7 @@ public class TinyTimeTracker extends FragmentActivity {
 
     @Override
     public void onPause() {
+        datasource.close();
         super.onPause();
     }
 
@@ -207,6 +210,11 @@ public class TinyTimeTracker extends FragmentActivity {
         currentTracker = tracker;
         mainFragment.refresh(this);
         statsFragment.refresh();
+    }
+
+    public LogDataSource getDataSource() {
+        datasource.open();
+        return datasource;
     }
 
     public TrackerEntry getCurrentTracker() {

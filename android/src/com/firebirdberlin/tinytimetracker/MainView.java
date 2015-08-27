@@ -10,20 +10,21 @@ import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
-
+import java.util.List;
+import android.util.Pair;
 
 public class MainView extends View {
-     private Context mContext;
+     private TinyTimeTracker mContext;
      private int workingHoursInSeconds = 8 * 3600;
 
      public MainView(Context context) {
          super(context);
-         mContext = context;
+         mContext = (TinyTimeTracker) context;
      }
 
      public MainView(Context context, AttributeSet attrs) {
          super(context, attrs);
-         mContext = context;
+         mContext = (TinyTimeTracker) context;
      }
 
      @Override
@@ -31,7 +32,15 @@ public class MainView extends View {
         super.onDraw(canvas);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
-        Long seconds_today = settings.getLong("seconds_today", 0L);
+        UnixTimestamp today = UnixTimestamp.startOfToday();
+        LogDataSource datasource = mContext.getDataSource();
+        TrackerEntry tracker = mContext.getCurrentTracker();
+        if (tracker == null) {
+            return;
+        }
+        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), tracker.getID());
+
+        Long seconds_today = new Long(duration.getTimestamp() / 1000L);
 
         workingHoursInSeconds = (int) (Settings.getWorkingHours(mContext) * 3600.f);
         int angle = 360 * seconds_today.intValue() / workingHoursInSeconds;
@@ -58,7 +67,6 @@ public class MainView extends View {
         paint.setColor(Color.WHITE);
         paint.setTextSize(150);
         paint.setStrokeWidth(1);
-        UnixTimestamp duration = new UnixTimestamp(1000L * seconds_today.longValue());
         String text = duration.durationAsHours();
         Rect bounds = new Rect();
         paint.getTextBounds(text, 0, text.length(), bounds);

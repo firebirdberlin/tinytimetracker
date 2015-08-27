@@ -55,8 +55,7 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
-        LogDataSource datasource = new LogDataSource(mContext);
-        datasource.open();
+        LogDataSource datasource = mContext.getDataSource();
 
         TrackerEntry tracker = mContext.getCurrentTracker();
         if (tracker != null) {
@@ -78,7 +77,6 @@ public class StatsFragment extends ListFragment {
                 }
             }
         }
-        datasource.close();
         two_column_adapter.notifyDataSetChanged();
     }
 
@@ -91,8 +89,7 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
-        LogDataSource datasource = new LogDataSource(mContext);
-        datasource.open();
+        LogDataSource datasource = mContext.getDataSource();
         TrackerEntry tracker = mContext.getCurrentTracker();
         if (tracker != null) {
             long tracker_id = tracker.getID();
@@ -109,7 +106,6 @@ public class StatsFragment extends ListFragment {
                 two_column_adapter.addRight(e.toString());
             }
         }
-        datasource.close();
         two_column_adapter.notifyDataSetChanged();
     }
 

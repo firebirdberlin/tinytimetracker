@@ -28,9 +28,8 @@ public class MainFragment extends Fragment {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
 
-        LogDataSource datasource = new LogDataSource(getActivity());
+        LogDataSource datasource = mContext.getDataSource();
         List<TrackerEntry> trackers = datasource.getTrackers();
-        datasource.close();
 
         ArrayAdapter adapter = new ArrayAdapter(getActivity(),
                                                 R.layout.main_spinner,
