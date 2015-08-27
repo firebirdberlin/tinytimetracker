@@ -9,6 +9,8 @@ import android.util.Log;
 import android.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
@@ -39,6 +41,28 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_METHOD, method);
         long insertId = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
         return insertId;
+    }
+
+    public Set<String> getTrackedSSIDs(String method) {
+        if (database == null) {
+            open();
+        }
+        Cursor cursor = null;
+        Set<String> names = new HashSet<String>();
+        try{
+            cursor = database.rawQuery("SELECT name FROM trackers WHERE method=?",
+                                       new String[] {method});
+
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                String name = cursor.getString(0);
+                names.add(name);
+                cursor.moveToNext();
+            }
+        }finally {
+            cursor.close();
+        }
+        return names;
     }
 
     public long getTrackerID(String name, String method) {

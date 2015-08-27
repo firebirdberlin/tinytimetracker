@@ -21,6 +21,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.getpebble.android.kit.PebbleKit;
@@ -41,7 +42,6 @@ public class WiFiService extends Service {
     private SharedPreferences settings = null;
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
-    private String TRACKED_SSID = "";
     private boolean showNotifications = false;
     private int notificationInterval = 60 * 60;
     private LogDataSource datasource;
@@ -68,7 +68,6 @@ public class WiFiService extends Service {
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         showNotifications = Settings.showNotifications(mContext);
         notificationInterval = 60 * Settings.getNotificationInterval(mContext);
-        TRACKED_SSID = Settings.getTrackedSSID(this);
 
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
@@ -171,13 +170,14 @@ public class WiFiService extends Service {
 
     private void getWiFiNetworks(){
 
+        Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
         String formattedWorkTime = "";
         boolean network_found = false;
         long now = System.currentTimeMillis();
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
-                if (TRACKED_SSID.equals(network.SSID)) {
+                if (trackedSSIDs.contains(network.SSID)) {
                     network_found = true;
                     Log.d(TAG, network.SSID);
 
