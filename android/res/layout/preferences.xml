@@ -3,19 +3,6 @@
         android:title="@string/pref_wifi_settings"
         android:key="pref_key_worktime_settings">
 
-        <ListPreference
-            android:key="pref_key_wifi_ssid_select"
-            android:summary="@string/pref_summary_wifi_ssid"
-            android:title="@string/pref_title_wifi_ssid"
-            android:entries="@array/empty_array"
-            android:entryValues="@array/empty_array"
-        />
-
-        <EditTextPreference
-            android:key="pref_key_wifi_ssid"
-            android:summary="@string/pref_summary_wifi_ssid"
-            android:title="@string/pref_title_wifi_ssid_manual" />
-
         <firebirdberlin.com.tinytimetracker.SeekBarPreference
             android:dialogMessage="@string/pref_summary_seconds_connection_lost"
             android:key="pref_key_absence_time"
