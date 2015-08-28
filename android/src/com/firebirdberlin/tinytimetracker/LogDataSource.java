@@ -31,6 +31,12 @@ public class LogDataSource {
         database = dbHelper.getWritableDatabase();
     }
 
+    private void init() {
+        if (database == null) {
+            open();
+        }
+    }
+
     public void close() {
         dbHelper.close();
     }
@@ -44,9 +50,7 @@ public class LogDataSource {
     }
 
     public Set<String> getTrackedSSIDs(String method) {
-        if (database == null) {
-            open();
-        }
+        init();
         Cursor cursor = null;
         Set<String> names = new HashSet<String>();
         try{
@@ -66,9 +70,7 @@ public class LogDataSource {
     }
 
     public List<TrackerEntry> getTrackers() {
-        if (database == null) {
-            open();
-        }
+        init();
         Cursor cursor = null;
         List<TrackerEntry> entries = new ArrayList<TrackerEntry>();
         try{
@@ -93,9 +95,7 @@ public class LogDataSource {
     }
 
     public TrackerEntry getTracker(String name) {
-        if (database == null) {
-            open();
-        }
+        init();
         Cursor cursor = null;
         TrackerEntry entry = new TrackerEntry();
         try{
@@ -115,9 +115,7 @@ public class LogDataSource {
     }
 
     public long getTrackerID(String name, String method) {
-        if (database == null) {
-            open();
-        }
+        init();
         Cursor cursor = null;
         long tracker_id = -1L;
         try{
@@ -141,6 +139,14 @@ public class LogDataSource {
         }
         return tracker_id;
     }
+
+    public boolean deleteTracker(long id) {
+        init();
+        database.delete(SQLiteHandler.TABLE_LOGS, "tracker_id=?", new String[] {String.valueOf(id)});
+        int rows_affected = database.delete(SQLiteHandler.TABLE_TRACKERS, "_id=?", new String[] {String.valueOf(id)});
+        return rows_affected > 0;
+    }
+
 
     public long createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         ContentValues values = new ContentValues();

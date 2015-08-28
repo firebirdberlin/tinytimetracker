@@ -2,11 +2,13 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -109,6 +111,9 @@ public class TinyTimeTracker extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
+            case R.id.action_delete:
+                confirmDeletion();
+                return true;
             case R.id.action_settings:
                 Settings.openSettings(this);
                 return true;
@@ -126,12 +131,29 @@ public class TinyTimeTracker extends FragmentActivity {
         }
     }
 
+    private void confirmDeletion() {
+        if (currentTracker == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+            .setTitle("Delete " + currentTracker.getSSID())
+            .setMessage("Do you really want to delete this tracker and all data ?")
+            .setIcon(R.drawable.ic_delete)
+            .setNegativeButton(android.R.string.no, null)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    Log.d(TAG, "Dialog " + String.valueOf(whichButton));
+                    datasource.deleteTracker(currentTracker.getID());
+                }}).show();
+    }
+
     private void openDonationPage() {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
         startActivity(browserIntent);
     }
-
 
     private void openPebbleAppStore() {
         try {
@@ -142,19 +164,16 @@ public class TinyTimeTracker extends FragmentActivity {
         }
     }
 
-
     private void openGitHub() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/firebirdberlin/tinytimetracker"));
         startActivity(intent);
     }
-
 
     public static void startService(Context context){
         Intent intent = new Intent(context, WiFiService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startService(intent);
     }
-
 
     public static void scheduleWiFiService(Context context) {
         Intent intent = new Intent(context, AlarmReceiver.class);
@@ -165,7 +184,6 @@ public class TinyTimeTracker extends FragmentActivity {
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 120000, sender);
     }
 
-
     public void enableBootReceiver(Context context){
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
@@ -174,7 +192,6 @@ public class TinyTimeTracker extends FragmentActivity {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
     }
-
 
     public void disableBootReceiver(Context context){
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
@@ -198,7 +215,6 @@ public class TinyTimeTracker extends FragmentActivity {
 
         }
     };
-
 
     public static boolean isAirplaneModeOn(Context context) {
        return Global.getInt(context.getContentResolver(),
