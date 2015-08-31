@@ -17,8 +17,8 @@ import android.net.wifi.WifiManager.WifiLock;
 import android.os.BatteryManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import de.greenrobot.event.EventBus;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
@@ -169,6 +169,8 @@ public class WiFiService extends Service {
 
     private void getWiFiNetworks(){
 
+        EventBus bus = EventBus.getDefault();
+
         Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
         String formattedWorkTime = "";
         boolean network_found = false;
@@ -180,9 +182,14 @@ public class WiFiService extends Service {
                     network_found = true;
                     Log.d(TAG, network.SSID);
 
-                    long tracker_id = datasource.getOrCreateTrackerID(network.SSID, "WLAN");
-                    long log_id = datasource.addTimeStamp(tracker_id, now, SECONDS_CONNECTION_LOST);
+                    TrackerEntry tracker = datasource.getTracker(network.SSID);
+                    if (tracker == null) {
+                        continue;
+                    }
 
+                    LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
+
+                    long tracker_id = tracker.getID();
                     UnixTimestamp today = UnixTimestamp.startOfToday();
                     UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
                     long seconds_today = duration_today.getTimestamp() / 1000L;
@@ -205,6 +212,7 @@ public class WiFiService extends Service {
                     editor.commit();
 
                     formattedWorkTime = duration_today.durationAsHours();
+                    bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
                 }
             }
         }
@@ -219,7 +227,9 @@ public class WiFiService extends Service {
                 formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
             }
         }
-        sendMessageToActivity("WiFiService Update completed");
+
+        bus.post(new OnWifiUpdateCompleted());
+
         if ( isPebbleConnected()) {
             sendDataToPebble(formattedWorkTime);
         }
@@ -249,11 +259,5 @@ public class WiFiService extends Service {
         }
 
         return (int) ((float)level / (float)scale * 100.0f);
-    }
-
-    private void sendMessageToActivity(String msg) {
-        Intent intent = new Intent("WiFiServiceUpdates");
-        intent.putExtra("Status", msg);
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 }

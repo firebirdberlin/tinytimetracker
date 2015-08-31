@@ -132,6 +132,13 @@ public class StatsFragment extends ListFragment {
         refresh(checkedId);
     }
 
+    public void onEvent(OnWifiUpdateCompleted event) {
+        if (event.success && currentTracker.equals(event.tracker)) {
+            int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
+            refresh(checkedId);
+        }
+    }
+
     public void onEvent(OnTrackerSelected event) {
         this.currentTracker = event.newTracker;
         if (radio_group_aggregation == null) {

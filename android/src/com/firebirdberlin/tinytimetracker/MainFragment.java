@@ -11,10 +11,10 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import de.greenrobot.event.EventBus;
 
 public class MainFragment extends Fragment {
     private Spinner spinner = null;
@@ -52,15 +52,5 @@ public class MainFragment extends Fragment {
         });
         timeView = (MainView) v.findViewById(R.id.main_time_view);
         return v;
-    }
-
-    public void refresh(Context context) {
-        if (timeView == null || spinner == null) {
-            return;
-        }
-        timeView.invalidate();
-        String ssid = Settings.getTrackedSSID(context);
-        int spinnerPosition = ((ArrayAdapter) spinner.getAdapter()).getPosition(ssid);
-        spinner.setSelection(spinnerPosition);
     }
 }

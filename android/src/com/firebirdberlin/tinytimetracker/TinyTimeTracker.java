@@ -22,7 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
@@ -78,8 +77,6 @@ public class TinyTimeTracker extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("WiFiServiceUpdates"));
     }
 
     @Override
@@ -205,20 +202,6 @@ public class TinyTimeTracker extends FragmentActivity {
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
     }
-
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Get extra data included in the Intent
-            String message = intent.getStringExtra("Status");
-            if (message != null ) {
-                Log.d(TAG, "WiFi update received");
-                // todo add event
-            }
-
-
-        }
-    };
 
     public static boolean isAirplaneModeOn(Context context) {
        return Global.getInt(context.getContentResolver(),

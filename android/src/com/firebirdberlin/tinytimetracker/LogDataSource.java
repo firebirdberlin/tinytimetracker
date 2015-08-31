@@ -97,12 +97,13 @@ public class LogDataSource {
     public TrackerEntry getTracker(String name) {
         init();
         Cursor cursor = null;
-        TrackerEntry entry = new TrackerEntry();
+        TrackerEntry entry = null;
         try{
             cursor = database.rawQuery("SELECT _id, name FROM trackers WHERE name=?",
                                        new String[] {name});
 
             if(cursor.getCount() > 0) {
+                entry = new TrackerEntry();
                 cursor.moveToFirst();
                 entry.setID(cursor.getLong(0));
                 entry.setSSID(cursor.getString(1));
@@ -148,23 +149,23 @@ public class LogDataSource {
     }
 
 
-    public long createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
+    public LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, tracker_id);
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, timestamp_start);
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, timestamp_end);
         long insertId = database.insert(SQLiteHandler.TABLE_LOGS, null, values);
-        return insertId;
+        return new LogEntry(insertId, tracker_id, timestamp_start, timestamp_end);
     }
 
-    public long replaceLogEntry(LogEntry log_entry) {
+    public LogEntry replaceLogEntry(LogEntry log_entry) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, log_entry.getTrackerID());
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, log_entry.getTimestampStart());
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
         long log_id = database.replace(SQLiteHandler.TABLE_LOGS, null, values);
-        return log_id;
+        return log_entry;
     }
 
     public List<LogEntry> getAllEntries(String name) {
@@ -289,14 +290,18 @@ public class LogDataSource {
         return new UnixTimestamp(duration_millis);
     }
 
-    public long addTimeStamp(long tracker_id, long timestamp, long seconds_connection_lost){
+    public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long seconds_connection_lost){
+        if (tracker == null) return null;
+
+        long tracker_id = tracker.getID();
         Log.i(TAG, "addTimestamp(" + String.valueOf(tracker_id) + ", " + String.valueOf(timestamp) + ", " + String.valueOf(seconds_connection_lost) + ")");
         LogEntry log = getLatestLogEntry(tracker_id);
         if (log != null) {
             long cmp_time = timestamp - 1000 * seconds_connection_lost;
             if (log.getTimestampEnd() >= cmp_time) {
                 log.setTimestampEnd(timestamp);
-                return replaceLogEntry(log);
+                replaceLogEntry(log);
+                return log;
             }
         }
 

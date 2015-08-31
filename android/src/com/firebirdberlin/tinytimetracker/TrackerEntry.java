@@ -23,4 +23,14 @@ public class TrackerEntry {
     public String toString() {
         return ssid;
     }
+
+    @Override
+    public boolean equals(Object other_object) {
+        if (other_object == null) return false;
+        if (other_object.getClass() != getClass()) return false;
+        TrackerEntry other = (TrackerEntry) other_object;
+        if (id != other.id) return false;
+        if (!ssid.equals(other.ssid)) return false;
+        return true;
+    }
 }

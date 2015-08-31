@@ -32,6 +32,12 @@ public class MainView extends View {
          mContext = (TinyTimeTracker) context;
      }
 
+    public void onEvent(OnWifiUpdateCompleted event) {
+        if (event.success && currentTracker.equals(event.tracker)) {
+            invalidate();
+        }
+    }
+
     public void onEvent(OnTrackerSelected event) {
         currentTracker = event.newTracker;
         invalidate();
