@@ -15,6 +15,7 @@ import android.widget.TextView;
 import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.List;
+import de.greenrobot.event.EventBus;
 
 public class StatsFragment extends ListFragment {
     final List<String> svalues1 = new ArrayList<String>();
@@ -22,12 +23,14 @@ public class StatsFragment extends ListFragment {
     TwoColumnListAdapter two_column_adapter = null;
     RadioGroup radio_group_aggregation = null;
     TinyTimeTracker mContext = null;
+    TrackerEntry currentTracker = null;
+    EventBus bus = EventBus.getDefault();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        setRetainInstance(true);
         mContext = (TinyTimeTracker) getActivity();
+        bus.register(this);
 
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
         radio_group_aggregation = (RadioGroup) v.findViewById(R.id.radio_group_aggregation);
@@ -57,9 +60,8 @@ public class StatsFragment extends ListFragment {
         two_column_adapter.clear();
         LogDataSource datasource = mContext.getDataSource();
 
-        TrackerEntry tracker = mContext.getCurrentTracker();
-        if (tracker != null) {
-            long tracker_id = tracker.getID();
+        if (currentTracker != null) {
+            long tracker_id = currentTracker.getID();
             List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(tracker_id, aggregation_type);
             for (Pair<Long, Long> e : values) {
                 UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
@@ -90,9 +92,8 @@ public class StatsFragment extends ListFragment {
 
         two_column_adapter.clear();
         LogDataSource datasource = mContext.getDataSource();
-        TrackerEntry tracker = mContext.getCurrentTracker();
-        if (tracker != null) {
-            long tracker_id = tracker.getID();
+        if (currentTracker != null) {
+            long tracker_id = currentTracker.getID();
             List<LogEntry> values = datasource.getAllEntries(tracker_id);
             String lastDate = "";
             for (LogEntry e : values) {
@@ -124,6 +125,15 @@ public class StatsFragment extends ListFragment {
     }
 
     public void refresh() {
+        if (radio_group_aggregation == null) {
+            return;
+        }
+        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
+        refresh(checkedId);
+    }
+
+    public void onEvent(OnTrackerSelected event) {
+        this.currentTracker = event.newTracker;
         if (radio_group_aggregation == null) {
             return;
         }

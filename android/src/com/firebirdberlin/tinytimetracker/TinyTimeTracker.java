@@ -29,12 +29,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import de.greenrobot.event.EventBus;
 
 
 public class TinyTimeTracker extends FragmentActivity {
     public static final String TAG = "TinyTimeTracker";
-    private static MainFragment mainFragment = null;
-    private static StatsFragment statsFragment = null;
+    EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
     private static LogDataSource datasource = null;
 
@@ -42,9 +42,8 @@ public class TinyTimeTracker extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        bus.register(this);
         if (datasource == null) datasource = new LogDataSource(this);
-        if (mainFragment == null) mainFragment = new MainFragment();
-        if (statsFragment == null) statsFragment = new StatsFragment();
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
 
@@ -62,9 +61,11 @@ public class TinyTimeTracker extends FragmentActivity {
         @Override
         public Fragment getItem(int pos) {
             switch(pos) {
-                case 0: return mainFragment;
-                case 1: return statsFragment;
-                default: return mainFragment;
+                case 0:
+                default:
+                    return new MainFragment();
+                case 1:
+                    return new StatsFragment();
             }
         }
 
@@ -212,9 +213,9 @@ public class TinyTimeTracker extends FragmentActivity {
             String message = intent.getStringExtra("Status");
             if (message != null ) {
                 Log.d(TAG, "WiFi update received");
-                mainFragment.refresh(context);
-                statsFragment.refresh();
+                // todo add event
             }
+
 
         }
     };
@@ -224,19 +225,13 @@ public class TinyTimeTracker extends FragmentActivity {
                Global.AIRPLANE_MODE_ON, 0) != 0;
     }
 
-    public void setCurrentTracker(TrackerEntry tracker) {
-        Log.d(TAG, "currentTracker: " + tracker.toString());
-        currentTracker = tracker;
-        mainFragment.refresh(this);
-        statsFragment.refresh();
+    public void onEvent(OnTrackerSelected event) {
+        currentTracker = event.newTracker;
+        Log.d(TAG, "currentTracker: " + currentTracker.toString());
     }
 
     public LogDataSource getDataSource() {
         datasource.open();
         return datasource;
-    }
-
-    public TrackerEntry getCurrentTracker() {
-        return currentTracker;
     }
 }

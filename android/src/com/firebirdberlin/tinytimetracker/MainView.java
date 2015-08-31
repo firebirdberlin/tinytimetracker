@@ -12,20 +12,30 @@ import android.util.AttributeSet;
 import android.view.View;
 import java.util.List;
 import android.util.Pair;
+import de.greenrobot.event.EventBus;
 
 public class MainView extends View {
      private TinyTimeTracker mContext;
      private int workingHoursInSeconds = 8 * 3600;
+     EventBus bus = EventBus.getDefault();
+     TrackerEntry currentTracker = null;
 
      public MainView(Context context) {
          super(context);
+         bus.register(this);
          mContext = (TinyTimeTracker) context;
      }
 
      public MainView(Context context, AttributeSet attrs) {
          super(context, attrs);
+         bus.register(this);
          mContext = (TinyTimeTracker) context;
      }
+
+    public void onEvent(OnTrackerSelected event) {
+        currentTracker = event.newTracker;
+        invalidate();
+    }
 
      @Override
      protected void onDraw(Canvas canvas) {
@@ -34,11 +44,10 @@ public class MainView extends View {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         UnixTimestamp today = UnixTimestamp.startOfToday();
         LogDataSource datasource = mContext.getDataSource();
-        TrackerEntry tracker = mContext.getCurrentTracker();
-        if (tracker == null) {
+        if (currentTracker == null) {
             return;
         }
-        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), tracker.getID());
+        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.getID());
 
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
 

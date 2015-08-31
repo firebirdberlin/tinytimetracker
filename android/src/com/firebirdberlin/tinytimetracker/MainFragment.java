@@ -14,6 +14,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import de.greenrobot.event.EventBus;
 
 public class MainFragment extends Fragment {
     private Spinner spinner = null;
@@ -23,7 +24,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        setRetainInstance(true);
+
         mContext = (TinyTimeTracker) getActivity();
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
@@ -40,7 +41,9 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 TrackerEntry tracker = (TrackerEntry) parentView.getItemAtPosition(position);
-                mContext.setCurrentTracker(tracker);
+
+                EventBus bus = EventBus.getDefault();
+                bus.post(new OnTrackerSelected(tracker));
             }
 
             @Override
