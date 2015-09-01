@@ -187,6 +187,7 @@ public class LogDataSource {
     }
 
     public LogEntry replaceLogEntry(LogEntry log_entry) {
+        init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, log_entry.getTrackerID());
@@ -194,6 +195,16 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
         long log_id = database.replace(SQLiteHandler.TABLE_LOGS, null, values);
         return log_entry;
+    }
+
+    public TrackerEntry replaceTrackerEntry(TrackerEntry tracker) {
+        init();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHandler.COLUMN_ID, tracker.getID());
+        values.put(SQLiteHandler.COLUMN_METHOD, "WLAN");
+        values.put(SQLiteHandler.COLUMN_NAME, tracker.getSSID());
+        long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
+        return tracker;
     }
 
     public List<LogEntry> getAllEntries(String name) {

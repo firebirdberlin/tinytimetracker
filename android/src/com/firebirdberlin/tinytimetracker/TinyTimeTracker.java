@@ -109,6 +109,9 @@ public class TinyTimeTracker extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
+            case R.id.action_edit:
+                AddTrackerActivity.open(this, currentTracker.getID());
+                return true;
             case R.id.action_add:
                 AddTrackerActivity.open(this);
                 return true;

@@ -16,16 +16,28 @@ import java.util.List;
 
 public class AddTrackerActivity extends Activity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
+    private TrackerEntry tracker = null;
+    private LogDataSource datasource = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
+
+        datasource = new LogDataSource(this);
+        Intent intent = getIntent();
+        long tracker_id = intent.getLongExtra("tracker_id", -1L);
+        if (tracker_id > -1L) {
+            tracker = datasource.getTracker(tracker_id);
+        }
+        init();
     }
 
-    public static void open(Context context) {
-        Intent myIntent = new Intent(context, AddTrackerActivity.class);
-        context.startActivity(myIntent);
+    private void init() {
+        if (tracker != null) {
+            EditText edit_tracker_name = (EditText) findViewById(R.id.edit_tracker_name);
+            edit_tracker_name.setText(tracker.getSSID());
+        }
     }
 
     public void onChooseWifi(View v) {
@@ -63,15 +75,26 @@ public class AddTrackerActivity extends Activity {
         EditText edit_name = (EditText) findViewById(R.id.edit_tracker_name);
         String ssid = edit_name.getText().toString();
         if (! ssid.isEmpty()) {
-            saveNewSSID(ssid);
+            if (tracker != null) {
+                tracker.setSSID(ssid);
+                datasource.replaceTrackerEntry(tracker);
+            } else {
+                datasource.getOrCreateTracker(ssid, "WLAN");
+            }
+            datasource.close();
+            this.finish();
         }
-        this.finish();
     }
 
-    private void saveNewSSID(String new_ssid) {
-        LogDataSource datasource = new LogDataSource(this);
-        datasource.open();
-        datasource.getOrCreateTracker(new_ssid, "WLAN");
-        datasource.close();
+    public static void open(Context context) {
+        Intent myIntent = new Intent(context, AddTrackerActivity.class);
+        context.startActivity(myIntent);
     }
+
+    public static void open(Context context, long tracker_id) {
+        Intent myIntent = new Intent(context, AddTrackerActivity.class);
+        myIntent.putExtra("tracker_id", tracker_id);
+        context.startActivity(myIntent);
+    }
+
 }
