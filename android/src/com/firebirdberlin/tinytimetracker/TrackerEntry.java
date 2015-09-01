@@ -4,6 +4,11 @@ public class TrackerEntry {
     private long id;
     private String ssid;
 
+    public TrackerEntry(long id, String name, String method){
+        this.id = id;
+        this.ssid = name;
+    }
+
     public long getID() {
         return id;
     }

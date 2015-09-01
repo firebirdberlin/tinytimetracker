@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.Pair;
+import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,12 +42,15 @@ public class LogDataSource {
         dbHelper.close();
     }
 
-    public long createTrackerEntry(String name, String method) {
+    public TrackerEntry createTracker(String name, String method) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_NAME, name);
         values.put(SQLiteHandler.COLUMN_METHOD, method);
         long insertId = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
-        return insertId;
+        TrackerEntry tracker = new TrackerEntry(insertId, name, method);
+        EventBus bus = EventBus.getDefault();
+        bus.post(new OnTrackerAdded(tracker));
+        return tracker;
     }
 
     public Set<String> getTrackedSSIDs(String method) {
@@ -79,10 +83,9 @@ public class LogDataSource {
 
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                TrackerEntry entry = new TrackerEntry();
-                entry.setID(cursor.getLong(0));
-                entry.setSSID(cursor.getString(1));
-
+                TrackerEntry entry = new TrackerEntry(cursor.getLong(0),
+                                                      cursor.getString(1),
+                                                      "WLAN");
                 entries.add(entry);
 
                 cursor.moveToNext();
@@ -94,6 +97,28 @@ public class LogDataSource {
 
     }
 
+    public TrackerEntry getTracker(long id) {
+        init();
+        Cursor cursor = null;
+        TrackerEntry entry = null;
+        try{
+            cursor = database.rawQuery("SELECT _id, name FROM trackers WHERE _id=?",
+                                       new String[] {String.valueOf(id)});
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                entry = new TrackerEntry(cursor.getLong(0),
+                                         cursor.getString(1),
+                                         "WLAN");
+            }
+        }finally {
+            cursor.close();
+        }
+        return entry;
+
+    }
+
+
     public TrackerEntry getTracker(String name) {
         init();
         Cursor cursor = null;
@@ -103,10 +128,10 @@ public class LogDataSource {
                                        new String[] {name});
 
             if(cursor.getCount() > 0) {
-                entry = new TrackerEntry();
                 cursor.moveToFirst();
-                entry.setID(cursor.getLong(0));
-                entry.setSSID(cursor.getString(1));
+                entry = new TrackerEntry(cursor.getLong(0),
+                                         cursor.getString(1),
+                                         "WLAN");
             }
         }finally {
             cursor.close();
@@ -133,18 +158,21 @@ public class LogDataSource {
         return tracker_id;
     }
 
-    public long getOrCreateTrackerID(String name, String method) {
-        long tracker_id = getTrackerID(name, method);
-        if (tracker_id == -1L) {
-            tracker_id = createTrackerEntry(name, method);
+    public TrackerEntry getOrCreateTracker(String name, String method) {
+        TrackerEntry tracker = getTracker(name);
+        if (tracker == null) {
+            tracker = createTracker(name, method);
         }
-        return tracker_id;
+        return tracker;
     }
 
     public boolean deleteTracker(long id) {
+        TrackerEntry tracker = getTracker(id);
         init();
         database.delete(SQLiteHandler.TABLE_LOGS, "tracker_id=?", new String[] {String.valueOf(id)});
         int rows_affected = database.delete(SQLiteHandler.TABLE_TRACKERS, "_id=?", new String[] {String.valueOf(id)});
+        EventBus bus = EventBus.getDefault();
+        bus.post(new OnTrackerDeleted(tracker));
         return rows_affected > 0;
     }
 

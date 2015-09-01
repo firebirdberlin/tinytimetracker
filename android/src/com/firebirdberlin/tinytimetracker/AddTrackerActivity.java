@@ -71,7 +71,7 @@ public class AddTrackerActivity extends Activity {
     private void saveNewSSID(String new_ssid) {
         LogDataSource datasource = new LogDataSource(this);
         datasource.open();
-        datasource.getOrCreateTrackerID(new_ssid, "WLAN");
+        datasource.getOrCreateTracker(new_ssid, "WLAN");
         datasource.close();
     }
 }
