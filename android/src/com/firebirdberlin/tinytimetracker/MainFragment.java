@@ -68,17 +68,24 @@ public class MainFragment extends Fragment {
         datasource.close();
     }
 
-    public void onEvent(OnTrackerDeleted event) {
-        Log.i(TAG, "OnTrackerDeleted");
-        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
-        adapter.remove(event.tracker);
-        adapter.notifyDataSetChanged();
-    }
-
     public void onEvent(OnTrackerAdded event) {
         Log.i(TAG, "OnTrackerAdded");
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.add(event.tracker);
+        adapter.notifyDataSetChanged();
+    }
+
+    public void onEvent(OnTrackerChanged event) {
+        Log.i(TAG, "OnTrackerChanged");
+        loadTrackers();
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        adapter.notifyDataSetChanged();
+    }
+
+    public void onEvent(OnTrackerDeleted event) {
+        Log.i(TAG, "OnTrackerDeleted");
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        adapter.remove(event.tracker);
         adapter.notifyDataSetChanged();
     }
 }

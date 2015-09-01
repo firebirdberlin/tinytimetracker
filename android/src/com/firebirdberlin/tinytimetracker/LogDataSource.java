@@ -204,6 +204,8 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_METHOD, "WLAN");
         values.put(SQLiteHandler.COLUMN_NAME, tracker.getSSID());
         long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
+        EventBus bus = EventBus.getDefault();
+        bus.post(new OnTrackerChanged(tracker));
         return tracker;
     }
 
