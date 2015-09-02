@@ -3,10 +3,12 @@ package com.firebirdberlin.tinytimetracker;
 public class TrackerEntry {
     private long id;
     private String ssid;
+    private String verbose_name;
 
-    public TrackerEntry(long id, String name, String method){
+    public TrackerEntry(long id, String name, String verbose_name, String method){
         this.id = id;
         this.ssid = name;
+        this.verbose_name = verbose_name;
     }
 
     public long getID() {
@@ -21,12 +23,20 @@ public class TrackerEntry {
         return ssid;
     }
 
+    public void setVerboseName(String verbose_name) {
+        this.verbose_name = verbose_name;
+    }
+
+    public String getVerboseName() {
+        return verbose_name;
+    }
+
     public void setSSID(String ssid) {
         this.ssid = ssid;
     }
 
     public String toString() {
-        return ssid;
+        return verbose_name;
     }
 
     @Override

@@ -36,7 +36,9 @@ public class AddTrackerActivity extends Activity {
     private void init() {
         if (tracker != null) {
             EditText edit_tracker_name = (EditText) findViewById(R.id.edit_tracker_name);
+            EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
             edit_tracker_name.setText(tracker.getSSID());
+            edit_tracker_verbose_name.setText(tracker.getVerboseName());
         }
     }
 
@@ -62,8 +64,10 @@ public class AddTrackerActivity extends Activity {
                         Log.i(TAG, String.valueOf(ssid_seq[item]));
                         String ssid = String.valueOf(ssid_seq[item]);
                         EditText edit_name = (EditText) findViewById(R.id.edit_tracker_name);
+                        EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
 
                         edit_name.setText(ssid);
+                        edit_tracker_verbose_name.setText(ssid);
                         dialog.dismiss();
                     }
                 })
@@ -73,13 +77,16 @@ public class AddTrackerActivity extends Activity {
 
     public void onClickOk(View v) {
         EditText edit_name = (EditText) findViewById(R.id.edit_tracker_name);
+        EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
         String ssid = edit_name.getText().toString();
+        String verbose_name = edit_tracker_verbose_name.getText().toString();
         if (! ssid.isEmpty()) {
             if (tracker != null) {
                 tracker.setSSID(ssid);
+                tracker.setVerboseName(verbose_name);
                 datasource.replaceTrackerEntry(tracker);
             } else {
-                datasource.getOrCreateTracker(ssid, "WLAN");
+                datasource.getOrCreateTracker(ssid, verbose_name, "WLAN");
             }
             datasource.close();
             this.finish();

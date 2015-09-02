@@ -182,7 +182,7 @@ public class WiFiService extends Service {
                     network_found = true;
                     Log.d(TAG, network.SSID);
 
-                    TrackerEntry tracker = datasource.getTracker(network.SSID);
+                    TrackerEntry tracker = datasource.getTrackerBySSID(network.SSID);
                     if (tracker == null) {
                         continue;
                     }

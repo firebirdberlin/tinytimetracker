@@ -17,15 +17,15 @@
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <EditText
             android:layout_weight="7"
-            android:id="@+id/edit_tracker_name"
-            android:layout_width="fill_parent"
+            android:id="@+id/edit_tracker_verbose_name"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/edit_tracker_name_hint"
+            android:hint="@string/edit_tracker_verbose_name_hint"
             android:padding="5dip"
             android:singleLine="true"
             android:drawableLeft="@drawable/ic_edit" />
@@ -39,6 +39,16 @@
             android:onClick="onChooseWifi"
             android:text=""/>
     </LinearLayout>
+
+    <EditText
+        android:id="@+id/edit_tracker_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_tracker_name_hint"
+        android:padding="5dip"
+        android:singleLine="true"
+        android:drawableLeft="@drawable/ic_edit" />
+
     </LinearLayout>
 
     <Button

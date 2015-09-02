@@ -42,12 +42,13 @@ public class LogDataSource {
         dbHelper.close();
     }
 
-    public TrackerEntry createTracker(String name, String method) {
+    public TrackerEntry createTracker(String name, String verbose_name, String method) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_NAME, name);
         values.put(SQLiteHandler.COLUMN_METHOD, method);
+        values.put(SQLiteHandler.COLUMN_VERBOSE, verbose_name);
         long insertId = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
-        TrackerEntry tracker = new TrackerEntry(insertId, name, method);
+        TrackerEntry tracker = new TrackerEntry(insertId, name, verbose_name, method);
         EventBus bus = EventBus.getDefault();
         bus.post(new OnTrackerAdded(tracker));
         return tracker;
@@ -78,14 +79,15 @@ public class LogDataSource {
         Cursor cursor = null;
         List<TrackerEntry> entries = new ArrayList<TrackerEntry>();
         try{
-            cursor = database.rawQuery("SELECT _id, name FROM trackers",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers",
                                        new String[] {});
 
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 TrackerEntry entry = new TrackerEntry(cursor.getLong(0),
                                                       cursor.getString(1),
-                                                      "WLAN");
+                                                      cursor.getString(2),
+                                                      cursor.getString(3));
                 entries.add(entry);
 
                 cursor.moveToNext();
@@ -102,14 +104,15 @@ public class LogDataSource {
         Cursor cursor = null;
         TrackerEntry entry = null;
         try{
-            cursor = database.rawQuery("SELECT _id, name FROM trackers WHERE _id=?",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers WHERE _id=?",
                                        new String[] {String.valueOf(id)});
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 entry = new TrackerEntry(cursor.getLong(0),
                                          cursor.getString(1),
-                                         "WLAN");
+                                         cursor.getString(2),
+                                         cursor.getString(3));
             }
         }finally {
             cursor.close();
@@ -119,19 +122,42 @@ public class LogDataSource {
     }
 
 
-    public TrackerEntry getTracker(String name) {
+    public TrackerEntry getTracker(String verbose_name) {
         init();
         Cursor cursor = null;
         TrackerEntry entry = null;
         try{
-            cursor = database.rawQuery("SELECT _id, name FROM trackers WHERE name=?",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers WHERE verbose_name=?",
+                                       new String[] {verbose_name});
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                entry = new TrackerEntry(cursor.getLong(0),
+                                         cursor.getString(1),
+                                         cursor.getString(2),
+                                         cursor.getString(3));
+            }
+        }finally {
+            cursor.close();
+        }
+        return entry;
+
+    }
+
+    public TrackerEntry getTrackerBySSID(String name) {
+        init();
+        Cursor cursor = null;
+        TrackerEntry entry = null;
+        try{
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers WHERE name=?",
                                        new String[] {name});
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 entry = new TrackerEntry(cursor.getLong(0),
                                          cursor.getString(1),
-                                         "WLAN");
+                                         cursor.getString(2),
+                                         cursor.getString(3));
             }
         }finally {
             cursor.close();
@@ -158,10 +184,10 @@ public class LogDataSource {
         return tracker_id;
     }
 
-    public TrackerEntry getOrCreateTracker(String name, String method) {
-        TrackerEntry tracker = getTracker(name);
+    public TrackerEntry getOrCreateTracker(String name, String verbose_name, String method) {
+        TrackerEntry tracker = getTracker(verbose_name);
         if (tracker == null) {
-            tracker = createTracker(name, method);
+            tracker = createTracker(name, verbose_name, method);
         }
         return tracker;
     }
@@ -203,6 +229,7 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_ID, tracker.getID());
         values.put(SQLiteHandler.COLUMN_METHOD, "WLAN");
         values.put(SQLiteHandler.COLUMN_NAME, tracker.getSSID());
+        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.getVerboseName());
         long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
         EventBus bus = EventBus.getDefault();
         bus.post(new OnTrackerChanged(tracker));
