@@ -148,8 +148,7 @@ public class TinyTimeTracker extends FragmentActivity {
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    Log.d(TAG, "Dialog " + String.valueOf(whichButton));
-                    datasource.deleteTracker(currentTracker.getID());
+                    datasource.delete(currentTracker);
                 }}).show();
     }
 

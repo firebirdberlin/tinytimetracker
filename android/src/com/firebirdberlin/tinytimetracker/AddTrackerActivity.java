@@ -80,17 +80,38 @@ public class AddTrackerActivity extends Activity {
         EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
         String ssid = edit_name.getText().toString();
         String verbose_name = edit_tracker_verbose_name.getText().toString();
-        if (! ssid.isEmpty()) {
-            if (tracker != null) {
+
+        if (validateInputs(ssid, verbose_name) == false) {
+            return;
+        }
+
+        if (! ssid.isEmpty() && ! verbose_name.isEmpty()) {
+            if (tracker == null) {
+                tracker = new TrackerEntry( ssid, verbose_name, "WLAN");
+            } else {
                 tracker.setSSID(ssid);
                 tracker.setVerboseName(verbose_name);
-                datasource.replaceTrackerEntry(tracker);
-            } else {
-                datasource.getOrCreateTracker(ssid, verbose_name, "WLAN");
             }
+            datasource.save(tracker);
             datasource.close();
             this.finish();
         }
+    }
+
+    private boolean validateInputs(String name, String verbose_name) {
+        if (name.isEmpty() || verbose_name.isEmpty()) {
+            return false;
+        }
+
+        TrackerEntry other = datasource.getTracker(verbose_name);
+        if (tracker == null && other != null) { // a new tracker would be created
+            return false;
+        }
+
+        if (tracker != null && other != null && other.getID() != tracker.getID()) {
+            return false;
+        }
+        return true;
     }
 
     public static void open(Context context) {

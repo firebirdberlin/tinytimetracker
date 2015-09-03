@@ -21,6 +21,7 @@ public class LogDataSource {
     private Context mContext = null;
     private SQLiteDatabase database = null;
     private SQLiteHandler dbHelper;
+    private EventBus bus = EventBus.getDefault();
 
     public LogDataSource(Context context) {
         mContext = context;
@@ -42,15 +43,20 @@ public class LogDataSource {
         dbHelper.close();
     }
 
-    public TrackerEntry createTracker(String name, String verbose_name, String method) {
+    public TrackerEntry save(TrackerEntry tracker) {
         ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_NAME, name);
-        values.put(SQLiteHandler.COLUMN_METHOD, method);
-        values.put(SQLiteHandler.COLUMN_VERBOSE, verbose_name);
-        long insertId = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
-        TrackerEntry tracker = new TrackerEntry(insertId, name, verbose_name, method);
-        EventBus bus = EventBus.getDefault();
-        bus.post(new OnTrackerAdded(tracker));
+        values.put(SQLiteHandler.COLUMN_NAME, tracker.getName());
+        values.put(SQLiteHandler.COLUMN_METHOD, tracker.getMethod());
+        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.getVerboseName());
+        if (tracker.getID() == TrackerEntry.NOT_SAVED) {
+            long id = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
+            tracker.setID(id);
+            bus.post(new OnTrackerAdded(tracker));
+        } else {
+            values.put(SQLiteHandler.COLUMN_ID, tracker.getID());
+            long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
+            bus.post(new OnTrackerChanged(tracker));
+        }
         return tracker;
     }
 
@@ -184,22 +190,24 @@ public class LogDataSource {
         return tracker_id;
     }
 
-    public TrackerEntry getOrCreateTracker(String name, String verbose_name, String method) {
-        TrackerEntry tracker = getTracker(verbose_name);
+    public boolean delete(TrackerEntry tracker) {
         if (tracker == null) {
-            tracker = createTracker(name, verbose_name, method);
+            return false;
         }
-        return tracker;
-    }
 
-    public boolean deleteTracker(long id) {
-        TrackerEntry tracker = getTracker(id);
+        long id = tracker.getID();
+        if (id == TrackerEntry.NOT_SAVED) {
+            return false;
+        }
+
         init();
         database.delete(SQLiteHandler.TABLE_LOGS, "tracker_id=?", new String[] {String.valueOf(id)});
         int rows_affected = database.delete(SQLiteHandler.TABLE_TRACKERS, "_id=?", new String[] {String.valueOf(id)});
-        EventBus bus = EventBus.getDefault();
-        bus.post(new OnTrackerDeleted(tracker));
-        return rows_affected > 0;
+        boolean success = (rows_affected > 0);
+        if (success) {
+            bus.post(new OnTrackerDeleted(tracker));
+        }
+        return success;
     }
 
 
@@ -231,7 +239,6 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_NAME, tracker.getSSID());
         values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.getVerboseName());
         long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
-        EventBus bus = EventBus.getDefault();
         bus.post(new OnTrackerChanged(tracker));
         return tracker;
     }

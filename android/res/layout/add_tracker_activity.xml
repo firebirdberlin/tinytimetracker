@@ -9,26 +9,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <TextView
-        android:text="Add a tracker"
-        android:id="@+id/text1"
+    <EditText
+        android:drawableLeft="@drawable/ic_edit"
+        android:hint="@string/edit_tracker_verbose_name_hint"
+        android:id="@+id/edit_tracker_verbose_name"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:padding="5dip"
+        android:singleLine="true" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:paddingTop="10dip"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <EditText
-            android:layout_weight="7"
-            android:id="@+id/edit_tracker_verbose_name"
-            android:layout_width="match_parent"
+            android:drawableLeft="@drawable/ic_edit"
+            android:hint="@string/edit_tracker_name_hint"
+            android:id="@+id/edit_tracker_name"
             android:layout_height="wrap_content"
-            android:hint="@string/edit_tracker_verbose_name_hint"
+            android:layout_weight="7"
+            android:layout_width="match_parent"
             android:padding="5dip"
-            android:singleLine="true"
-            android:drawableLeft="@drawable/ic_edit" />
+            android:singleLine="true" />
 
         <Button
             android:layout_weight="3"
@@ -39,15 +43,6 @@
             android:onClick="onChooseWifi"
             android:text=""/>
     </LinearLayout>
-
-    <EditText
-        android:id="@+id/edit_tracker_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/edit_tracker_name_hint"
-        android:padding="5dip"
-        android:singleLine="true"
-        android:drawableLeft="@drawable/ic_edit" />
 
     </LinearLayout>
 
