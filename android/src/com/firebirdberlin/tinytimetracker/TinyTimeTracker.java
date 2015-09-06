@@ -141,8 +141,9 @@ public class TinyTimeTracker extends FragmentActivity {
         }
 
         new AlertDialog.Builder(this)
-            .setTitle("Delete " + currentTracker.getSSID())
-            .setMessage("Do you really want to delete this tracker and all data ?")
+            .setTitle(this.getResources().getString(R.string.confirm_delete)
+                      + " '" + currentTracker.getVerboseName() + "'")
+            .setMessage(this.getResources().getString(R.string.confirm_delete_question))
             .setIcon(R.drawable.ic_delete)
             .setNegativeButton(android.R.string.no, null)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

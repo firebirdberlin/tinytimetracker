@@ -8,6 +8,8 @@
     <string name="action_donate">Spenden</string>
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_open_github">Beitragen</string>
+    <string name="confirm_delete">Lösche</string>
+    <string name="confirm_delete_question">Soll dieser Tracker mit allen Daten wirklich gelöscht werden ?</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Tag</string>
     <string name="aggregation_week">Woche</string>

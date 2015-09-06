@@ -71,10 +71,10 @@
         </Preference>
         <Preference
             android:key="pref_static_icon_2"
-            android:title="Icon: settings"
-            android:summary="dtafalonso">
+            android:title="Icons"
+            android:summary="icons8">
             <intent android:action="android.intent.action.VIEW"
-                android:data="http://www.iconarchive.com/show/android-l-icons-by-dtafalonso/Settings-L-icon.html" />
+                android:data="https://icons8.com/" />
         </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

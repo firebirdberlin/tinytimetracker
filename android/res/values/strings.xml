@@ -8,6 +8,8 @@
     <string name="action_donate">Donate</string>
     <string name="action_pebble_app_store">Open Pebble App Store</string>
     <string name="action_open_github">Contribute</string>
+    <string name="confirm_delete">Delete</string>
+    <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Day</string>
     <string name="aggregation_week">Week</string>
