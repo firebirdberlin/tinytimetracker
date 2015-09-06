@@ -29,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import de.greenrobot.event.EventBus;
+import java.util.List;
 
 
 public class TinyTimeTracker extends FragmentActivity {
@@ -42,7 +43,6 @@ public class TinyTimeTracker extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         bus.register(this);
-        if (datasource == null) datasource = new LogDataSource(this);
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
 
@@ -77,11 +77,18 @@ public class TinyTimeTracker extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        if (datasource == null) datasource = new LogDataSource(this);
+        List<TrackerEntry> trackers = datasource.getTrackers();
+        if (trackers.isEmpty()) {
+            AddTrackerActivity.open(this); 
+        }
     }
 
     @Override
     public void onPause() {
         datasource.close();
+        datasource = null;
         super.onPause();
     }
 
@@ -102,6 +109,11 @@ public class TinyTimeTracker extends FragmentActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_actions, menu);
+
+        MenuItem item_edit = menu.findItem(R.id.action_edit);
+        MenuItem item_delete = menu.findItem(R.id.action_delete);
+        item_edit.setVisible(currentTracker != null);
+        item_delete.setVisible(currentTracker != null);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -110,7 +122,9 @@ public class TinyTimeTracker extends FragmentActivity {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_edit:
-                AddTrackerActivity.open(this, currentTracker.getID());
+                if (currentTracker != null) {
+                    AddTrackerActivity.open(this, currentTracker.getID());
+                }
                 return true;
             case R.id.action_add:
                 AddTrackerActivity.open(this);
@@ -213,11 +227,13 @@ public class TinyTimeTracker extends FragmentActivity {
 
     public void onEvent(OnTrackerSelected event) {
         currentTracker = event.newTracker;
+        invalidateOptionsMenu();
         Log.d(TAG, "currentTracker: " + currentTracker.toString());
     }
 
-    public LogDataSource getDataSource() {
-        datasource.open();
-        return datasource;
+    public void onEvent(OnTrackerDeleted event) {
+        currentTracker = null;
+        invalidateOptionsMenu();
+        Log.d(TAG, "currentTracker: null");
     }
 }

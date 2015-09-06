@@ -12,24 +12,24 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import de.greenrobot.event.EventBus;
 import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.List;
-import de.greenrobot.event.EventBus;
 
 public class StatsFragment extends ListFragment {
     final List<String> svalues1 = new ArrayList<String>();
     final List<String> svalues2 = new ArrayList<String>();
     TwoColumnListAdapter two_column_adapter = null;
     RadioGroup radio_group_aggregation = null;
-    TinyTimeTracker mContext = null;
+    Context mContext = null;
     TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        mContext = (TinyTimeTracker) getActivity();
+        mContext = (Context) getActivity();
         bus.register(this);
 
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
@@ -58,7 +58,7 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
-        LogDataSource datasource = mContext.getDataSource();
+        LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
             long tracker_id = currentTracker.getID();
@@ -91,7 +91,7 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
-        LogDataSource datasource = mContext.getDataSource();
+        LogDataSource datasource = new LogDataSource(mContext);
         if (currentTracker != null) {
             long tracker_id = currentTracker.getID();
             List<LogEntry> values = datasource.getAllEntries(tracker_id);
@@ -141,6 +141,15 @@ public class StatsFragment extends ListFragment {
 
     public void onEvent(OnTrackerSelected event) {
         this.currentTracker = event.newTracker;
+        if (radio_group_aggregation == null) {
+            return;
+        }
+        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
+        refresh(checkedId);
+    }
+
+    public void onEvent(OnTrackerDeleted event) {
+        this.currentTracker = null;
         if (radio_group_aggregation == null) {
             return;
         }

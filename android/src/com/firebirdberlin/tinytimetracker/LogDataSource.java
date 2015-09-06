@@ -44,6 +44,7 @@ public class LogDataSource {
     }
 
     public TrackerEntry save(TrackerEntry tracker) {
+        init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_NAME, tracker.getName());
         values.put(SQLiteHandler.COLUMN_METHOD, tracker.getMethod());
@@ -99,7 +100,9 @@ public class LogDataSource {
                 cursor.moveToNext();
             }
         }finally {
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
         return entries;
 
@@ -212,6 +215,7 @@ public class LogDataSource {
 
 
     public LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
+        init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, tracker_id);
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, timestamp_start);
@@ -249,6 +253,7 @@ public class LogDataSource {
     }
 
     public List<LogEntry> getAllEntries(long tracker_id) {
+        init();
         List<LogEntry> entries = new ArrayList<LogEntry>();
         Cursor cursor = null;
 
@@ -273,6 +278,7 @@ public class LogDataSource {
     }
 
     public LogEntry getLatestLogEntry(long tracker_id) {
+        init();
         Cursor cursor = null;
         LogEntry log = null;
         try{
@@ -299,6 +305,7 @@ public class LogDataSource {
     }
 
     public List< Pair<Long,Long> > getTotalDurationAggregated(long tracker_id, int aggregation_type, long limit) {
+        init();
         String group_by = "";
         switch (aggregation_type) {
             case AGGRETATION_DAY:
@@ -345,6 +352,7 @@ public class LogDataSource {
     }
 
     public UnixTimestamp getTotalDurationSince(long timestamp, long tracker_id) {
+        init();
         Cursor cursor = null;
         long duration_millis = 0;
         try{
@@ -360,12 +368,15 @@ public class LogDataSource {
                 duration_millis = cursor.getLong(0);
             }
         }finally {
-            cursor.close();
+            if (cursor != null){
+               cursor.close();
+            }
         }
         return new UnixTimestamp(duration_millis);
     }
 
     public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long seconds_connection_lost){
+        init();
         if (tracker == null) return null;
 
         long tracker_id = tracker.getID();

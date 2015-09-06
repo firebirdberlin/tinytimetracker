@@ -9,13 +9,13 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.view.View;
-import java.util.List;
 import android.util.Pair;
+import android.view.View;
 import de.greenrobot.event.EventBus;
+import java.util.List;
 
 public class MainView extends View {
-     private TinyTimeTracker mContext;
+     private Context mContext;
      private int workingHoursInSeconds = 8 * 3600;
      EventBus bus = EventBus.getDefault();
      TrackerEntry currentTracker = null;
@@ -23,7 +23,7 @@ public class MainView extends View {
      public MainView(Context context) {
          super(context);
          bus.register(this);
-         mContext = (TinyTimeTracker) context;
+         mContext = context;
      }
 
      public MainView(Context context, AttributeSet attrs) {
@@ -43,13 +43,18 @@ public class MainView extends View {
         invalidate();
     }
 
+    public void onEvent(OnTrackerDeleted event) {
+        currentTracker = null;
+        invalidate();
+    }
+
      @Override
      protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         UnixTimestamp today = UnixTimestamp.startOfToday();
-        LogDataSource datasource = mContext.getDataSource();
+        LogDataSource datasource = new LogDataSource(mContext);
         if (currentTracker == null) {
             return;
         }
