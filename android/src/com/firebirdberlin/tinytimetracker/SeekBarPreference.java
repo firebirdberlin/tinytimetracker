@@ -1,8 +1,8 @@
-/* The following code was written by Matthew Wiggins 
- * and is released under the APACHE 2.0 license 
- * 
+/* The following code was written by Matthew Wiggins
+ * and is released under the APACHE 2.0 license
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Improvements :
  * - save the value on positive button click, not on seekbar change
  * - handle @string/... values in xml file
@@ -43,7 +43,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     // Constructor :
     public SeekBarPreference(Context context, AttributeSet attrs) {
 
-        super(context,attrs); 
+        super(context,attrs);
         mContext = context;
 
         // Get string value for dialogMessage :
@@ -66,7 +66,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
     // ------------------------------------------------------------------------------------------
     // DialogPreference methods :
-    @Override 
+    @Override
     protected View onCreateDialogView() {
 
         LinearLayout.LayoutParams params;
@@ -84,13 +84,13 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
         mValueText.setGravity(Gravity.CENTER_HORIZONTAL);
         mValueText.setTextSize(32);
         params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT, 
+                LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
         layout.addView(mValueText, params);
 
         mSeekBar = new SeekBar(mContext);
         mSeekBar.setOnSeekBarChangeListener(this);
-        layout.addView(mSeekBar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        layout.addView(mSeekBar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         if (shouldPersist())
             mValue = getPersistedInt(mDefault);
@@ -101,7 +101,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
         return layout;
     }
 
-    @Override 
+    @Override
     protected void onBindDialogView(View v) {
         super.onBindDialogView(v);
         mSeekBar.setMax(mMax);
@@ -109,12 +109,12 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     }
 
     @Override
-    protected void onSetInitialValue(boolean restore, Object defaultValue)  
+    protected void onSetInitialValue(boolean restore, Object defaultValue)
     {
         super.onSetInitialValue(restore, defaultValue);
-        if (restore) 
+        if (restore)
             mValue = shouldPersist() ? getPersistedInt(mDefault) : 0;
-            else 
+            else
                 mValue = (Integer)defaultValue;
     }
     // ------------------------------------------------------------------------------------------
@@ -138,10 +138,10 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     public void setMax(int max) { mMax = max; }
     public int getMax() { return mMax; }
 
-    public void setProgress(int progress) { 
+    public void setProgress(int progress) {
         mValue = progress;
         if (mSeekBar != null)
-            mSeekBar.setProgress(progress); 
+            mSeekBar.setProgress(progress);
     }
     public int getProgress() { return mValue; }
     // ------------------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
 
     // ------------------------------------------------------------------------------------------
-    // Set the positive button listener and onClick action : 
+    // Set the positive button listener and onClick action :
     @Override
     public void showDialog(Bundle state) {
 
