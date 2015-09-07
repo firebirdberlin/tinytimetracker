@@ -1,10 +1,9 @@
 package com.firebirdberlin.tinytimetracker;
 
 import android.util.Log;
-import android.text.format.DateFormat;
-import java.util.Locale;
 import java.util.Calendar;
 import java.util.Date;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 
@@ -27,29 +26,33 @@ public class UnixTimestamp {
     }
 
     public String toDateTimeString(){
-        return toString("yyyyMMddHHmm");
+        Date date = new Date(timestamp);
+        DateFormat df = DateFormat.getDateTimeInstance();
+        return df.format(date);
     }
 
     public String toDateString(){
-        return toString("yyyyMMdd");
+        Date date = new Date(timestamp);
+        DateFormat df = DateFormat.getDateInstance();
+        return df.format(date);
     }
 
     public String toWeekString(){
-        return toYearString() + " w" + toString("ww");
+        Date date = new Date(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy 'w'ww");
+        return sdf.format(date);
     }
 
     public String toYearString(){
-        return toString("yyyy");
+        Date date = new Date(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        return sdf.format(date);
     }
 
     public String toTimeString(){
-        return toString("HHmm");
-    }
-
-    public String toString(String skeleton){
         Date date = new Date(timestamp);
-        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-        return new SimpleDateFormat(pattern).format(date);
+        DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
+        return df.format(date);
     }
 
     public String durationAsMinutes(){
@@ -64,7 +67,6 @@ public class UnixTimestamp {
         long minutes = (seconds % 3600) / 60;
         long sec = seconds % 60;
 
-        //return String.format("%02d:%02d:%02d", hours, minutes, sec);
         return String.format("%02d:%02d", hours, minutes);
     }
 
