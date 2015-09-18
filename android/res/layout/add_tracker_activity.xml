@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <EditText
+        android:drawableLeft="@drawable/ic_edit"
+        android:hint="@string/edit_tracker_verbose_name_hint"
+        android:id="@+id/edit_tracker_verbose_name"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="5dip"
+        android:singleLine="true" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:paddingTop="10dip"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:drawableLeft="@drawable/ic_edit"
+            android:hint="@string/edit_tracker_name_hint"
+            android:id="@+id/edit_tracker_name"
+            android:layout_height="wrap_content"
+            android:layout_weight="7"
+            android:layout_width="match_parent"
+            android:padding="5dip"
+            android:singleLine="true" />
+
+        <Button
+            android:layout_weight="3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_wifi"
+            android:id="@+id/button_wifi"
+            android:onClick="onChooseWifi"
+            android:text=""/>
+    </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/ic_ok"
+        android:id="@+id/button_ok"
+        android:onClick="onClickOk"
+        android:text="OK"/>
+
+</RelativeLayout>
+

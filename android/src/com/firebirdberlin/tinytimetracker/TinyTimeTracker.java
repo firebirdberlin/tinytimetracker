@@ -2,75 +2,118 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.SharedPreferences;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.Settings.Global;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import de.greenrobot.event.EventBus;
+import java.util.List;
 
 
-import java.lang.Runnable;
-
-public class TinyTimeTracker extends Activity {
+public class TinyTimeTracker extends FragmentActivity {
     public static final String TAG = "TinyTimeTracker";
-    private Handler viewHandler = new Handler();
-    private View timeView = null;
-    private int workingHoursInSeconds = 8 * 3600;
+    EventBus bus = EventBus.getDefault();
+    private TrackerEntry currentTracker = null;
+    private static LogDataSource datasource = null;
 
-    /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.main);
-        timeView = new MyView(this);
-        setContentView(timeView);
+        setContentView(R.layout.main);
+        bus.register(this);
+        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
 
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
     }
 
+    private class MyPagerAdapter extends FragmentPagerAdapter {
+
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int pos) {
+            switch(pos) {
+                case 0:
+                default:
+                    return new MainFragment();
+                case 1:
+                    return new StatsFragment();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        workingHoursInSeconds = (int) (Settings.getWorkingHours(this) * 3600.f);
-        viewHandler.post(updateView);
+
+        if (datasource == null) datasource = new LogDataSource(this);
+        List<TrackerEntry> trackers = datasource.getTrackers();
+        if (trackers.isEmpty()) {
+            AddTrackerActivity.open(this); 
+        }
     }
 
     @Override
     public void onPause() {
+        datasource.close();
+        datasource = null;
         super.onPause();
-        viewHandler.removeCallbacks(updateView);
     }
 
-    Runnable updateView = new Runnable(){
-        @Override
-        public void run(){
-            timeView.invalidate();
-            viewHandler.postDelayed(updateView, 20000);
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+
         }
-    };
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_actions, menu);
+
+        MenuItem item_edit = menu.findItem(R.id.action_edit);
+        MenuItem item_delete = menu.findItem(R.id.action_delete);
+        item_edit.setVisible(currentTracker != null);
+        item_delete.setVisible(currentTracker != null);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -78,6 +121,17 @@ public class TinyTimeTracker extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
+            case R.id.action_edit:
+                if (currentTracker != null) {
+                    AddTrackerActivity.open(this, currentTracker.getID());
+                }
+                return true;
+            case R.id.action_add:
+                AddTrackerActivity.open(this);
+                return true;
+            case R.id.action_delete:
+                confirmDeletion();
+                return true;
             case R.id.action_settings:
                 Settings.openSettings(this);
                 return true;
@@ -95,71 +149,42 @@ public class TinyTimeTracker extends Activity {
         }
     }
 
+    private void confirmDeletion() {
+        if (currentTracker == null) {
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+            .setTitle(this.getResources().getString(R.string.confirm_delete)
+                      + " '" + currentTracker.getVerboseName() + "'")
+            .setMessage(this.getResources().getString(R.string.confirm_delete_question))
+            .setIcon(R.drawable.ic_delete)
+            .setNegativeButton(android.R.string.no, null)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    datasource.delete(currentTracker);
+                }}).show();
+    }
+
     private void openDonationPage() {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
         startActivity(browserIntent);
     }
 
-
     private void openPebbleAppStore() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
-        startActivity(intent);
-    }
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
+            startActivity(intent);
+        } catch ( ActivityNotFoundException e) {
 
+        }
+    }
 
     private void openGitHub() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/firebirdberlin/tinytimetracker"));
         startActivity(intent);
-    }
-
-
-    public class MyView extends View {
-         private Context mContext;
-
-         public MyView(Context context) {
-             super(context);
-             mContext = context;
-         }
-
-         @Override
-         protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
-            Long seconds_today = settings.getLong("seconds_today", 0L);
-            int angle = 360 * seconds_today.intValue() / workingHoursInSeconds;
-
-            int x = getWidth();
-            int y = getHeight();
-            int radius = 8 * x / 20;
-            Paint paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setColor(Color.TRANSPARENT);
-            paint.setStrokeWidth(4);
-            paint.setStrokeCap(Paint.Cap.ROUND);
-
-            final RectF rect = new RectF();
-            rect.set(x/2 - radius, y/2 - radius, x/2 + radius, y/2 + radius);
-            paint.setColor(Color.parseColor("#AA6AB4D7"));
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            canvas.drawArc(rect, -90, angle, true, paint);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.parseColor("#AA33A6DE"));
-            canvas.drawArc(rect, -90, 360, true, paint);
-
-            paint.setColor(Color.WHITE);
-            paint.setTextSize(150);
-            paint.setStrokeWidth(1);
-            Rect bounds = new Rect();
-            String text = WiFiService.formatAsHours(seconds_today.intValue());
-            paint.getTextBounds(text, 0, text.length(), bounds);
-            int height = bounds.height();
-            int width = bounds.width();
-            canvas.drawText(text, (x - width)/2, (y + height)/2, paint);
-
-        }
     }
 
     public static void startService(Context context){
@@ -167,7 +192,6 @@ public class TinyTimeTracker extends Activity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startService(intent);
     }
-
 
     public static void scheduleWiFiService(Context context) {
         Intent intent = new Intent(context, AlarmReceiver.class);
@@ -178,7 +202,6 @@ public class TinyTimeTracker extends Activity {
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 120000, sender);
     }
 
-
     public void enableBootReceiver(Context context){
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
@@ -187,7 +210,6 @@ public class TinyTimeTracker extends Activity {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 PackageManager.DONT_KILL_APP);
     }
-
 
     public void disableBootReceiver(Context context){
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
@@ -198,6 +220,20 @@ public class TinyTimeTracker extends Activity {
                 PackageManager.DONT_KILL_APP);
     }
 
+    public static boolean isAirplaneModeOn(Context context) {
+       return Global.getInt(context.getContentResolver(),
+               Global.AIRPLANE_MODE_ON, 0) != 0;
+    }
 
+    public void onEvent(OnTrackerSelected event) {
+        currentTracker = event.newTracker;
+        invalidateOptionsMenu();
+        Log.d(TAG, "currentTracker: " + currentTracker.toString());
+    }
 
+    public void onEvent(OnTrackerDeleted event) {
+        currentTracker = null;
+        invalidateOptionsMenu();
+        Log.d(TAG, "currentTracker: null");
+    }
 }

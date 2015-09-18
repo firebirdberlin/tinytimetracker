@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tiny Time Tracker</string>
+    <string name="action_add">Tracker hinzufügen</string>
+    <string name="action_edit">Tracker editieren</string>
+    <string name="action_delete">Tracker löschen</string>
     <string name="action_settings">Einstellungen</string>
     <string name="action_donate">Spenden</string>
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_open_github">Beitragen</string>
+    <string name="confirm_delete">Lösche</string>
+    <string name="confirm_delete_question">Soll dieser Tracker mit allen Daten wirklich gelöscht werden ?</string>
+    <string name="aggregation_detail">Detail</string>
+    <string name="aggregation_day">Tag</string>
+    <string name="aggregation_week">Woche</string>
+    <string name="aggregation_year">Jahr</string>
+    <string name="edit_tracker_name_hint">WLAN SSID</string>
+    <string name="edit_tracker_verbose_name_hint">Anzeigename</string>
     <string name="pref_wifi_settings">WLAN</string>
     <string name="pref_worktime_settings">Arbeitszeit</string>
     <string name="pref_notification_settings">Benachrichtigungen</string>
     <string name="pref_credits">Über</string>
-    <string name="pref_title_wifi_ssid">WLAN SSID</string>
-    <string name="pref_title_wifi_ssid_manual">Eingestellte WLAN SSID</string>
-    <string name="pref_summary_wifi_ssid">Der Name des überwachten WLAN Netzwerkes.</string>
-    <string name="pref_title_seconds_connection_lost">Inaktivitätszeit in Sekunden</string>
-    <string name="pref_summary_seconds_connection_lost">Zeit in Sekunden bis Abwesenheit erkannt wird.</string>
+    <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
+    <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
     <string name="pref_dialog_notification_interval_minutes">Zeit nach der eine Benachrichtigung angezeigt werden soll.</string>
     <string name="pref_title_notification_interval_minutes">Benachrichtigungsinterval</string>
     <string name="pref_summary_notification_interval_minutes">Wie oft möchten Sie benachrichtigt werden ?</string>

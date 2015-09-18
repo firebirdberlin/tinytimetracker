@@ -3,25 +3,14 @@
         android:title="@string/pref_wifi_settings"
         android:key="pref_key_worktime_settings">
 
-        <ListPreference
-            android:key="pref_key_wifi_ssid_select"
-            android:summary="@string/pref_summary_wifi_ssid"
-            android:title="@string/pref_title_wifi_ssid"
-            android:entries="@array/empty_array"
-            android:entryValues="@array/empty_array"
-        />
-        <EditTextPreference
-            android:key="pref_key_wifi_ssid"
-            android:summary="@string/pref_summary_wifi_ssid"
-            android:title="@string/pref_title_wifi_ssid_manual" />
-        <EditTextPreference
-            android:key="pref_key_seconds_connection_lost"
+        <firebirdberlin.com.tinytimetracker.SeekBarPreference
+            android:dialogMessage="@string/pref_summary_seconds_connection_lost"
+            android:key="pref_key_absence_time"
+            android:defaultValue="20"
+            android:max="60"
             android:summary="@string/pref_summary_seconds_connection_lost"
             android:title="@string/pref_title_seconds_connection_lost"
-            android:defaultValue="300"
-            android:inputType="number"
-            />
-
+            android:text="@string/pref_unit_notification_interval_minutes"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -82,10 +71,10 @@
         </Preference>
         <Preference
             android:key="pref_static_icon_2"
-            android:title="Icon: settings"
-            android:summary="dtafalonso">
+            android:title="Icons"
+            android:summary="icons8">
             <intent android:action="android.intent.action.VIEW"
-                android:data="http://www.iconarchive.com/show/android-l-icons-by-dtafalonso/Settings-L-icon.html" />
+                android:data="https://icons8.com/" />
         </Preference>
     </PreferenceCategory>
 </PreferenceScreen>
