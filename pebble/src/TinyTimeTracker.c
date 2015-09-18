@@ -5,6 +5,10 @@
 #define KEY_WORKTIME 2
 #define KEY_BATTERY_PERCENT 3
 
+#define KEY_WATCH_IS_PLUGGED 4
+#define VALUE_WATCH_IS_PLUGGED 1
+#define VALUE_WATCH_IS_UNPLUGGED 0
+
 static Window *window;
 static Layer *s_clock_layer;
 static Layer *s_worktime_layer;
@@ -420,6 +424,22 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
+static void send_int_to_phone(int key, int value) {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_int(iter, key, &value, sizeof(int), true);
+    app_message_outbox_send();
+}
+
+static void battery_handler(BatteryChargeState charge_state) {
+
+    if (charge_state.is_plugged) {
+        send_int_to_phone(KEY_WATCH_IS_PLUGGED, VALUE_WATCH_IS_PLUGGED);
+    } else {
+        send_int_to_phone(KEY_WATCH_IS_PLUGGED, VALUE_WATCH_IS_UNPLUGGED);
+    }
+}
+
 static void init(void) {
     window = window_create();
     window_set_window_handlers(window, (WindowHandlers) {
@@ -432,6 +452,7 @@ static void init(void) {
 
     // Register with TickTimerService
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+    battery_state_service_subscribe(battery_handler);
     app_message_register_inbox_received(inbox_received_callback);
     app_message_register_inbox_dropped(inbox_dropped_callback);
     app_message_register_outbox_failed(outbox_failed_callback);
