@@ -7,8 +7,11 @@
 
 #define KEY_WATCH_IS_PLUGGED 4
 #define KEY_WATCH_BATTERY_LEVEL 5
+#define KEY_WAITING_FOR_INPUT 6
 #define VALUE_WATCH_IS_PLUGGED 1
 #define VALUE_WATCH_IS_UNPLUGGED 0
+#define VALUE_WAITING_FOR_INPUT 1
+#define VALUE_NOT_WAITING_FOR_INPUT 0
 
 static Window *window;
 static Layer *s_clock_layer;
@@ -33,8 +36,6 @@ static int angle_270 = 3 * TRIG_MAX_ANGLE / 4;
 
 int phone_battery_percent = 0;
 
-
-static void send_int_to_phone(int key, int value);
 
 /*\
 |*| DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
@@ -429,14 +430,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
-static void send_int_to_phone(int key, int value) {
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-    dict_write_int(iter, key, &value, sizeof(int), true);
-    app_message_outbox_send();
-}
-
-void send_battery_state_to_phone() {
+void send_battery_state_to_phone(int waiting_for_input) {
     BatteryChargeState charge_state = battery_state_service_peek();
 
     DictionaryIterator *iter;
@@ -445,19 +439,20 @@ void send_battery_state_to_phone() {
     int charge_percent = (int) charge_state.charge_percent;
     dict_write_int(iter, KEY_WATCH_IS_PLUGGED, &plugged, sizeof(int), true);
     dict_write_int(iter, KEY_WATCH_BATTERY_LEVEL, &charge_percent, sizeof(int), true);
+    dict_write_int(iter, KEY_WAITING_FOR_INPUT, &waiting_for_input, sizeof(int), true);
     app_message_outbox_send();
 
 }
 
 static void battery_handler(BatteryChargeState charge_state) {
-    send_battery_state_to_phone();
+    send_battery_state_to_phone(VALUE_NOT_WAITING_FOR_INPUT);
 }
 
 
 void bluetooth_handler(bool connected) {
     if (connected) {
         APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
-        send_battery_state_to_phone();
+        send_battery_state_to_phone(VALUE_WAITING_FOR_INPUT);
     } else {
         APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
         phone_battery_percent = 0;
@@ -486,7 +481,7 @@ static void init(void) {
 
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
     update_time();
-    send_battery_state_to_phone();
+    send_battery_state_to_phone(VALUE_WAITING_FOR_INPUT);
 }
 
 static void deinit(void) {
