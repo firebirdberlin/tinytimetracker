@@ -261,7 +261,6 @@ public class LogDataSource {
                                    + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
                                    new String[] {String.valueOf(tracker_id)});
 
-        Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             long log_id = cursor.getLong(0);
@@ -286,7 +285,6 @@ public class LogDataSource {
                                        + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 1",
                                        new String[] {String.valueOf(tracker_id)});
 
-            Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 long log_id = cursor.getLong(0);
@@ -335,12 +333,10 @@ public class LogDataSource {
                                        + limit_str,
                                        new String[] {String.valueOf(tracker_id)});
 
-            Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 long timestamp = cursor.getLong(0);
                 long duration_millis = cursor.getLong(1);
-                Log.d(TAG, String.valueOf(timestamp) + " : " + String.valueOf(duration_millis) + " s");
                 results.add(new Pair(timestamp, duration_millis));
 
                 cursor.moveToNext();
@@ -361,10 +357,8 @@ public class LogDataSource {
                                        new String[] {String.valueOf(tracker_id),
                                                      String.valueOf(timestamp)});
 
-            Log.d(TAG, String.valueOf(cursor.getCount()) + " results");
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
-                Log.d(TAG, String.valueOf(cursor.getLong(0)) + " ms");
                 duration_millis = cursor.getLong(0);
             }
         }finally {

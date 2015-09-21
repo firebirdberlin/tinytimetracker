@@ -29,6 +29,14 @@
         <receiver android:name=".AlarmReceiver" android:enabled="true">
         </receiver>
 
+        <receiver android:name=".PebbleMessageReceiver"
+            android:enabled="true"
+            android:priority="1000">
+            <intent-filter android:priority="1000">
+                 <action android:name="com.getpebble.action.app.RECEIVE"/>
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".BootReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>

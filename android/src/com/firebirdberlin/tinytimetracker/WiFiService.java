@@ -58,11 +58,13 @@ public class WiFiService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        Log.i(TAG, "WIFI SERVICE init ...");
         mContext = this;
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
         if ( ! wifiLock.isHeld()) {
             wifiLock.acquire();
         }
+
         //showNotification();
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -72,13 +74,13 @@ public class WiFiService extends Service {
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
         if ( TinyTimeTracker.isAirplaneModeOn(mContext) ){
-            Log.d(TAG, "Airplane mode enabled");
+            Log.i(TAG, "Airplane mode enabled");
             stopSelf();
             return Service.START_NOT_STICKY;
         }
 
         if ( ! wifiManager.isWifiEnabled() ){
-            Log.d(TAG, "WIFI disabled");
+            Log.i(TAG, "WIFI disabled");
             stopSelf();
             return Service.START_NOT_STICKY;
         }
@@ -95,6 +97,7 @@ public class WiFiService extends Service {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
+        Log.i(TAG, "WIFI SERVICE starts ...");
         return Service.START_NOT_STICKY;
     }
 
@@ -116,6 +119,7 @@ public class WiFiService extends Service {
             wifiLock.release();
         }
         wifiLock = null;
+        Log.i(TAG, "Bye bye.");
     }
 
 
@@ -146,7 +150,7 @@ public class WiFiService extends Service {
         pendingIntent = PendingIntent.getService(this, 0, intent, 0);
 
         note = buildNotification("TinyTimeTracker", "... is running.");
-        note.setLatestEventInfo(this, "TinyTimeTracker", "... is running", pendingIntent);
+        //note.setLatestEventInfo(this, "TinyTimeTracker", "... is running", pendingIntent);
         note.flags|=Notification.FLAG_FOREGROUND_SERVICE;
         note.flags|=Notification.FLAG_NO_CLEAR;
         startForeground(1337, note);
