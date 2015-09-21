@@ -63,7 +63,7 @@ public class WiFiService extends Service {
         if ( ! wifiLock.isHeld()) {
             wifiLock.acquire();
         }
-        showNotification();
+        //showNotification();
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         showNotifications = Settings.showNotifications(mContext);
@@ -132,10 +132,10 @@ public class WiFiService extends Service {
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true).build();
-//            .addAction(R.drawable.ic_launcher, "unmute", pIntentUnmute).build();
-//            .addAction(R.drawable.icon, "More", pIntent)
-//            .addAction(R.drawable.icon, "And more", pIntent).build();
+            .setAutoCancel(true)
+            //.setPriority(Notification.PRIORITY_MIN)
+            .build();
+
         return note;
     }
 
