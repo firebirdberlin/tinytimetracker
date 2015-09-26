@@ -5,6 +5,14 @@
 #define KEY_WORKTIME 2
 #define KEY_BATTERY_PERCENT 3
 
+#define KEY_WATCH_IS_PLUGGED 4
+#define KEY_WATCH_BATTERY_LEVEL 5
+#define KEY_WAITING_FOR_INPUT 6
+#define VALUE_WATCH_IS_PLUGGED 1
+#define VALUE_WATCH_IS_UNPLUGGED 0
+#define VALUE_WAITING_FOR_INPUT 1
+#define VALUE_NOT_WAITING_FOR_INPUT 0
+
 static Window *window;
 static Layer *s_clock_layer;
 static Layer *s_worktime_layer;
@@ -27,6 +35,8 @@ static int angle_180 = TRIG_MAX_ANGLE / 2;
 static int angle_270 = 3 * TRIG_MAX_ANGLE / 4;
 
 int phone_battery_percent = 0;
+
+
 /*\
 |*| DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
 \*/
@@ -420,6 +430,36 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
+void send_battery_state_to_phone(int waiting_for_input) {
+    BatteryChargeState charge_state = battery_state_service_peek();
+
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    int plugged = (int) charge_state.is_plugged;
+    int charge_percent = (int) charge_state.charge_percent;
+    dict_write_int(iter, KEY_WATCH_IS_PLUGGED, &plugged, sizeof(int), true);
+    dict_write_int(iter, KEY_WATCH_BATTERY_LEVEL, &charge_percent, sizeof(int), true);
+    dict_write_int(iter, KEY_WAITING_FOR_INPUT, &waiting_for_input, sizeof(int), true);
+    app_message_outbox_send();
+
+}
+
+static void battery_handler(BatteryChargeState charge_state) {
+    send_battery_state_to_phone(VALUE_NOT_WAITING_FOR_INPUT);
+}
+
+
+void bluetooth_handler(bool connected) {
+    if (connected) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
+        send_battery_state_to_phone(VALUE_WAITING_FOR_INPUT);
+    } else {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
+        phone_battery_percent = 0;
+        layer_mark_dirty(s_clock_layer);
+    }
+}
+
 static void init(void) {
     window = window_create();
     window_set_window_handlers(window, (WindowHandlers) {
@@ -432,6 +472,8 @@ static void init(void) {
 
     // Register with TickTimerService
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+    battery_state_service_subscribe(battery_handler);
+    bluetooth_connection_service_subscribe(bluetooth_handler);
     app_message_register_inbox_received(inbox_received_callback);
     app_message_register_inbox_dropped(inbox_dropped_callback);
     app_message_register_outbox_failed(outbox_failed_callback);
@@ -439,10 +481,14 @@ static void init(void) {
 
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
     update_time();
+    send_battery_state_to_phone(VALUE_WAITING_FOR_INPUT);
 }
 
 static void deinit(void) {
-  window_destroy(window);
+    bluetooth_connection_service_unsubscribe();
+    battery_state_service_unsubscribe();
+    tick_timer_service_unsubscribe();
+    window_destroy(window);
 }
 
 int main(void) {
