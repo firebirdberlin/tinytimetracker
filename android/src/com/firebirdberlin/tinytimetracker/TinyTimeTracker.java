@@ -15,9 +15,11 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Global;
+import android.provider.Settings.System;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -81,7 +83,7 @@ public class TinyTimeTracker extends FragmentActivity {
         if (datasource == null) datasource = new LogDataSource(this);
         List<TrackerEntry> trackers = datasource.getTrackers();
         if (trackers.isEmpty()) {
-            AddTrackerActivity.open(this); 
+            AddTrackerActivity.open(this);
         }
     }
 
@@ -221,8 +223,11 @@ public class TinyTimeTracker extends FragmentActivity {
     }
 
     public static boolean isAirplaneModeOn(Context context) {
-       return Global.getInt(context.getContentResolver(),
-               Global.AIRPLANE_MODE_ON, 0) != 0;
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN){
+            return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
+        } else {
+            return System.getInt(context.getContentResolver(), System.AIRPLANE_MODE_ON, 0) != 0;
+        }
     }
 
     public void onEvent(OnTrackerSelected event) {
