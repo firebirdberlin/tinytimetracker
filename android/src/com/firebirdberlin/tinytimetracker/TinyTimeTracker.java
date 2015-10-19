@@ -108,20 +108,24 @@ public class TinyTimeTracker extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_actions, menu);
 
         MenuItem item_edit = menu.findItem(R.id.action_edit);
         MenuItem item_delete = menu.findItem(R.id.action_delete);
+        MenuItem item_pebble_app_store = menu.findItem(R.id.action_pebble_app_store);
         item_edit.setVisible(currentTracker != null);
         item_delete.setVisible(currentTracker != null);
+
+        boolean pebbleAppStoreIsInstalled = Utility.isPackageInstalled(this,
+                                                                       "com.getpebble.android");
+        item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
+
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_edit:
                 if (currentTracker != null) {
