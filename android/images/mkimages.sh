@@ -9,7 +9,11 @@ mkdir -p ../res/drawable-xhdpi
 mkdir -p ../res/drawable-xxhdpi
 mkdir -p ../res/drawable-xxxhdpi
 
-msize=48
+# launcher icons
+# msize=48
+# action bar icons 
+msize=24
+
 lsize=`calc -p 0.7*$msize`
 hsize=`calc -p 1.5*$msize`
 xhsize=`calc -p 2.0*$msize`
