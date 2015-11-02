@@ -19,7 +19,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -45,6 +44,7 @@ public class WiFiService extends Service {
     private boolean showNotifications = false;
     private int notificationInterval = 60 * 60;
     private LogDataSource datasource;
+    private boolean wifiWasEnabled = false;
 
 
     @Override
@@ -65,14 +65,6 @@ public class WiFiService extends Service {
             wifiLock.acquire();
         }
 
-        //showNotification();
-
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
-        showNotifications = Settings.showNotifications(mContext);
-        notificationInterval = 60 * Settings.getNotificationInterval(mContext);
-
-        SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
-
         if ( TinyTimeTracker.isAirplaneModeOn(mContext) ){
             Log.i(TAG, "Airplane mode enabled");
             stopSelf();
@@ -81,8 +73,7 @@ public class WiFiService extends Service {
 
         if ( ! wifiManager.isWifiEnabled() ){
             Log.i(TAG, "WIFI disabled");
-            stopSelf();
-            return Service.START_NOT_STICKY;
+            wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
 
         boolean success = wifiManager.startScan();
@@ -93,6 +84,12 @@ public class WiFiService extends Service {
             stopSelf();
             return Service.START_NOT_STICKY;
         }
+
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+
+        showNotifications = Settings.showNotifications(mContext);
+        notificationInterval = 60 * Settings.getNotificationInterval(mContext);
+        SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
@@ -113,6 +110,10 @@ public class WiFiService extends Service {
             unregisterReceiver(wifiReceiver);
         } catch(IllegalArgumentException e) {
             // receiver was not registered
+        }
+
+        if ( wifiWasEnabled && wifiManager.isWifiEnabled() ){
+            wifiManager.setWifiEnabled(false);
         }
 
         if (wifiLock.isHeld()) {
