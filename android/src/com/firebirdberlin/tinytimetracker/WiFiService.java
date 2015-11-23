@@ -76,6 +76,10 @@ public class WiFiService extends Service {
             wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
 
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(wifiReceiver, filter);
+
         boolean success = wifiManager.startScan();
         if (! success){
             if ( isPebbleConnected()) {
@@ -91,9 +95,6 @@ public class WiFiService extends Service {
         notificationInterval = 60 * Settings.getNotificationInterval(mContext);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(wifiReceiver, filter);
         Log.i(TAG, "WIFI SERVICE starts ...");
         return Service.START_NOT_STICKY;
     }
