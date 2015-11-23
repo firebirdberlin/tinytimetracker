@@ -82,9 +82,6 @@ public class TinyTimeTracker extends FragmentActivity {
 
         if (datasource == null) datasource = new LogDataSource(this);
         List<TrackerEntry> trackers = datasource.getTrackers();
-        if (trackers.isEmpty()) {
-            AddTrackerActivity.open(this);
-        }
     }
 
     @Override
