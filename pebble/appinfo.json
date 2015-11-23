@@ -3,9 +3,12 @@
   "shortName": "TinyTimeTracker",
   "longName": "TinyTimeTracker",
   "companyName": "firebirdberlin",
-  "versionLabel": "1.3",
+  "versionLabel": "1.4",
   "sdkVersion": "3",
-  "targetPlatforms": ["aplite", "basalt"],
+  "targetPlatforms": [
+    "aplite",
+    "basalt"
+  ],
   "watchapp": {
     "watchface": true
   },
@@ -14,87 +17,88 @@
     "KEY_CONDITIONS": 1
   },
   "resources": {
-      "media": [
-        {
-          "type": "font",
-          "name": "FONT_AUDIMAT_MONO_BOLD_40",
-          "file": "fonts/AudimatMB.ttf",
-          "compatibility":"2.7"
-        },
-        {
-          "type": "font",
-          "name": "FONT_AUDIMAT_MONO_BOLD_28",
-          "file": "fonts/AudimatMB.ttf",
-          "compatibility":"2.7"
-        },
-        {
-          "type": "font",
-          "name": "FONT_AUDIMAT_MONO_22",
-          "file": "fonts/AudimatM.ttf",
-          "compatibility":"2.7"
-        },
-        {
-          "type": "png",
-          "name": "IMAGE_BACKGROUND",
-          "file": "images/background.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_01d",
-          "file": "images/2.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_01n",
-          "file": "images/3.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_02d",
-          "file": "images/8.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_02n",
-          "file": "images/9.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_03d",
-          "file": "images/14.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_04d",
-          "file": "images/25.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_09d",
-          "file": "images/18.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_10d",
-          "file": "images/17.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_11d",
-          "file": "images/15.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_13d",
-          "file": "images/23.png"
-        },
-        {
-          "type": "png",
-          "name": "ICON_50d",
-          "file": "images/13.png"
-        }
-      ]
+    "media": [
+      {
+        "type": "font",
+        "name": "FONT_AUDIMAT_MONO_BOLD_40",
+        "file": "fonts/AudimatMB.ttf",
+        "compatibility": "2.7"
+      },
+      {
+        "type": "font",
+        "name": "FONT_AUDIMAT_MONO_BOLD_28",
+        "file": "fonts/AudimatMB.ttf",
+        "compatibility": "2.7"
+      },
+      {
+        "type": "font",
+        "name": "FONT_AUDIMAT_MONO_22",
+        "file": "fonts/AudimatM.ttf",
+        "compatibility": "2.7"
+      },
+      {
+        "type": "png",
+        "name": "IMAGE_BACKGROUND",
+        "file": "images/background.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_01d",
+        "file": "images/2.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_01n",
+        "file": "images/3.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_02d",
+        "file": "images/8.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_02n",
+        "file": "images/9.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_03d",
+        "file": "images/14.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_04d",
+        "file": "images/25.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_09d",
+        "file": "images/18.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_10d",
+        "file": "images/17.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_11d",
+        "file": "images/15.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_13d",
+        "file": "images/23.png"
+      },
+      {
+        "type": "png",
+        "name": "ICON_50d",
+        "file": "images/13.png"
+      }
+    ]
   },
-  "capabilities":
-      [ "location" ]
+  "capabilities": [
+    "location"
+  ]
 }
