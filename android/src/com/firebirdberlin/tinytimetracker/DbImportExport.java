@@ -7,9 +7,11 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
  
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -60,6 +62,17 @@ public class DbImportExport {
 			return false;
 		}
 	}
+
+    protected static void shareFile(Context context) {
+        String path = IMPORT_FILE.getAbsolutePath();
+        Uri uri = Uri.parse(path);
+        Intent email = new Intent(android.content.Intent.ACTION_SEND);
+        email.setType("application/octet-stream");
+        email.putExtra(Intent.EXTRA_STREAM, uri);
+        email.putExtra(android.content.Intent.EXTRA_STREAM, Uri.parse("file:" + path));
+
+        context.startActivity(Intent.createChooser(email, "Send mail..."));
+    }
  
 	/** Replaces current database with the IMPORT_FILE if
 	 * import database is valid and of the correct type **/

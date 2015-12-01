@@ -20,6 +20,7 @@ public class SettingsFragment extends PreferenceFragment {
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 DbImportExport.exportDb();
+                DbImportExport.shareFile(getActivity());
                 return true;
             }
         });
