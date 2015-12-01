@@ -49,6 +49,19 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/pref_data_export"
+        android:key="pref_key_data_backup">
+
+        <Preference
+            android:title="@string/pref_title_export"
+            android:key="pref_key_data_export"/>
+
+        <Preference
+            android:title="@string/pref_title_import"
+            android:key="pref_key_data_import"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/pref_credits"
         android:key="pref_key_credits">
         <Preference

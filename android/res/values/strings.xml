@@ -19,6 +19,9 @@
     <string name="pref_wifi_settings">Wifi</string>
     <string name="pref_worktime_settings">Worktime</string>
     <string name="pref_notification_settings">Notifications</string>
+    <string name="pref_data_export">tBackup and restore</string>
+    <string name="pref_title_export">Data export</string>
+    <string name="pref_title_import">Data import</string>
     <string name="pref_credits">Credits</string>
     <string name="pref_title_seconds_connection_lost">Absence time</string>
     <string name="pref_summary_seconds_connection_lost">Time after which absence is detected.</string>
