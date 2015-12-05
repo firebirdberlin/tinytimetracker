@@ -59,6 +59,11 @@
         <Preference
             android:title="@string/pref_title_import"
             android:key="pref_key_data_import"/>
+
+        <Preference
+            android:title="@string/pref_title_share"
+            android:key="pref_key_data_share"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

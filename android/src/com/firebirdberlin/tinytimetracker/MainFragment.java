@@ -89,4 +89,11 @@ public class MainFragment extends Fragment {
         adapter.remove(event.tracker);
         adapter.notifyDataSetChanged();
     }
+
+    public void onEvent(OnDatabaseImported event) {
+        Log.i(TAG, "OnDatabaseImported");
+        loadTrackers();
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        adapter.notifyDataSetChanged();
+    }
 }

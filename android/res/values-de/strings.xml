@@ -19,6 +19,10 @@
     <string name="pref_wifi_settings">WLAN</string>
     <string name="pref_worktime_settings">Arbeitszeit</string>
     <string name="pref_notification_settings">Benachrichtigungen</string>
+    <string name="pref_data_export">Sichern und Wiederherstellen</string>
+    <string name="pref_title_export">Datenbankexport</string>
+    <string name="pref_title_import">Datenbankimport</string>
+    <string name="pref_title_share">Teilen</string>
     <string name="pref_credits">Über</string>
     <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
     <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
