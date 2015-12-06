@@ -19,6 +19,7 @@
         android:singleLine="true" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/layout_add"
         android:paddingTop="10dip"
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -43,6 +44,15 @@
             android:onClick="onChooseWifi"
             android:text=""/>
     </LinearLayout>
+
+
+    <ListView android:id="@id/android:list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:padding="5dip"
+        android:layout_below="@id/layout_add"
+        android:drawSelectorOnTop="true"/>
 
     </LinearLayout>
 
