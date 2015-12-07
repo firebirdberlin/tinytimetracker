@@ -55,10 +55,31 @@ public class LogDataSource {
             bus.post(new OnTrackerAdded(tracker));
         } else {
             values.put(SQLiteHandler.COLUMN_ID, tracker.getID());
-            long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
+            database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
             bus.post(new OnTrackerChanged(tracker));
         }
         return tracker;
+    }
+
+    public AccessPoint save(AccessPoint accessPoint) {
+        init();
+        if (accessPoint.getTrackerID() == accessPoint.NOT_SAVED) {
+            return accessPoint;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHandler.COLUMN_SSID, accessPoint.ssid);
+        values.put(SQLiteHandler.COLUMN_BSSID, accessPoint.bssid);
+        values.put(SQLiteHandler.COLUMN_TRACKER_ID, accessPoint.getTrackerID());
+
+        if (accessPoint.getID() == AccessPoint.NOT_SAVED) {
+            long id = database.insert(SQLiteHandler.TABLE_ACCESS_POINTS, null, values);
+            accessPoint.setID(id);
+        } else {
+            values.put(SQLiteHandler.COLUMN_ID, accessPoint.getID());
+            database.replace(SQLiteHandler.TABLE_ACCESS_POINTS, null, values);
+        }
+        return accessPoint;
     }
 
     public Set<String> getTrackedSSIDs(String method) {

@@ -19,7 +19,9 @@ public class AddTrackerActivity extends ListActivity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
     private TrackerEntry tracker = null;
     private LogDataSource datasource = null;
-    private TwoLineListAdapter two_line_adapter = null;
+    private AccessPointAdapter accessPointAdapter = null;
+    private EditText edit_tracker_verbose_name = null;
+    private EditText edit_tracker_name = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,83 +38,82 @@ public class AddTrackerActivity extends ListActivity {
     }
 
     private void init() {
+        edit_tracker_name = (EditText) findViewById(R.id.edit_tracker_name);
+        edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
+
+        final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
+
+        accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
+        setListAdapter(accessPointAdapter);
+
         if (tracker != null) {
-            EditText edit_tracker_name = (EditText) findViewById(R.id.edit_tracker_name);
-            EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
             edit_tracker_name.setText(tracker.getSSID());
             edit_tracker_verbose_name.setText(tracker.getVerboseName());
-
-            final LinkedList<String> ssids = new LinkedList<String>();
-            final LinkedList<String> bssids = new LinkedList<String>();
-
-            ssids.add("Test");
-            bssids.add("aa:aa:aa:aa:aa:aa");
-
-            two_line_adapter = new TwoLineListAdapter(this, R.layout.list_2_lines, ssids, bssids);
-            setListAdapter(two_line_adapter);
         }
-
-
     }
 
     public void onChooseWifi(View v) {
-        final LinkedList<String> bssids = new LinkedList<String>();
-        final LinkedList<String> ssids = new LinkedList<String>();
+        final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
+        final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
+                                                                  accessPoints);
 
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         List<ScanResult> networkList = wifiManager.getScanResults();
-        if (networkList != null) {
-            for (ScanResult network : networkList) {
-                Log.i(TAG, network.SSID);
-                ssids.add(network.SSID);
-                bssids.add(network.BSSID);
+        if (networkList == null) {
+            return;
+        }
+
+        for (ScanResult network : networkList) {
+            if (accessPointAdapter.indexOfBSSID(network.BSSID) == -1) {
+                AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
+                adapter.add(accessPoint);
             }
         }
 
-        TwoLineListAdapter two_line_adapter = new TwoLineListAdapter(this, R.layout.list_2_lines,
-                                                                     ssids, bssids);
-        if (ssids.size() > 0) {
-            new AlertDialog.Builder(this)
-                .setTitle("Active WiFi networks")
-                .setIcon(R.drawable.ic_wifi)
-                .setAdapter(two_line_adapter,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int item) {
-                                    Log.i(TAG, ssids.get(item));
-                                    String ssid = ssids.get(item);
-                                    EditText edit_name = (EditText) findViewById(R.id.edit_tracker_name);
-                                    EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
+        new AlertDialog.Builder(this)
+            .setTitle("Active WiFi networks")
+            .setIcon(R.drawable.ic_wifi)
+            .setAdapter(adapter,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int item) {
+                                AccessPoint accessPoint = adapter.getItem(item);
+                                String ssid = accessPoint.ssid;
+                                String bssid = accessPoint.bssid;
 
-                                    edit_name.setText(ssid);
-                                    edit_tracker_verbose_name.setText(ssid);
-                                    dialog.dismiss();
+                                Log.i(TAG, ssid);
+
+                                if (edit_tracker_name.length() == 0) {
+                                    edit_tracker_name.setText(ssid);
                                 }
-                            })
-                .setNegativeButton(android.R.string.no, null).show();
-        }
+
+                                if (edit_tracker_verbose_name.length() == 0) {
+                                    edit_tracker_verbose_name.setText(ssid);
+                                }
+
+                                accessPointAdapter.add(accessPoint);
+
+                                dialog.dismiss();
+                            }
+                        })
+            .setNegativeButton(android.R.string.no, null).show();
     }
 
     public void onClickOk(View v) {
-        EditText edit_name = (EditText) findViewById(R.id.edit_tracker_name);
-        EditText edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
-        String ssid = edit_name.getText().toString();
+        String ssid = edit_tracker_name.getText().toString();
         String verbose_name = edit_tracker_verbose_name.getText().toString();
 
         if (validateInputs(ssid, verbose_name) == false) {
             return;
         }
 
-        if (! ssid.isEmpty() && ! verbose_name.isEmpty()) {
-            if (tracker == null) {
-                tracker = new TrackerEntry( ssid, verbose_name, "WLAN");
-            } else {
-                tracker.setSSID(ssid);
-                tracker.setVerboseName(verbose_name);
-            }
-            datasource.save(tracker);
-            datasource.close();
-            this.finish();
+        if (tracker == null) {
+            tracker = new TrackerEntry( ssid, verbose_name, "WLAN");
+        } else {
+            tracker.setSSID(ssid);
+            tracker.setVerboseName(verbose_name);
         }
+        datasource.save(tracker);
+        datasource.close();
     }
 
     private boolean validateInputs(String name, String verbose_name) {

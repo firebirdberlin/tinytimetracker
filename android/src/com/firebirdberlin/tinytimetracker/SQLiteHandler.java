@@ -18,8 +18,12 @@ public class SQLiteHandler extends SQLiteOpenHelper {
   public static final String COLUMN_TIMESTAMP_START = "timestamp_start";
   public static final String COLUMN_TRACKER_ID = "tracker_id";
 
+  public static final String TABLE_ACCESS_POINTS = "access_points";
+  public static final String COLUMN_SSID = "ssid";
+  public static final String COLUMN_BSSID = "bssid";
+
   private static final String DATABASE_NAME = "trackers.db";
-  private static final int DATABASE_VERSION = 2;
+  private static final int DATABASE_VERSION = 3;
 
   // Database creation sql statement
   private static final String DATABASE_CREATE_TRACKERS =
@@ -35,6 +39,13 @@ public class SQLiteHandler extends SQLiteOpenHelper {
           + COLUMN_TIMESTAMP_START + " integer not null, "
           + COLUMN_TIMESTAMP_END + " integer not null);";
 
+  private static final String DATABASE_CREATE_ACCESS_POINTS =
+        "CREATE TABLE " + TABLE_ACCESS_POINTS + "("
+          + COLUMN_ID + " integer primary key autoincrement, "
+          + COLUMN_TRACKER_ID + " integer REFERENCES " + TABLE_TRACKERS +"(" + COLUMN_ID + "),"
+          + COLUMN_SSID + " text not null, "
+          + COLUMN_BSSID + " text not null);";
+
   public SQLiteHandler(Context context) {
       super(context, DATABASE_NAME, null, DATABASE_VERSION);
   }
@@ -43,6 +54,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
   public void onCreate(SQLiteDatabase database) {
       database.execSQL(DATABASE_CREATE_TRACKERS);
       database.execSQL(DATABASE_CREATE_LOGS);
+      database.execSQL(DATABASE_CREATE_ACCESS_POINTS);
   }
 
   @Override
@@ -51,14 +63,19 @@ public class SQLiteHandler extends SQLiteOpenHelper {
               "Upgrading database from version " + oldVersion + " to "
               + newVersion + ", which will destroy all old data");
 
-      if (oldVersion == 1 && newVersion == 2) {
+      if (oldVersion == 1 && newVersion >= 2) {
           db.execSQL("ALTER TABLE " + TABLE_TRACKERS + " ADD COLUMN " + COLUMN_VERBOSE + " TEXT DEFAULT '' NOT NULL");
           db.execSQL("UPDATE " + TABLE_TRACKERS + " SET " + COLUMN_VERBOSE + " = " + COLUMN_NAME);
+      }
+
+      if (oldVersion <= 2 && newVersion >= 3) {
+          db.execSQL(DATABASE_CREATE_ACCESS_POINTS);
           return;
       }
       // otherwise drop and re-create
       db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKERS);
       db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOGS);
+      db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCESS_POINTS);
       onCreate(db);
   }
 

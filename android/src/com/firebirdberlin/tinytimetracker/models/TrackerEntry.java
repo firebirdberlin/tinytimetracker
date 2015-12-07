@@ -3,9 +3,23 @@ package com.firebirdberlin.tinytimetracker;
 public class TrackerEntry {
     public final static long NOT_SAVED = -1L;
     private long id;
-    private String ssid;
+    private String ssid = "_deprecated_";
     private String verbose_name;
     private String method;
+
+    public TrackerEntry(String verbose_name, String method){
+        this.id = -1L;
+        this.ssid = "_deprecated_";
+        this.verbose_name = verbose_name;
+        this.method = method;
+    }
+
+    public TrackerEntry(long id, String verbose_name, String method){
+        this.id = id;
+        this.ssid = "_deprecated_";
+        this.verbose_name = verbose_name;
+        this.method = method;
+    }
 
     public TrackerEntry(String name, String verbose_name, String method){
         this.id = -1L;
