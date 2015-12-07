@@ -3,9 +3,12 @@ package com.firebirdberlin.tinytimetracker;
 import android.app.ListActivity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -89,8 +92,7 @@ public class AddTrackerActivity extends ListActivity {
                                 }
 
                                 accessPointAdapter.add(accessPoint);
-                                button_wifi.setBackgroundColor(Color.TRANSPARENT);
-                                button_wifi.setBackgroundResource(R.drawable.ic_wifi);
+                                setWifiIconColor(Color.parseColor("#3498db"));
 
                                 dialog.dismiss();
                             }
@@ -130,7 +132,7 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         if (accessPoints.size() == 0) {
-            button_wifi.setBackgroundColor(Color.RED);
+            setWifiIconColor(Color.RED);
             return false;
         }
 
@@ -145,6 +147,13 @@ public class AddTrackerActivity extends ListActivity {
             return false;
         }
         return true;
+    }
+
+    private void setWifiIconColor(int color){
+        Resources res = getResources();
+        Drawable icon = res.getDrawable(R.drawable.ic_wifi);
+        icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        button_wifi.setBackgroundResource(R.drawable.ic_wifi);
     }
 
     public static void open(Context context) {
