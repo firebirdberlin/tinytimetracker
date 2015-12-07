@@ -5,13 +5,16 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,9 +23,9 @@ public class AddTrackerActivity extends ListActivity {
     private TrackerEntry tracker = null;
     private LogDataSource datasource = null;
     private AccessPointAdapter accessPointAdapter = null;
+    private Button button_wifi = null;
     private EditText edit_tracker_verbose_name = null;
-    private EditText edit_tracker_name = null;
-    final private LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
+    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +42,17 @@ public class AddTrackerActivity extends ListActivity {
     }
 
     private void init() {
-        edit_tracker_name = (EditText) findViewById(R.id.edit_tracker_name);
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
+        button_wifi = (Button) findViewById(R.id.button_wifi);
 
+        if (tracker != null) {
+            edit_tracker_verbose_name.setText(tracker.getVerboseName());
+
+            accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.getID());
+        }
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         setListAdapter(accessPointAdapter);
-
-        if (tracker != null) {
-            edit_tracker_name.setText(tracker.getSSID());
-            edit_tracker_verbose_name.setText(tracker.getVerboseName());
-        }
     }
 
     public void onChooseWifi(View v) {
@@ -80,17 +83,14 @@ public class AddTrackerActivity extends ListActivity {
                                 String ssid = accessPoint.ssid;
                                 String bssid = accessPoint.bssid;
 
-                                Log.i(TAG, ssid);
-
-                                if (edit_tracker_name.length() == 0) {
-                                    edit_tracker_name.setText(ssid);
-                                }
-
                                 if (edit_tracker_verbose_name.length() == 0) {
                                     edit_tracker_verbose_name.setText(ssid);
+                                    edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
                                 }
 
                                 accessPointAdapter.add(accessPoint);
+                                button_wifi.setBackgroundColor(Color.TRANSPARENT);
+                                button_wifi.setBackgroundResource(R.drawable.ic_wifi);
 
                                 dialog.dismiss();
                             }
@@ -113,7 +113,7 @@ public class AddTrackerActivity extends ListActivity {
 
         datasource.save(tracker);
         long tracker_id = tracker.getID();
-        for (int i=0; i < accessPoints.size(); i++ ) {
+        for (int i = 0; i < accessPoints.size(); i++ ) {
             AccessPoint ap = accessPoints.get(i);
             ap.setTrackerID(tracker_id);
             datasource.save(ap);
@@ -124,16 +124,24 @@ public class AddTrackerActivity extends ListActivity {
     }
 
     private boolean validateInputs(String verbose_name) {
-        if (accessPoints.size() == 0 || verbose_name.isEmpty()) {
+        if (verbose_name.isEmpty()) {
+            edit_tracker_verbose_name.setBackgroundColor(Color.RED);
+            return false;
+        }
+
+        if (accessPoints.size() == 0) {
+            button_wifi.setBackgroundColor(Color.RED);
             return false;
         }
 
         TrackerEntry other = datasource.getTracker(verbose_name);
-        if (tracker == null && other != null) { // a new tracker would be created
+        if (tracker == null && other != null) { // a tracker with this name already exists
+            edit_tracker_verbose_name.setBackgroundColor(Color.RED);
             return false;
         }
 
         if (tracker != null && other != null && other.getID() != tracker.getID()) {
+            edit_tracker_verbose_name.setBackgroundColor(Color.RED);
             return false;
         }
         return true;

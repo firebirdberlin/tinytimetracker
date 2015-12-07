@@ -292,6 +292,30 @@ public class LogDataSource {
         return entries;
     }
 
+    public List<AccessPoint> getAllAccessPoints(long tracker_id) {
+        init();
+        List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+        Cursor cursor = null;
+
+        cursor = database.rawQuery("SELECT _id, ssid, bssid FROM access_points "
+                                   + "WHERE tracker_id=?",
+                                   new String[] {String.valueOf(tracker_id)});
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            long log_id = cursor.getLong(0);
+            String ssid = cursor.getString(1);
+            String bssid = cursor.getString(2);
+            AccessPoint ap = new AccessPoint(log_id, tracker_id, ssid, bssid);
+            accessPoints.add(ap);
+
+            cursor.moveToNext();
+        }
+        // make sure to close the cursor
+        cursor.close();
+        return accessPoints;
+    }
+
     public LogEntry getLatestLogEntry(long tracker_id) {
         init();
         Cursor cursor = null;
