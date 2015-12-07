@@ -112,10 +112,7 @@ public class LogDataSource {
 
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                TrackerEntry entry = new TrackerEntry(cursor.getLong(0),
-                                                      cursor.getString(1),
-                                                      cursor.getString(2),
-                                                      cursor.getString(3));
+                TrackerEntry entry = getTrackerEntryFromCursor(cursor);
                 entries.add(entry);
 
                 cursor.moveToNext();
@@ -139,10 +136,7 @@ public class LogDataSource {
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
-                entry = new TrackerEntry(cursor.getLong(0),
-                                         cursor.getString(1),
-                                         cursor.getString(2),
-                                         cursor.getString(3));
+                entry = getTrackerEntryFromCursor(cursor);
             }
         }finally {
             cursor.close();
@@ -162,10 +156,7 @@ public class LogDataSource {
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
-                entry = new TrackerEntry(cursor.getLong(0),
-                                         cursor.getString(1),
-                                         cursor.getString(2),
-                                         cursor.getString(3));
+                entry = getTrackerEntryFromCursor(cursor);
             }
         }finally {
             cursor.close();
@@ -184,16 +175,20 @@ public class LogDataSource {
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
-                entry = new TrackerEntry(cursor.getLong(0),
-                                         cursor.getString(1),
-                                         cursor.getString(2),
-                                         cursor.getString(3));
+                entry = getTrackerEntryFromCursor(cursor);
             }
         }finally {
             cursor.close();
         }
         return entry;
 
+    }
+
+    private TrackerEntry getTrackerEntryFromCursor(Cursor cursor) {
+        return new TrackerEntry(cursor.getLong(0),
+                                cursor.getString(1),
+                                cursor.getString(2),
+                                cursor.getString(3));
     }
 
     public long getTrackerID(String name, String method) {

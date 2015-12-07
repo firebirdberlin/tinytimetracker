@@ -41,6 +41,10 @@ public class AccessPoint {
         return bssid;
     }
 
+    public void setTrackerID(long tracker_id) {
+        this.tracker_id = tracker_id;
+    }
+
     public long getTrackerID() {
         return tracker_id;
     }

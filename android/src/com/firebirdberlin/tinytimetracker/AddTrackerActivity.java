@@ -22,6 +22,7 @@ public class AddTrackerActivity extends ListActivity {
     private AccessPointAdapter accessPointAdapter = null;
     private EditText edit_tracker_verbose_name = null;
     private EditText edit_tracker_name = null;
+    final private LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +42,6 @@ public class AddTrackerActivity extends ListActivity {
         edit_tracker_name = (EditText) findViewById(R.id.edit_tracker_name);
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
 
-        final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         setListAdapter(accessPointAdapter);
@@ -99,25 +99,32 @@ public class AddTrackerActivity extends ListActivity {
     }
 
     public void onClickOk(View v) {
-        String ssid = edit_tracker_name.getText().toString();
         String verbose_name = edit_tracker_verbose_name.getText().toString();
 
-        if (validateInputs(ssid, verbose_name) == false) {
+        if (validateInputs(verbose_name) == false) {
             return;
         }
 
         if (tracker == null) {
-            tracker = new TrackerEntry( ssid, verbose_name, "WLAN");
+            tracker = new TrackerEntry(verbose_name, "WLAN");
         } else {
-            tracker.setSSID(ssid);
             tracker.setVerboseName(verbose_name);
         }
+
         datasource.save(tracker);
+        long tracker_id = tracker.getID();
+        for (int i=0; i < accessPoints.size(); i++ ) {
+            AccessPoint ap = accessPoints.get(i);
+            ap.setTrackerID(tracker_id);
+            datasource.save(ap);
+
+        }
         datasource.close();
+        this.finish();
     }
 
-    private boolean validateInputs(String name, String verbose_name) {
-        if (name.isEmpty() || verbose_name.isEmpty()) {
+    private boolean validateInputs(String verbose_name) {
+        if (accessPoints.size() == 0 || verbose_name.isEmpty()) {
             return false;
         }
 
