@@ -32,6 +32,7 @@
             android:layout_height="wrap_content"
             android:padding="5dip"
             android:layout_below="@id/layout_add"
+            android:longClickable="true"
             android:drawSelectorOnTop="true"/>
 
         <Button

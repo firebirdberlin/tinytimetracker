@@ -229,6 +229,21 @@ public class LogDataSource {
         return success;
     }
 
+    public boolean delete(AccessPoint accessPoint) {
+        if (accessPoint == null) {
+            return false;
+        }
+
+        long id = accessPoint.getID();
+        if (id == AccessPoint.NOT_SAVED) {
+            return false;
+        }
+
+        init();
+        int rows_affected = database.delete(SQLiteHandler.TABLE_ACCESS_POINTS, "_id=?",
+                                            new String[] {String.valueOf(id)});
+        return (rows_affected > 0);
+    }
 
     public LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         init();

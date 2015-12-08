@@ -14,8 +14,15 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemLongClickListener;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -26,14 +33,18 @@ public class AddTrackerActivity extends ListActivity {
     private TrackerEntry tracker = null;
     private LogDataSource datasource = null;
     private AccessPointAdapter accessPointAdapter = null;
+    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
     private Button button_wifi = null;
     private EditText edit_tracker_verbose_name = null;
-    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+
+    private final int RED = Color.parseColor("#AAC0392B");
+    private final int BLUE = Color.parseColor("#3498db");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
+        registerForContextMenu(this.getListView());
 
         datasource = new LogDataSource(this);
         Intent intent = getIntent();
@@ -47,6 +58,7 @@ public class AddTrackerActivity extends ListActivity {
     private void init() {
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
         button_wifi = (Button) findViewById(R.id.button_wifi);
+        setWifiIconColor(BLUE);
 
         if (tracker != null) {
             edit_tracker_verbose_name.setText(tracker.getVerboseName());
@@ -56,6 +68,31 @@ public class AddTrackerActivity extends ListActivity {
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         setListAdapter(accessPointAdapter);
+    }
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_menu_access_points, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.action_add:
+                onChooseWifi(button_wifi);
+                return true;
+            case R.id.action_delete:
+                AccessPoint accessPoint = accessPoints.remove(info.position);
+                datasource.delete(accessPoint);
+                accessPointAdapter.notifyDataSetChanged();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     public void onChooseWifi(View v) {
@@ -88,11 +125,10 @@ public class AddTrackerActivity extends ListActivity {
 
                                 if (edit_tracker_verbose_name.length() == 0) {
                                     edit_tracker_verbose_name.setText(ssid);
-                                    edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
                                 }
 
                                 accessPointAdapter.add(accessPoint);
-                                setWifiIconColor(Color.parseColor("#3498db"));
+                                setWifiIconColor(BLUE);
 
                                 dialog.dismiss();
                             }
@@ -127,23 +163,26 @@ public class AddTrackerActivity extends ListActivity {
 
     private boolean validateInputs(String verbose_name) {
         if (verbose_name.isEmpty()) {
-            edit_tracker_verbose_name.setBackgroundColor(Color.RED);
+            edit_tracker_verbose_name.setBackgroundColor(RED);
+            edit_tracker_verbose_name.invalidate();
             return false;
         }
 
         if (accessPoints.size() == 0) {
-            setWifiIconColor(Color.RED);
+            setWifiIconColor(RED);
             return false;
         }
 
         TrackerEntry other = datasource.getTracker(verbose_name);
         if (tracker == null && other != null) { // a tracker with this name already exists
-            edit_tracker_verbose_name.setBackgroundColor(Color.RED);
+            edit_tracker_verbose_name.setBackgroundColor(RED);
+            edit_tracker_verbose_name.invalidate();
             return false;
         }
 
         if (tracker != null && other != null && other.getID() != tracker.getID()) {
-            edit_tracker_verbose_name.setBackgroundColor(Color.RED);
+            edit_tracker_verbose_name.setBackgroundColor(RED);
+            edit_tracker_verbose_name.invalidate();
             return false;
         }
         return true;
@@ -154,6 +193,10 @@ public class AddTrackerActivity extends ListActivity {
         Drawable icon = res.getDrawable(R.drawable.ic_wifi);
         icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         button_wifi.setBackgroundResource(R.drawable.ic_wifi);
+        button_wifi.invalidate();
+
+        edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
+        edit_tracker_verbose_name.invalidate();
     }
 
     public static void open(Context context) {
