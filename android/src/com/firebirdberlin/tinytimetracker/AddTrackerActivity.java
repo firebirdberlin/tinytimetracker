@@ -149,6 +149,8 @@ public class AddTrackerActivity extends ListActivity {
             tracker.setVerboseName(verbose_name);
         }
 
+        // when saving the account the deprecated fields shall no longer contain useful data
+        tracker.setSSID("_deprecated_");
         datasource.save(tracker);
         long tracker_id = tracker.getID();
         for (int i = 0; i < accessPoints.size(); i++ ) {

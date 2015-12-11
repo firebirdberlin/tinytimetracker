@@ -164,7 +164,6 @@ public class LogDataSource {
 
     }
 
-
     public TrackerEntry getTracker(String verbose_name) {
         init();
         Cursor cursor = null;
@@ -264,6 +263,7 @@ public class LogDataSource {
 
         init();
         database.delete(SQLiteHandler.TABLE_LOGS, "tracker_id=?", new String[] {String.valueOf(id)});
+        database.delete(SQLiteHandler.TABLE_ACCESS_POINTS, "tracker_id=?", new String[] {String.valueOf(id)});
         int rows_affected = database.delete(SQLiteHandler.TABLE_TRACKERS, "_id=?", new String[] {String.valueOf(id)});
         boolean success = (rows_affected > 0);
         if (success) {
@@ -450,8 +450,8 @@ public class LogDataSource {
         Cursor cursor = null;
         long duration_millis = 0;
         try{
-            cursor = database.rawQuery("SELECT SUM(timestamp_end - timestamp_start) FROM logs "
-                                       + "WHERE tracker_id=? and timestamp_start>=?",
+            cursor = database.rawQuery("SELECT SUM(timestamp_end - timestamp_start) FROM logs " +
+                                       "WHERE tracker_id=? and timestamp_start>=?",
                                        new String[] {String.valueOf(tracker_id),
                                                      String.valueOf(timestamp)});
 

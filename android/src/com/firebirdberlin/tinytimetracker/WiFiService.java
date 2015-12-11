@@ -19,6 +19,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -165,50 +166,20 @@ public class WiFiService extends Service {
         EventBus bus = EventBus.getDefault();
 
         String formattedWorkTime = "";
-        boolean network_found = false;
         long now = System.currentTimeMillis();
-        List<ScanResult> networkList = wifiManager.getScanResults();
-        if (networkList != null) {
+        Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate();
 
-            Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
-            for (ScanResult network : networkList) {
-                if (trackedBSSIDs.contains(network.BSSID)) {
-                    network_found = true;
-                    Log.d(TAG, network.BSSID);
-                    Set<TrackerEntry> trackers = datasource.getTrackersByBSSID(network.BSSID);
-                    for (TrackerEntry tracker: trackers) {
-                        LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
+        for (TrackerEntry tracker: trackersToUpdate) {
+            LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
 
-                        UnixTimestamp duration_today = evaluateParamsForNotifications(tracker, now);
+            UnixTimestamp duration_today = evaluateParamsForNotifications(tracker, now);
 
-                        formattedWorkTime = duration_today.durationAsHours();
-                        bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
-                    }
-                }
-            }
-
-            // legacy code; support old database format < version 3 which does not consider BSSIDs
-            Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
-            for (ScanResult network : networkList) {
-                if (trackedSSIDs.contains(network.SSID)) {
-                    network_found = true;
-                    Log.d(TAG, network.SSID);
-
-                    TrackerEntry tracker = datasource.getTrackerBySSID(network.SSID);
-                    if (tracker == null) {
-                        continue;
-                    }
-
-                    LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
-
-                    UnixTimestamp duration_today = evaluateParamsForNotifications(tracker, now);
-
-                    formattedWorkTime = duration_today.durationAsHours();
-                    bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
-                }
-            }
+            formattedWorkTime = duration_today.durationAsHours();
+            bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
         }
 
+
+        boolean network_found = (trackersToUpdate.size() > 0);
         if ( !network_found) {
             // user has left the office for less than 90 mins
             long seconds_today = settings.getLong("seconds_today", 0L);
@@ -226,6 +197,39 @@ public class WiFiService extends Service {
             sendDataToPebble(formattedWorkTime);
         }
         stopSelf();
+    }
+
+    private Set<TrackerEntry> getTrackersToUpdate() {
+        Set<TrackerEntry> trackersToUpdate = new HashSet<TrackerEntry>();
+
+        List<ScanResult> networkList = wifiManager.getScanResults();
+
+        Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
+        for (ScanResult network : networkList) {
+            if (trackedBSSIDs.contains(network.BSSID)) {
+                Log.d(TAG, network.BSSID);
+                Set<TrackerEntry> trackers = datasource.getTrackersByBSSID(network.BSSID);
+                trackersToUpdate.addAll(trackers);
+            }
+        }
+
+        /* Legacy code; support the old database format which does not consider BSSIDs
+         * (< version 3)
+         * Newer database versions still have the attribute 'name' but it contains the value
+         * '_deprecated_'
+         */
+        Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
+        for (ScanResult network : networkList) {
+            if (trackedSSIDs.contains(network.SSID)) {
+                Log.d(TAG, network.SSID);
+
+                TrackerEntry tracker = datasource.getTrackerBySSID(network.SSID);
+                if (tracker != null) {
+                    trackersToUpdate.add(tracker);
+                }
+            }
+        }
+        return trackersToUpdate;
     }
 
     private UnixTimestamp evaluateParamsForNotifications(TrackerEntry tracker, long now) {
