@@ -145,19 +145,6 @@ public class WiFiService extends Service {
         return note;
     }
 
-    public void showNotification(){
-
-        Intent intent = new Intent(this, WiFiService.class);
-        intent.putExtra("action", "click");
-        pendingIntent = PendingIntent.getService(this, 0, intent, 0);
-
-        note = buildNotification("TinyTimeTracker", "... is running.");
-        //note.setLatestEventInfo(this, "TinyTimeTracker", "... is running", pendingIntent);
-        note.flags|=Notification.FLAG_FOREGROUND_SERVICE;
-        note.flags|=Notification.FLAG_NO_CLEAR;
-        startForeground(1337, note);
-    }
-
     public void updateNotification(String title, String text){
         if (! showNotifications) {
             return;
@@ -177,12 +164,31 @@ public class WiFiService extends Service {
 
         EventBus bus = EventBus.getDefault();
 
-        Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
         String formattedWorkTime = "";
         boolean network_found = false;
         long now = System.currentTimeMillis();
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
+
+            Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
+            for (ScanResult network : networkList) {
+                if (trackedBSSIDs.contains(network.BSSID)) {
+                    network_found = true;
+                    Log.d(TAG, network.BSSID);
+                    Set<TrackerEntry> trackers = datasource.getTrackersByBSSID(network.BSSID);
+                    for (TrackerEntry tracker: trackers) {
+                        LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
+
+                        UnixTimestamp duration_today = evaluateParamsForNotifications(tracker, now);
+
+                        formattedWorkTime = duration_today.durationAsHours();
+                        bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
+                    }
+                }
+            }
+
+            // legacy code; support old database format < version 3 which does not consider BSSIDs
+            Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
             for (ScanResult network : networkList) {
                 if (trackedSSIDs.contains(network.SSID)) {
                     network_found = true;
@@ -195,27 +201,7 @@ public class WiFiService extends Service {
 
                     LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
 
-                    long tracker_id = tracker.getID();
-                    UnixTimestamp today = UnixTimestamp.startOfToday();
-                    UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
-                    long seconds_today = duration_today.getTimestamp() / 1000L;
-                    long last_notification = settings.getLong("last_notification", 0L);
-                    SharedPreferences.Editor editor = settings.edit();
-
-                    if (seconds_today < last_notification) {
-                        Log.w(TAG, "date changed");
-                        last_notification = 0L;
-                        editor.putLong("last_notification", 0L);
-                    }
-
-                    if (seconds_today - last_notification >= notificationInterval){
-                        updateNotification(duration_today.durationAsHours(), network.SSID);
-                        editor.putLong("last_notification", seconds_today);
-                    }
-
-                    editor.putLong("last_seen", now);
-                    editor.putLong("seconds_today", seconds_today);
-                    editor.commit();
+                    UnixTimestamp duration_today = evaluateParamsForNotifications(tracker, now);
 
                     formattedWorkTime = duration_today.durationAsHours();
                     bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
@@ -240,6 +226,32 @@ public class WiFiService extends Service {
             sendDataToPebble(formattedWorkTime);
         }
         stopSelf();
+    }
+
+    private UnixTimestamp evaluateParamsForNotifications(TrackerEntry tracker, long now) {
+        long tracker_id = tracker.getID();
+        UnixTimestamp today = UnixTimestamp.startOfToday();
+        UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
+        long seconds_today = duration_today.getTimestamp() / 1000L;
+        long last_notification = settings.getLong("last_notification", 0L);
+
+        SharedPreferences.Editor editor = settings.edit();
+
+        if (seconds_today < last_notification) {
+            Log.w(TAG, "date changed");
+            last_notification = 0L;
+            editor.putLong("last_notification", 0L);
+        }
+
+        if (seconds_today - last_notification >= notificationInterval){
+            updateNotification(duration_today.durationAsHours(), tracker.getSSID());
+            editor.putLong("last_notification", seconds_today);
+        }
+
+        editor.putLong("last_seen", now);
+        editor.putLong("seconds_today", seconds_today);
+        editor.commit();
+        return duration_today;
     }
 
     private boolean isPebbleConnected() {

@@ -102,6 +102,25 @@ public class LogDataSource {
         return names;
     }
 
+    public Set<String> getTrackedBSSIDs() {
+        init();
+        Cursor cursor = null;
+        Set<String> bssids = new HashSet<String>();
+        try{
+            cursor = database.query(SQLiteHandler.TABLE_ACCESS_POINTS, new String[] {"bssid"},
+                                    null, null, null, null, null, null);
+
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                bssids.add(cursor.getString(0));
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return bssids;
+    }
+
     public List<TrackerEntry> getTrackers() {
         init();
         Cursor cursor = null;
@@ -181,6 +200,30 @@ public class LogDataSource {
             cursor.close();
         }
         return entry;
+
+    }
+
+    public Set<TrackerEntry> getTrackersByBSSID(String bssid) {
+        final String query = "SELECT trackers._id, name, verbose_name, method FROM trackers " +
+                             "INNER JOIN access_points ON trackers._id=access_points.tracker_id " +
+                             "WHERE access_points.bssid=?";
+
+        init();
+
+        Set<TrackerEntry> entries = new HashSet<TrackerEntry>();
+        Cursor cursor = database.rawQuery(query, new String[] {bssid});
+
+        try{
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                TrackerEntry entry = getTrackerEntryFromCursor(cursor);
+                entries.add(entry);
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return entries;
 
     }
 
