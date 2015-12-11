@@ -78,7 +78,8 @@ public class DbImportExport {
         email.putExtra(Intent.EXTRA_STREAM, uri);
         email.putExtra(android.content.Intent.EXTRA_STREAM, Uri.parse("file:" + filename));
 
-        context.startActivity(Intent.createChooser(email, "Select application"));
+        context.startActivity(Intent.createChooser(email,
+                              context.getResources().getString(R.string.dialog_title_share_database)));
     }
 
     /** Replaces current database with the IMPORT_FILE if

@@ -12,6 +12,9 @@
     <string name="action_open_github">Contribute</string>
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
+    <string name="dialog_title_wifi_networks">Active WiFi networks</string>
+    <string name="dialog_title_database_backup">Database files</string>
+    <string name="dialog_title_share_database">Select an application</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Day</string>
     <string name="aggregation_week">Week</string>

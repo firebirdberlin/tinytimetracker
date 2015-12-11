@@ -91,7 +91,7 @@ public class SettingsFragment extends PreferenceFragment {
         final CharSequence[] files_seq = files.toArray(new CharSequence[files.size()]);
 
         new AlertDialog.Builder(getActivity())
-            .setTitle("Database files")
+            .setTitle(getActivity().getResources().getString(R.string.dialog_title_database_backup))
             .setSingleChoiceItems(files_seq, 0, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int item) {
                     result = file_list[item].getAbsolutePath();

@@ -114,7 +114,7 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         new AlertDialog.Builder(this)
-            .setTitle("Active WiFi networks")
+            .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
             .setIcon(R.drawable.ic_wifi)
             .setAdapter(adapter,
                         new DialogInterface.OnClickListener() {
