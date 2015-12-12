@@ -52,12 +52,8 @@ public class DbImportExport {
         File dbFile = DATA_DIRECTORY_DATABASE;
         String filename = DATABASE_NAME + "_" + currentDateAndTime + DATABASE_NAME_EXT;
 
-        File exportDir = DATABASE_DIRECTORY;
-        File file = new File(exportDir, filename);
-
-        if (!exportDir.exists()) {
-            exportDir.mkdirs();
-        }
+        createDatabaseDirectory();
+        File file = new File(DATABASE_DIRECTORY, filename);
 
         try {
             file.createNewFile();
@@ -69,6 +65,12 @@ public class DbImportExport {
         }
         deleteOldBackupFiles();
         return true;
+    }
+
+    private static void createDatabaseDirectory() {
+        if (!DATABASE_DIRECTORY.exists()) {
+            DATABASE_DIRECTORY.mkdirs();
+        }
     }
 
     protected static void shareFile(Context context, String filename) {
@@ -145,6 +147,7 @@ public class DbImportExport {
 
         };
 
+        createDatabaseDirectory();
         return DbImportExport.DATABASE_DIRECTORY.listFiles(filter);
     }
 
