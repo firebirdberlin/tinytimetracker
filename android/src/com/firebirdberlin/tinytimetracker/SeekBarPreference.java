@@ -28,6 +28,8 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     // ------------------------------------------------------------------------------------------
     // Private attributes :
     private static final String androidns="http://schemas.android.com/apk/res/android";
+    private static final String seekbar="seekbar";
+
 
     private SeekBar mSeekBar;
     private TextView mSplashText,mValueText;
@@ -35,6 +37,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
 
     private String mDialogMessage, mSuffix;
     private int mDefault, mMax, mValue = 0;
+    private int mStep = 1;
     // ------------------------------------------------------------------------------------------
 
 
@@ -59,6 +62,7 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
         // Get default and max seekbar values :
         mDefault = attrs.getAttributeIntValue(androidns, "defaultValue", 0);
         mMax = attrs.getAttributeIntValue(androidns, "max", 100);
+        mStep = attrs.getAttributeIntValue(seekbar, "step", 1);
     }
     // ------------------------------------------------------------------------------------------
 
@@ -124,8 +128,8 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
     // ------------------------------------------------------------------------------------------
     // OnSeekBarChangeListener methods :
     @Override
-    public void onProgressChanged(SeekBar seek, int value, boolean fromTouch)
-    {
+    public void onProgressChanged(SeekBar seek, int value, boolean fromTouch) {
+        value = value / mStep * mStep;
         String t = String.valueOf(value);
         mValueText.setText(mSuffix == null ? t : t.concat(" " + mSuffix));
     }

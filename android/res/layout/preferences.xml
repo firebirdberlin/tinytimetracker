@@ -32,20 +32,22 @@
 
         <CheckBoxPreference
             android:title="@string/pref_title_show_notifications"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:summary="@string/pref_summary_show_notifications"
             android:key="pref_key_show_notifications"
             android:disableDependentsState="false" />
 
         <firebirdberlin.com.tinytimetracker.SeekBarPreference
-            android:defaultValue="60"
+            xmlns:seekbar="seekbar"
+            android:defaultValue="480"
+            android:dependency="pref_key_show_notifications"
             android:dialogMessage="@string/pref_dialog_notification_interval_minutes"
             android:key="pref_key_notification_interval_minutes"
-            android:max="360"
+            android:max="600"
             android:summary="@string/pref_summary_notification_interval_minutes"
             android:text="@string/pref_unit_notification_interval_minutes"
             android:title="@string/pref_title_notification_interval_minutes"
-            android:dependency="pref_key_show_notifications"/>
+            seekbar:step="30" />
     </PreferenceCategory>
 
     <PreferenceCategory
