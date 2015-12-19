@@ -11,6 +11,14 @@
             android:summary="@string/pref_summary_seconds_connection_lost"
             android:title="@string/pref_title_seconds_connection_lost"
             android:text="@string/pref_unit_notification_interval_minutes"/>
+
+        <CheckBoxPreference
+            android:title="@string/pref_title_show_notifications"
+            android:defaultValue="false"
+            android:summary="@string/pref_summary_show_notifications"
+            android:key="pref_key_show_notifications"
+            android:disableDependentsState="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -24,30 +32,6 @@
             android:defaultValue="8"
             android:inputType="numberDecimal"
             />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/pref_notification_settings"
-        android:key="pref_key_notification_settings">
-
-        <CheckBoxPreference
-            android:title="@string/pref_title_show_notifications"
-            android:defaultValue="false"
-            android:summary="@string/pref_summary_show_notifications"
-            android:key="pref_key_show_notifications"
-            android:disableDependentsState="false" />
-
-        <firebirdberlin.com.tinytimetracker.SeekBarPreference
-            xmlns:seekbar="seekbar"
-            android:defaultValue="480"
-            android:dependency="pref_key_show_notifications"
-            android:dialogMessage="@string/pref_dialog_notification_interval_minutes"
-            android:key="pref_key_notification_interval_minutes"
-            android:max="600"
-            android:summary="@string/pref_summary_notification_interval_minutes"
-            android:text="@string/pref_unit_notification_interval_minutes"
-            android:title="@string/pref_title_notification_interval_minutes"
-            seekbar:step="30" />
     </PreferenceCategory>
 
     <PreferenceCategory

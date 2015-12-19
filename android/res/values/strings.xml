@@ -23,7 +23,6 @@
     <string name="edit_tracker_verbose_name_hint">Display name</string>
     <string name="pref_wifi_settings">Wifi</string>
     <string name="pref_worktime_settings">Worktime</string>
-    <string name="pref_notification_settings">Notifications</string>
     <string name="pref_data_export">Backup and restore</string>
     <string name="pref_title_export">Data export</string>
     <string name="pref_title_import">Data import</string>
@@ -31,12 +30,9 @@
     <string name="pref_credits">Credits</string>
     <string name="pref_title_seconds_connection_lost">Absence time</string>
     <string name="pref_summary_seconds_connection_lost">Time after which absence is detected.</string>
-    <string name="pref_dialog_notification_interval_minutes">Time in minutes after which the notification will reappear.</string>
-    <string name="pref_title_notification_interval_minutes">Notification interval</string>
-    <string name="pref_summary_notification_interval_minutes">How often do you want to be notified ?</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
     <string name="pref_title_show_notifications">Notifications</string>
-    <string name="pref_summary_show_notifications">Periodically send push notifications.</string>
+    <string name="pref_summary_show_notifications">Show notifications in the notification area.</string>
     <string name="pref_title_working_hours">Working hours</string>
     <string name="pref_summary_working_hours">Your daily working hours.</string>
     <string-array name="empty_array"/>

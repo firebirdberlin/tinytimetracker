@@ -31,12 +31,10 @@
     <string name="pref_credits">Über</string>
     <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
     <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
-    <string name="pref_dialog_notification_interval_minutes">Zeit nach der eine Benachrichtigung angezeigt werden soll.</string>
-    <string name="pref_title_notification_interval_minutes">Benachrichtigungsintervall</string>
     <string name="pref_summary_notification_interval_minutes">Wie oft möchten Sie benachrichtigt werden ?</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
     <string name="pref_title_show_notifications">Benachrichtigungen</string>
-    <string name="pref_summary_show_notifications">Sende wiederkehrende Benachrichtigungen.</string>
+    <string name="pref_summary_show_notifications">Zeige Benachrichtigungen an.</string>
     <string name="pref_title_working_hours">Arbeitsstunden</string>
     <string name="pref_summary_working_hours">Ihre tägliche Arbeitszeit in Stunden.</string>
     <string-array name="empty_array"/>

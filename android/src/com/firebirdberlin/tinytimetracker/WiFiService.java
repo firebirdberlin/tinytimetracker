@@ -137,10 +137,10 @@ public class WiFiService extends Service {
          note  = new Notification.Builder(this)
             .setContentTitle(title)
             .setContentText(text)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_hourglass)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            //.setPriority(Notification.PRIORITY_MIN)
+            .setOngoing(true)
+            .setPriority(Notification.PRIORITY_MAX)
             .build();
 
         return note;
@@ -148,6 +148,7 @@ public class WiFiService extends Service {
 
     public void updateNotification(String title, String text){
         if (! showNotifications) {
+            notificationManager.cancel(NOTIFICATION_ID_WIFI);
             return;
         }
 
@@ -155,26 +156,22 @@ public class WiFiService extends Service {
         notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
 
-
-    public void showNotificationError(String title, String text){
-        note = buildNotification(title, text);
-        notificationManager.notify(NOTIFICATION_ID_ERROR, note);
-    }
-
     private void getWiFiNetworks(){
 
         EventBus bus = EventBus.getDefault();
 
         String formattedWorkTime = "";
+        String trackerVerboseName = "";
         long now = System.currentTimeMillis();
         Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate();
 
         for (TrackerEntry tracker: trackersToUpdate) {
             LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
 
-            UnixTimestamp duration_today = evaluateParamsForNotifications(tracker, now);
+            UnixTimestamp duration_today = evaluateDurationToday(tracker, now);
 
             formattedWorkTime = duration_today.durationAsHours();
+            trackerVerboseName = tracker.getVerboseName();
             bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
         }
 
@@ -188,10 +185,14 @@ public class WiFiService extends Service {
             long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
             if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
                 formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
+            } else {
+                notificationManager.cancel(NOTIFICATION_ID_WIFI);
             }
         }
 
         bus.post(new OnWifiUpdateCompleted());
+
+        updateNotification(formattedWorkTime, trackerVerboseName);
 
         if ( isPebbleConnected()) {
             sendDataToPebble(formattedWorkTime);
@@ -232,26 +233,14 @@ public class WiFiService extends Service {
         return trackersToUpdate;
     }
 
-    private UnixTimestamp evaluateParamsForNotifications(TrackerEntry tracker, long now) {
+    private UnixTimestamp evaluateDurationToday(TrackerEntry tracker, long now) {
         long tracker_id = tracker.getID();
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
         long seconds_today = duration_today.getTimestamp() / 1000L;
-        long last_notification = settings.getLong("last_notification", 0L);
+
 
         SharedPreferences.Editor editor = settings.edit();
-
-        if (seconds_today < last_notification) {
-            Log.w(TAG, "date changed");
-            last_notification = 0L;
-            editor.putLong("last_notification", 0L);
-        }
-
-        if (seconds_today - last_notification >= notificationInterval){
-            updateNotification(duration_today.durationAsHours(), tracker.getSSID());
-            editor.putLong("last_notification", seconds_today);
-        }
-
         editor.putLong("last_seen", now);
         editor.putLong("seconds_today", seconds_today);
         editor.commit();
