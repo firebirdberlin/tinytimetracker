@@ -55,10 +55,12 @@
     <PreferenceCategory
         android:title="@string/pref_credits"
         android:key="pref_key_credits">
-        <Preference
-            android:key="pref_static_credits"
+
+        <com.firebirdberlin.tinytimetracker.VersionPreference
+            android:key="version"
             android:selectable="false"
-            android:title="Stefan Fruhner (2015)" />
+            android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)"/>
+
         <Preference
             android:key="pref_static_credits2"
             android:title="SeekBarPreference"
