@@ -156,15 +156,12 @@ public class WiFiService extends Service {
 
         for (TrackerEntry tracker: trackersToUpdate) {
             LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
-            UnixTimestamp duration_today = evaluateDurationToday(tracker, now);
-            formattedWorkTime = duration_today.durationAsHours();
-            trackerVerboseName = tracker.getVerboseName();
             bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
         }
 
         boolean network_found = (trackersToUpdate.size() > 0);
 
-        if ( !network_found) {
+        if ( !network_found ) {
             // user has left the office for less than 90 mins
             long seconds_today = settings.getLong("seconds_today", 0L);
             long last_seen = settings.getLong("last_seen", 0L);
@@ -174,29 +171,24 @@ public class WiFiService extends Service {
             if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
                 formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
             }
-            else {
-                notificationManager.cancel(NOTIFICATION_ID_WIFI);
-            }
+        }
+        else {
+            // use the first result for notifications
+            TrackerEntry tracker = trackersToUpdate.iterator().next();
+            UnixTimestamp duration_today = evaluateDurationToday(tracker);
+            saveTimestampLastSeen(duration_today, now);
+            formattedWorkTime = duration_today.durationAsHours();
+            trackerVerboseName = tracker.getVerboseName();
         }
 
         bus.post(new OnWifiUpdateCompleted());
         updateNotification(formattedWorkTime, trackerVerboseName);
 
-        if ( isPebbleConnected()) {
+        if ( isPebbleConnected() ) {
             sendDataToPebble(formattedWorkTime);
         }
 
         stopSelf();
-    }
-
-    public void updateNotification(String title, String text) {
-        if ( !showNotifications || title.isEmpty() ) {
-            notificationManager.cancel(NOTIFICATION_ID_WIFI);
-            return;
-        }
-
-        note = buildNotification(title, text);
-        notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
 
     private Set<TrackerEntry> getTrackersToUpdate() {
@@ -233,16 +225,29 @@ public class WiFiService extends Service {
         return trackersToUpdate;
     }
 
-    private UnixTimestamp evaluateDurationToday(TrackerEntry tracker, long now) {
+    private UnixTimestamp evaluateDurationToday(TrackerEntry tracker) {
         long tracker_id = tracker.getID();
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
+        return duration_today;
+    }
+
+    private void saveTimestampLastSeen(UnixTimestamp duration_today, long now) {
         long seconds_today = duration_today.getTimestamp() / 1000L;
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_seen", now);
         editor.putLong("seconds_today", seconds_today);
         editor.commit();
-        return duration_today;
+    }
+
+    public void updateNotification(String title, String text) {
+        if ( !showNotifications || title.isEmpty() ) {
+            notificationManager.cancel(NOTIFICATION_ID_WIFI);
+            return;
+        }
+
+        note = buildNotification(title, text);
+        notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
 
     private boolean isPebbleConnected() {
