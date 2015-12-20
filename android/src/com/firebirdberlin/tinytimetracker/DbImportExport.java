@@ -42,16 +42,17 @@ public class DbImportExport {
 
     /** Saves the application database to the
      * export directory under MyDb.db **/
-    protected static  boolean exportDb(){
+    protected static  boolean exportDb() {
         Log.d(TAG, "exportDb()");
-        if( ! SdIsPresent() ) return false;
+
+        if( ! SdIsPresent() ) {
+            return false;
+        }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String currentDateAndTime = sdf.format(new Date());
-
         File dbFile = DATA_DIRECTORY_DATABASE;
         String filename = DATABASE_NAME + "_" + currentDateAndTime + DATABASE_NAME_EXT;
-
         createDatabaseDirectory();
         File file = new File(DATABASE_DIRECTORY, filename);
 
@@ -59,10 +60,12 @@ public class DbImportExport {
             file.createNewFile();
             copyFile(dbFile, file);
             Log.d(TAG, "exported " + file.getAbsolutePath());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return false;
         }
+
         deleteOldBackupFiles();
         return true;
     }
@@ -79,16 +82,18 @@ public class DbImportExport {
         email.setType("application/octet-stream");
         email.putExtra(Intent.EXTRA_STREAM, uri);
         email.putExtra(android.content.Intent.EXTRA_STREAM, Uri.parse("file:" + filename));
-
         context.startActivity(Intent.createChooser(email,
                               context.getResources().getString(R.string.dialog_title_share_database)));
     }
 
     /** Replaces current database with the IMPORT_FILE if
      * import database is valid and of the correct type **/
-    protected static boolean restoreDb(String filename){
+    protected static boolean restoreDb(String filename) {
         Log.d(TAG, "restoreDb()");
-        if( ! SdIsPresent() ) return false;
+
+        if( ! SdIsPresent() ) {
+            return false;
+        }
 
         File exportFile = DATA_DIRECTORY_DATABASE;
         File importFile = new File(filename);
@@ -105,7 +110,8 @@ public class DbImportExport {
             copyFile(importFile, exportFile);
             Log.d(TAG, "restored from " + filename);
             return true;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return false;
         }
@@ -114,26 +120,33 @@ public class DbImportExport {
     private static void copyFile(File src, File dst) throws IOException {
         FileChannel inChannel = new FileInputStream(src).getChannel();
         FileChannel outChannel = new FileOutputStream(dst).getChannel();
+
         try {
             inChannel.transferTo(0, inChannel.size(), outChannel);
-        } finally {
-            if (inChannel != null)
+        }
+        finally {
+            if (inChannel != null) {
                 inChannel.close();
-            if (outChannel != null)
+            }
+
+            if (outChannel != null) {
                 outChannel.close();
+            }
         }
     }
 
     private static void deleteOldBackupFiles() {
         File[] files = listFiles();
-        if (files.length < MIN_NUMBER_OF_BACKUPS_TO_KEEP) return;
+
+        if (files.length < MIN_NUMBER_OF_BACKUPS_TO_KEEP) {
+            return;
+        }
 
         for (File file: files) {
             if (file.lastModified() + MAX_FILE_AGE < System.currentTimeMillis()) {
                 file.delete();
             }
         }
-
     }
 
     public static File[] listFiles() {
@@ -144,9 +157,7 @@ public class DbImportExport {
                 return (filename.startsWith("trackers") &&
                         filename.endsWith(".db")) || sel.isDirectory();
             }
-
         };
-
         createDatabaseDirectory();
         return DbImportExport.DATABASE_DIRECTORY.listFiles(filter);
     }

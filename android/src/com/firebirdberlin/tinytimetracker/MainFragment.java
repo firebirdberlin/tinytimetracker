@@ -28,12 +28,9 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         bus.register(this);
-
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
-
         loadTrackers();
         ArrayAdapter adapter = new ArrayAdapter(getActivity(),
                                                 R.layout.main_spinner,
@@ -44,12 +41,10 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 TrackerEntry tracker = (TrackerEntry) parentView.getItemAtPosition(position);
-
                 Log.i(TAG, "Tracker selected " + tracker.getVerboseName());
                 EventBus bus = EventBus.getDefault();
                 bus.post(new OnTrackerSelected(tracker));
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
             }
@@ -63,9 +58,11 @@ public class MainFragment extends Fragment {
         datasource.open();
         List<TrackerEntry> trackers_loaded = datasource.getTrackers();
         trackers.clear();
+
         for (TrackerEntry e : trackers_loaded) {
             trackers.add(e);
         }
+
         datasource.close();
     }
 

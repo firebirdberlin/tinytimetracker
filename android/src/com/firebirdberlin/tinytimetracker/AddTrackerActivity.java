@@ -45,13 +45,14 @@ public class AddTrackerActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
         registerForContextMenu(this.getListView());
-
         datasource = new LogDataSource(this);
         Intent intent = getIntent();
         long tracker_id = intent.getLongExtra("tracker_id", -1L);
+
         if (tracker_id > -1L) {
             tracker = datasource.getTracker(tracker_id);
         }
+
         init();
     }
 
@@ -62,7 +63,6 @@ public class AddTrackerActivity extends ListActivity {
 
         if (tracker != null) {
             edit_tracker_verbose_name.setText(tracker.getVerboseName());
-
             accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.getID());
         }
 
@@ -81,27 +81,28 @@ public class AddTrackerActivity extends ListActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+
         switch (item.getItemId()) {
-            case R.id.action_add:
-                onChooseWifi(button_wifi);
-                return true;
-            case R.id.action_delete:
-                AccessPoint accessPoint = accessPoints.remove(info.position);
-                datasource.delete(accessPoint);
-                accessPointAdapter.notifyDataSetChanged();
-                return true;
-            default:
-                return super.onContextItemSelected(item);
+        case R.id.action_add:
+            onChooseWifi(button_wifi);
+            return true;
+        case R.id.action_delete:
+            AccessPoint accessPoint = accessPoints.remove(info.position);
+            datasource.delete(accessPoint);
+            accessPointAdapter.notifyDataSetChanged();
+            return true;
+        default:
+            return super.onContextItemSelected(item);
         }
     }
 
     public void onChooseWifi(View v) {
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
-                                                                  accessPoints);
-
+                accessPoints);
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         List<ScanResult> networkList = wifiManager.getScanResults();
+
         if (networkList == null) {
             return;
         }
@@ -114,26 +115,25 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         new AlertDialog.Builder(this)
-            .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
-            .setIcon(R.drawable.ic_wifi)
-            .setAdapter(adapter,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int item) {
-                                AccessPoint accessPoint = adapter.getItem(item);
-                                String ssid = accessPoint.ssid;
-                                String bssid = accessPoint.bssid;
+        .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
+        .setIcon(R.drawable.ic_wifi)
+        .setAdapter(adapter,
+        new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                AccessPoint accessPoint = adapter.getItem(item);
+                String ssid = accessPoint.ssid;
+                String bssid = accessPoint.bssid;
 
-                                if (edit_tracker_verbose_name.length() == 0) {
-                                    edit_tracker_verbose_name.setText(ssid);
-                                }
+                if (edit_tracker_verbose_name.length() == 0) {
+                    edit_tracker_verbose_name.setText(ssid);
+                }
 
-                                accessPointAdapter.add(accessPoint);
-                                setWifiIconColor(BLUE);
-
-                                dialog.dismiss();
-                            }
-                        })
-            .setNegativeButton(android.R.string.no, null).show();
+                accessPointAdapter.add(accessPoint);
+                setWifiIconColor(BLUE);
+                dialog.dismiss();
+            }
+        })
+        .setNegativeButton(android.R.string.no, null).show();
     }
 
     public void onClickOk(View v) {
@@ -145,7 +145,8 @@ public class AddTrackerActivity extends ListActivity {
 
         if (tracker == null) {
             tracker = new TrackerEntry(verbose_name, "WLAN");
-        } else {
+        }
+        else {
             tracker.setVerboseName(verbose_name);
         }
 
@@ -153,12 +154,13 @@ public class AddTrackerActivity extends ListActivity {
         tracker.setSSID("_deprecated_");
         datasource.save(tracker);
         long tracker_id = tracker.getID();
+
         for (int i = 0; i < accessPoints.size(); i++ ) {
             AccessPoint ap = accessPoints.get(i);
             ap.setTrackerID(tracker_id);
             datasource.save(ap);
-
         }
+
         datasource.close();
         this.finish();
     }
@@ -176,6 +178,7 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         TrackerEntry other = datasource.getTracker(verbose_name);
+
         if (tracker == null && other != null) { // a tracker with this name already exists
             edit_tracker_verbose_name.setBackgroundColor(RED);
             edit_tracker_verbose_name.invalidate();
@@ -187,16 +190,16 @@ public class AddTrackerActivity extends ListActivity {
             edit_tracker_verbose_name.invalidate();
             return false;
         }
+
         return true;
     }
 
-    private void setWifiIconColor(int color){
+    private void setWifiIconColor(int color) {
         Resources res = getResources();
         Drawable icon = res.getDrawable(R.drawable.ic_wifi);
         icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         button_wifi.setBackgroundResource(R.drawable.ic_wifi);
         button_wifi.invalidate();
-
         edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
         edit_tracker_verbose_name.invalidate();
     }

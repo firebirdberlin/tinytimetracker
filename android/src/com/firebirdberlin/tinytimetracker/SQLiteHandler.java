@@ -7,76 +7,77 @@ import android.util.Log;
 
 public class SQLiteHandler extends SQLiteOpenHelper {
 
-  public static final String TABLE_TRACKERS = "trackers";
-  public static final String COLUMN_ID = "_id";
-  public static final String COLUMN_METHOD = "method";
-  public static final String COLUMN_NAME = "name";
-  public static final String COLUMN_VERBOSE = "verbose_name";
+    public static final String TABLE_TRACKERS = "trackers";
+    public static final String COLUMN_ID = "_id";
+    public static final String COLUMN_METHOD = "method";
+    public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_VERBOSE = "verbose_name";
 
-  public static final String TABLE_LOGS = "logs";
-  public static final String COLUMN_TIMESTAMP_END = "timestamp_end";
-  public static final String COLUMN_TIMESTAMP_START = "timestamp_start";
-  public static final String COLUMN_TRACKER_ID = "tracker_id";
+    public static final String TABLE_LOGS = "logs";
+    public static final String COLUMN_TIMESTAMP_END = "timestamp_end";
+    public static final String COLUMN_TIMESTAMP_START = "timestamp_start";
+    public static final String COLUMN_TRACKER_ID = "tracker_id";
 
-  public static final String TABLE_ACCESS_POINTS = "access_points";
-  public static final String COLUMN_SSID = "ssid";
-  public static final String COLUMN_BSSID = "bssid";
+    public static final String TABLE_ACCESS_POINTS = "access_points";
+    public static final String COLUMN_SSID = "ssid";
+    public static final String COLUMN_BSSID = "bssid";
 
-  private static final String DATABASE_NAME = "trackers.db";
-  private static final int DATABASE_VERSION = 3;
+    private static final String DATABASE_NAME = "trackers.db";
+    private static final int DATABASE_VERSION = 3;
 
-  // Database creation sql statement
-  private static final String DATABASE_CREATE_TRACKERS =
+    // Database creation sql statement
+    private static final String DATABASE_CREATE_TRACKERS =
         "CREATE TABLE " + TABLE_TRACKERS + "("
-          + COLUMN_ID + " integer primary key autoincrement, "
-          + COLUMN_METHOD + " text not null, "
-          + COLUMN_NAME + " text not null, "
-          + COLUMN_VERBOSE + " text not null);";
-  private static final String DATABASE_CREATE_LOGS =
+        + COLUMN_ID + " integer primary key autoincrement, "
+        + COLUMN_METHOD + " text not null, "
+        + COLUMN_NAME + " text not null, "
+        + COLUMN_VERBOSE + " text not null);";
+    private static final String DATABASE_CREATE_LOGS =
         "CREATE TABLE " + TABLE_LOGS + "("
-          + COLUMN_ID + " integer primary key autoincrement, "
-          + COLUMN_TRACKER_ID + " integer REFERENCES " + TABLE_TRACKERS +"(" + COLUMN_ID + "),"
-          + COLUMN_TIMESTAMP_START + " integer not null, "
-          + COLUMN_TIMESTAMP_END + " integer not null);";
+        + COLUMN_ID + " integer primary key autoincrement, "
+        + COLUMN_TRACKER_ID + " integer REFERENCES " + TABLE_TRACKERS + "(" + COLUMN_ID + "),"
+        + COLUMN_TIMESTAMP_START + " integer not null, "
+        + COLUMN_TIMESTAMP_END + " integer not null);";
 
-  private static final String DATABASE_CREATE_ACCESS_POINTS =
+    private static final String DATABASE_CREATE_ACCESS_POINTS =
         "CREATE TABLE " + TABLE_ACCESS_POINTS + "("
-          + COLUMN_ID + " integer primary key autoincrement, "
-          + COLUMN_TRACKER_ID + " integer REFERENCES " + TABLE_TRACKERS +"(" + COLUMN_ID + "),"
-          + COLUMN_SSID + " text not null, "
-          + COLUMN_BSSID + " text not null);";
+        + COLUMN_ID + " integer primary key autoincrement, "
+        + COLUMN_TRACKER_ID + " integer REFERENCES " + TABLE_TRACKERS + "(" + COLUMN_ID + "),"
+        + COLUMN_SSID + " text not null, "
+        + COLUMN_BSSID + " text not null);";
 
-  public SQLiteHandler(Context context) {
-      super(context, DATABASE_NAME, null, DATABASE_VERSION);
-  }
+    public SQLiteHandler(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
 
-  @Override
-  public void onCreate(SQLiteDatabase database) {
-      database.execSQL(DATABASE_CREATE_TRACKERS);
-      database.execSQL(DATABASE_CREATE_LOGS);
-      database.execSQL(DATABASE_CREATE_ACCESS_POINTS);
-  }
+    @Override
+    public void onCreate(SQLiteDatabase database) {
+        database.execSQL(DATABASE_CREATE_TRACKERS);
+        database.execSQL(DATABASE_CREATE_LOGS);
+        database.execSQL(DATABASE_CREATE_ACCESS_POINTS);
+    }
 
-  @Override
-  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-      Log.w(SQLiteHandler.class.getName(),
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.w(SQLiteHandler.class.getName(),
               "Upgrading database from version " + oldVersion + " to "
               + newVersion + ", which will destroy all old data");
 
-      if (oldVersion == 1 && newVersion >= 2) {
-          db.execSQL("ALTER TABLE " + TABLE_TRACKERS + " ADD COLUMN " + COLUMN_VERBOSE + " TEXT DEFAULT '' NOT NULL");
-          db.execSQL("UPDATE " + TABLE_TRACKERS + " SET " + COLUMN_VERBOSE + " = " + COLUMN_NAME);
-      }
+        if (oldVersion == 1 && newVersion >= 2) {
+            db.execSQL("ALTER TABLE " + TABLE_TRACKERS + " ADD COLUMN " + COLUMN_VERBOSE + " TEXT DEFAULT '' NOT NULL");
+            db.execSQL("UPDATE " + TABLE_TRACKERS + " SET " + COLUMN_VERBOSE + " = " + COLUMN_NAME);
+        }
 
-      if (oldVersion <= 2 && newVersion >= 3) {
-          db.execSQL(DATABASE_CREATE_ACCESS_POINTS);
-          return;
-      }
-      // otherwise drop and re-create
-      db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKERS);
-      db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOGS);
-      db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCESS_POINTS);
-      onCreate(db);
-  }
+        if (oldVersion <= 2 && newVersion >= 3) {
+            db.execSQL(DATABASE_CREATE_ACCESS_POINTS);
+            return;
+        }
+
+        // otherwise drop and re-create
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKERS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOGS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCESS_POINTS);
+        onCreate(db);
+    }
 
 }

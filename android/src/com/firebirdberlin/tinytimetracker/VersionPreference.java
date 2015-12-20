@@ -16,7 +16,8 @@ public class VersionPreference extends Preference {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             String version = pInfo.versionName;
             setTitle("Tiny Time Tracker v" + version);
-        } catch (NameNotFoundException e){
+        }
+        catch (NameNotFoundException e) {
             return;
         }
     }

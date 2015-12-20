@@ -49,7 +49,7 @@ public class WiFiService extends Service {
 
 
     @Override
-    public void onCreate(){
+    public void onCreate() {
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         datasource = new LogDataSource(this);
@@ -58,21 +58,21 @@ public class WiFiService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(TAG, "WIFI SERVICE init ...");
         mContext = this;
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
+
         if ( ! wifiLock.isHeld()) {
             wifiLock.acquire();
         }
 
-        if ( TinyTimeTracker.isAirplaneModeOn(mContext) ){
+        if ( TinyTimeTracker.isAirplaneModeOn(mContext) ) {
             Log.i(TAG, "Airplane mode enabled");
             stopSelf();
             return Service.START_NOT_STICKY;
         }
 
-        if ( ! wifiManager.isWifiEnabled() ){
+        if ( ! wifiManager.isWifiEnabled() ) {
             Log.i(TAG, "WIFI disabled");
             wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
@@ -80,22 +80,21 @@ public class WiFiService extends Service {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
-
         boolean success = wifiManager.startScan();
-        if (! success){
+
+        if (! success) {
             if ( isPebbleConnected()) {
                 sendDataToPebble("");
-             }
+            }
+
             stopSelf();
             return Service.START_NOT_STICKY;
         }
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
-
         showNotifications = Settings.showNotifications(mContext);
         notificationInterval = 60 * Settings.getNotificationInterval(mContext);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
-
         Log.i(TAG, "WIFI SERVICE starts ...");
         return Service.START_NOT_STICKY;
     }
@@ -106,48 +105,92 @@ public class WiFiService extends Service {
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         datasource.close();
+
         try {
             unregisterReceiver(wifiReceiver);
-        } catch(IllegalArgumentException e) {
+        }
+        catch(IllegalArgumentException e) {
             // receiver was not registered
         }
 
-        if ( wifiWasEnabled && wifiManager.isWifiEnabled() ){
+        if ( wifiWasEnabled && wifiManager.isWifiEnabled() ) {
             wifiManager.setWifiEnabled(false);
         }
 
         if (wifiLock.isHeld()) {
             wifiLock.release();
         }
+
         wifiLock = null;
         Log.i(TAG, "Bye bye.");
     }
 
 
-    private BroadcastReceiver wifiReceiver = new BroadcastReceiver(){
-        public void onReceive(Context c, Intent i){
+    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
             getWiFiNetworks();
         }
     };
 
 
     private Notification buildNotification(String title, String text) {
-         note  = new Notification.Builder(this)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSmallIcon(R.drawable.ic_hourglass)
-            .setContentIntent(pendingIntent)
-            .setOngoing(true)
-            .setPriority(Notification.PRIORITY_MAX)
-            .build();
-
+        note  = new Notification.Builder(this)
+        .setContentTitle(title)
+        .setContentText(text)
+        .setSmallIcon(R.drawable.ic_hourglass)
+        .setContentIntent(pendingIntent)
+        .setOngoing(true)
+        .setPriority(Notification.PRIORITY_MAX)
+        .build();
         return note;
     }
 
-    public void updateNotification(String title, String text){
-        if (! showNotifications) {
+    private void getWiFiNetworks() {
+        EventBus bus = EventBus.getDefault();
+        String formattedWorkTime = "";
+        String trackerVerboseName = "";
+        long now = System.currentTimeMillis();
+        Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate();
+
+        for (TrackerEntry tracker: trackersToUpdate) {
+            LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
+            UnixTimestamp duration_today = evaluateDurationToday(tracker, now);
+            formattedWorkTime = duration_today.durationAsHours();
+            trackerVerboseName = tracker.getVerboseName();
+            bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
+        }
+
+        boolean network_found = (trackersToUpdate.size() > 0);
+
+        if ( !network_found) {
+            // user has left the office for less than 90 mins
+            long seconds_today = settings.getLong("seconds_today", 0L);
+            long last_seen = settings.getLong("last_seen", 0L);
+            long delta = (now - last_seen) / 1000L;
+            long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
+
+            if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
+                formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
+            }
+            else {
+                notificationManager.cancel(NOTIFICATION_ID_WIFI);
+            }
+        }
+
+        bus.post(new OnWifiUpdateCompleted());
+        updateNotification(formattedWorkTime, trackerVerboseName);
+
+        if ( isPebbleConnected()) {
+            sendDataToPebble(formattedWorkTime);
+        }
+
+        stopSelf();
+    }
+
+    public void updateNotification(String title, String text) {
+        if ( !showNotifications || title.isEmpty() ) {
             notificationManager.cancel(NOTIFICATION_ID_WIFI);
             return;
         }
@@ -156,56 +199,11 @@ public class WiFiService extends Service {
         notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
 
-    private void getWiFiNetworks(){
-
-        EventBus bus = EventBus.getDefault();
-
-        String formattedWorkTime = "";
-        String trackerVerboseName = "";
-        long now = System.currentTimeMillis();
-        Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate();
-
-        for (TrackerEntry tracker: trackersToUpdate) {
-            LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
-
-            UnixTimestamp duration_today = evaluateDurationToday(tracker, now);
-
-            formattedWorkTime = duration_today.durationAsHours();
-            trackerVerboseName = tracker.getVerboseName();
-            bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
-        }
-
-
-        boolean network_found = (trackersToUpdate.size() > 0);
-        if ( !network_found) {
-            // user has left the office for less than 90 mins
-            long seconds_today = settings.getLong("seconds_today", 0L);
-            long last_seen = settings.getLong("last_seen", 0L);
-            long delta = (now - last_seen)/1000L;
-            long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
-            if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
-                formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
-            } else {
-                notificationManager.cancel(NOTIFICATION_ID_WIFI);
-            }
-        }
-
-        bus.post(new OnWifiUpdateCompleted());
-
-        updateNotification(formattedWorkTime, trackerVerboseName);
-
-        if ( isPebbleConnected()) {
-            sendDataToPebble(formattedWorkTime);
-        }
-        stopSelf();
-    }
-
     private Set<TrackerEntry> getTrackersToUpdate() {
         Set<TrackerEntry> trackersToUpdate = new HashSet<TrackerEntry>();
-
         List<ScanResult> networkList = wifiManager.getScanResults();
-
         Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
+
         for (ScanResult network : networkList) {
             if (trackedBSSIDs.contains(network.BSSID)) {
                 Log.d(TAG, network.BSSID);
@@ -220,16 +218,18 @@ public class WiFiService extends Service {
          * '_deprecated_'
          */
         Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
+
         for (ScanResult network : networkList) {
             if (trackedSSIDs.contains(network.SSID)) {
                 Log.d(TAG, network.SSID);
-
                 TrackerEntry tracker = datasource.getTrackerBySSID(network.SSID);
+
                 if (tracker != null) {
                     trackersToUpdate.add(tracker);
                 }
             }
         }
+
         return trackersToUpdate;
     }
 
@@ -238,8 +238,6 @@ public class WiFiService extends Service {
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
         long seconds_today = duration_today.getTimestamp() / 1000L;
-
-
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_seen", now);
         editor.putLong("seconds_today", seconds_today);

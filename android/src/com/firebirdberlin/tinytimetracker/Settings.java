@@ -18,11 +18,10 @@ public class Settings extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
-                .commit();
+        .replace(android.R.id.content, new SettingsFragment())
+        .commit();
     }
 
 
@@ -32,25 +31,25 @@ public class Settings extends Activity {
     }
 
 
-    public static boolean showNotifications(Context context){
+    public static boolean showNotifications(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);
     }
 
 
-    public static int getNotificationInterval(Context context){
+    public static int getNotificationInterval(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getInt(Settings.PREF_KEY_NOTIFICATION_INTERVAL_MINUTES, 60);
     }
 
 
-    public static float getWorkingHours(Context context){
+    public static float getWorkingHours(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String workingHours = settings.getString(Settings.PREF_KEY_WORKING_HOURS, "8");
         return Float.parseFloat(workingHours);
     }
 
-    public static String getTrackedSSID(Context context){
+    public static String getTrackedSSID(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getString(Settings.PREF_KEY_WIFI_SSID, "");
     }

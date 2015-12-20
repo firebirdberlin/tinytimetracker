@@ -12,7 +12,7 @@ public class UnixTimestamp {
     private long timestamp;
 
 
-    public UnixTimestamp(long timestamp){
+    public UnixTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -25,52 +25,50 @@ public class UnixTimestamp {
         return toDateTimeString();
     }
 
-    public String toDateTimeString(){
+    public String toDateTimeString() {
         Date date = new Date(timestamp);
         DateFormat df = DateFormat.getDateTimeInstance();
         return df.format(date);
     }
 
-    public String toDateString(){
+    public String toDateString() {
         Date date = new Date(timestamp);
         DateFormat df = DateFormat.getDateInstance();
         return df.format(date);
     }
 
-    public String toWeekString(){
+    public String toWeekString() {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy 'w'ww");
         return sdf.format(date);
     }
 
-    public String toYearString(){
+    public String toYearString() {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
         return sdf.format(date);
     }
 
-    public String toTimeString(){
+    public String toTimeString() {
         Date date = new Date(timestamp);
         DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
         return df.format(date);
     }
 
-    public String durationAsMinutes(){
+    public String durationAsMinutes() {
         long min = timestamp / 1000 / 60;
-
         return String.format("%dmin", min);
     }
 
-    public String durationAsHours(){
+    public String durationAsHours() {
         long seconds = timestamp / 1000;
         long hours = seconds / 3600;
         long minutes = (seconds % 3600) / 60;
         long sec = seconds % 60;
-
         return String.format("%02d:%02d", hours, minutes);
     }
 
-    public static UnixTimestamp startOfToday(){
+    public static UnixTimestamp startOfToday() {
         long now = System.currentTimeMillis();
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(now);

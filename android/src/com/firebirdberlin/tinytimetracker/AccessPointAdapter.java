@@ -24,7 +24,8 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         View v = inflater.inflate(R.layout.list_2_lines, parent, false);
         TextView text1 = ( TextView ) v.findViewById ( R.id.text1 );
         TextView text2 = ( TextView ) v.findViewById ( R.id.text2 );
-        if (position < getCount()){
+
+        if (position < getCount()) {
             AccessPoint accessPoint = (AccessPoint) getItem(position);
             text1.setText(accessPoint.ssid);
             text2.setText(accessPoint.bssid);
@@ -39,16 +40,19 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         if (index == -1) {
             add(accessPoint);
         }
+
         return (index == -1);
     }
 
     public int indexOfBSSID(String bssid) {
         for (int i = 0; i < getCount() ; i++ ) {
             AccessPoint ap = getItem(i);
+
             if (ap.bssid.equals(bssid) ) {
                 return i;
             }
         }
+
         return -1;
     }
 }
