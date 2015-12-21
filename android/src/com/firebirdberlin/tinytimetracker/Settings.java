@@ -13,7 +13,6 @@ public class Settings extends Activity {
     public static final String PREF_KEY_WORKING_HOURS = "pref_key_working_hours";
     public static final String PREF_KEY_WIFI_SSID = "pref_key_wifi_ssid";
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
-    public static final String PREF_KEY_NOTIFICATION_INTERVAL_MINUTES = "pref_key_notification_interval_minutes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +33,6 @@ public class Settings extends Activity {
     public static boolean showNotifications(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);
-    }
-
-
-    public static int getNotificationInterval(Context context) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        return settings.getInt(Settings.PREF_KEY_NOTIFICATION_INTERVAL_MINUTES, 60);
     }
 
 

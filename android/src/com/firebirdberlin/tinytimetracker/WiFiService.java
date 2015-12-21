@@ -43,7 +43,6 @@ public class WiFiService extends Service {
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private boolean showNotifications = false;
-    private int notificationInterval = 60 * 60;
     private LogDataSource datasource;
     private boolean wifiWasEnabled = false;
 
@@ -68,7 +67,7 @@ public class WiFiService extends Service {
 
         if ( TinyTimeTracker.isAirplaneModeOn(mContext) ) {
             Log.i(TAG, "Airplane mode enabled");
-            stopSelf();
+            stopUnsuccessfulStartAttempt();
             return Service.START_NOT_STICKY;
         }
 
@@ -87,16 +86,20 @@ public class WiFiService extends Service {
                 sendDataToPebble("");
             }
 
-            stopSelf();
+            stopUnsuccessfulStartAttempt();
             return Service.START_NOT_STICKY;
         }
 
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
         showNotifications = Settings.showNotifications(mContext);
-        notificationInterval = 60 * Settings.getNotificationInterval(mContext);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
         Log.i(TAG, "WIFI SERVICE starts ...");
         return Service.START_NOT_STICKY;
+    }
+
+    private void stopUnsuccessfulStartAttempt() {
+        notificationManager.cancel(NOTIFICATION_ID_WIFI);
+        stopSelf();
     }
 
     @Override
