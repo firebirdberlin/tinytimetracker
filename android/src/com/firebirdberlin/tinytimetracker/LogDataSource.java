@@ -434,13 +434,13 @@ public class LogDataSource {
         switch (aggregation_type) {
         case AGGRETATION_DAY:
         default:
-            group_by = "strftime('%Y-%m-%d', timestamp_start/1000, 'unixepoch', 'localtime')";
+            group_by = "strftime('%Y-%m-%d', timestamp_end/1000, 'unixepoch', 'localtime')";
             break;
         case AGGRETATION_WEEK:
-            group_by = "strftime('%Y-%W', timestamp_start/1000, 'unixepoch', 'localtime')";
+            group_by = "strftime('%Y-%W', timestamp_end/1000, 'unixepoch', 'localtime')";
             break;
         case AGGRETATION_YEAR:
-            group_by = "strftime('%Y', timestamp_start/1000, 'unixepoch', 'localtime')";
+            group_by = "strftime('%Y', timestamp_end/1000, 'unixepoch', 'localtime')";
             break;
         }
 
@@ -454,7 +454,7 @@ public class LogDataSource {
         List< Pair<Long, Long> > results = new ArrayList< Pair<Long, Long> >();
 
         try {
-            cursor = database.rawQuery("SELECT timestamp_start, "
+            cursor = database.rawQuery("SELECT timestamp_end, "
                                        + "SUM(timestamp_end - timestamp_start) FROM logs "
                                        + "WHERE tracker_id=? GROUP BY " + group_by
                                        + " ORDER BY timestamp_start DESC"
@@ -481,13 +481,12 @@ public class LogDataSource {
         Cursor cursor = null;
         long duration_millis = 0;
 
-        try {
-            cursor = database.rawQuery("SELECT SUM(timestamp_end - timestamp_start) FROM logs " +
-                                       "WHERE tracker_id=? and timestamp_start>=?",
-                                       new String[] {String.valueOf(tracker_id),
-                                               String.valueOf(timestamp)
-                                                    });
+        cursor = database.rawQuery("SELECT SUM(timestamp_end - timestamp_start) FROM logs " +
+                                   "WHERE tracker_id=? and timestamp_end>=?",
+                                   new String[] {String.valueOf(tracker_id),
+                                                 String.valueOf(timestamp)});
 
+        try {
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 duration_millis = cursor.getLong(0);
