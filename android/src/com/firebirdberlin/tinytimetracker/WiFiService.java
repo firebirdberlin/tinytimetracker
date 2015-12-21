@@ -38,7 +38,6 @@ public class WiFiService extends Service {
     private int NOTIFICATION_ID = 1337;
     private int NOTIFICATION_ID_WIFI = 1338;
     private int NOTIFICATION_ID_ERROR = 1339;
-    private PendingIntent pendingIntent;
     private SharedPreferences settings = null;
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
@@ -139,12 +138,16 @@ public class WiFiService extends Service {
 
 
     private Notification buildNotification(String title, String text) {
+
+        Intent intent = new Intent(mContext, TinyTimeTracker.class);
+        PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+
         note  = new Notification.Builder(this)
         .setContentTitle(title)
         .setContentText(text)
         .setSmallIcon(R.drawable.ic_hourglass)
-        .setContentIntent(pendingIntent)
         .setOngoing(true)
+        .setContentIntent(pIntent)
         .setPriority(Notification.PRIORITY_MAX)
         .build();
         return note;
