@@ -13,6 +13,7 @@ public class Settings extends Activity {
     public static final String PREF_KEY_WORKING_HOURS = "pref_key_working_hours";
     public static final String PREF_KEY_WIFI_SSID = "pref_key_wifi_ssid";
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
+    public static final String PREF_KEY_LAST_TRACKER_ID = "last_tracker_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,10 @@ public class Settings extends Activity {
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);
     }
 
+    public static long getLastTrackerID(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return settings.getLong(Settings.PREF_KEY_LAST_TRACKER_ID, -1);
+    }
 
     public static float getWorkingHours(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);

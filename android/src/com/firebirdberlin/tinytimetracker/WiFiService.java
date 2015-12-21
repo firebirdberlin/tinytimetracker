@@ -182,7 +182,7 @@ public class WiFiService extends Service {
             // use the first result for notifications
             TrackerEntry tracker = trackersToUpdate.iterator().next();
             UnixTimestamp duration_today = evaluateDurationToday(tracker);
-            saveTimestampLastSeen(duration_today, now);
+            saveTimestampLastSeen(tracker, duration_today, now);
             formattedWorkTime = duration_today.durationAsHours();
             trackerVerboseName = tracker.getVerboseName();
         }
@@ -238,11 +238,14 @@ public class WiFiService extends Service {
         return duration_today;
     }
 
-    private void saveTimestampLastSeen(UnixTimestamp duration_today, long now) {
+    private void saveTimestampLastSeen(TrackerEntry tracker, UnixTimestamp duration_today, long now) {
         long seconds_today = duration_today.getTimestamp() / 1000L;
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_seen", now);
         editor.putLong("seconds_today", seconds_today);
+        if ( tracker != null ) {
+            editor.putLong("last_tracker_id", tracker.getID());
+        }
         editor.commit();
     }
 

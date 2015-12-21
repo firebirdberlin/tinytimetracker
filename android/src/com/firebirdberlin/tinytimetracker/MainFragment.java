@@ -16,12 +16,15 @@ import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MainFragment extends Fragment {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
     private Spinner spinner = null;
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
+    private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
     EventBus bus = EventBus.getDefault();
 
 
@@ -37,6 +40,13 @@ public class MainFragment extends Fragment {
                                                 trackers);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        long lastTrackerID = Settings.getLastTrackerID(getActivity());
+        if ( lastTrackerID != -1 ) {
+            int item = trackerIDToSelectionIDMap.get(lastTrackerID);
+            spinner.setSelection(item);
+        }
+
         spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -58,8 +68,10 @@ public class MainFragment extends Fragment {
         datasource.open();
         List<TrackerEntry> trackers_loaded = datasource.getTrackers();
         trackers.clear();
+        trackerIDToSelectionIDMap.clear();
 
         for (TrackerEntry e : trackers_loaded) {
+            trackerIDToSelectionIDMap.put(e.getID(), trackers.size());
             trackers.add(e);
         }
 
