@@ -46,14 +46,14 @@ public class LogDataSource {
     public TrackerEntry save(TrackerEntry tracker) {
         init();
         ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_NAME, tracker.getName());
+        values.put(SQLiteHandler.COLUMN_NAME, tracker.ssid);
         values.put(SQLiteHandler.COLUMN_METHOD, tracker.method);
         values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.verbose_name);
         values.put(SQLiteHandler.COLUMN_WORKING_HOURS, tracker.working_hours);
 
-        if (tracker.getID() == TrackerEntry.NOT_SAVED) {
+        if (tracker.id == TrackerEntry.NOT_SAVED) {
             long id = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
-            tracker.setID(id);
+            tracker.id = id;
             bus.post(new OnTrackerAdded(tracker));
         }
         else {
@@ -281,9 +281,7 @@ public class LogDataSource {
         if (tracker == null) {
             return false;
         }
-
-        long id = tracker.getID();
-
+        long id = tracker.id;
         if (id == TrackerEntry.NOT_SAVED) {
             return false;
         }
@@ -513,9 +511,8 @@ public class LogDataSource {
             return null;
         }
 
-        long tracker_id = tracker.getID();
-        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker_id) + ", " + String.valueOf(timestamp) + ", " + String.valueOf(seconds_connection_lost) + ")");
-        LogEntry log = getLatestLogEntry(tracker_id);
+        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker.id) + ", " + String.valueOf(timestamp) + ", " + String.valueOf(seconds_connection_lost) + ")");
+        LogEntry log = getLatestLogEntry(tracker.id);
 
         if (log != null) {
             long cmp_time = timestamp - 1000 * seconds_connection_lost;
@@ -528,6 +525,6 @@ public class LogDataSource {
         }
 
         // make a new entry
-        return createLogEntry(tracker_id, timestamp, timestamp);
+        return createLogEntry(tracker.id, timestamp, timestamp);
     }
 }

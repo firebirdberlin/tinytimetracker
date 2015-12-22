@@ -71,7 +71,7 @@ public class MainFragment extends Fragment {
         trackerIDToSelectionIDMap.clear();
 
         for (TrackerEntry e : trackers_loaded) {
-            trackerIDToSelectionIDMap.put(e.getID(), trackers.size());
+            trackerIDToSelectionIDMap.put(e.id, trackers.size());
             trackers.add(e);
         }
 
