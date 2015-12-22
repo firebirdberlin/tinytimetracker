@@ -191,7 +191,7 @@ public class WiFiService extends Service {
             UnixTimestamp duration_today = evaluateDurationToday(tracker);
             saveTimestampLastSeen(tracker, duration_today, now);
             formattedWorkTime = duration_today.durationAsHours();
-            trackerVerboseName = tracker.getVerboseName();
+            trackerVerboseName = tracker.verbose_name;
         }
 
         bus.post(new OnWifiUpdateCompleted());
@@ -239,9 +239,8 @@ public class WiFiService extends Service {
     }
 
     private UnixTimestamp evaluateDurationToday(TrackerEntry tracker) {
-        long tracker_id = tracker.getID();
         UnixTimestamp today = UnixTimestamp.startOfToday();
-        UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker_id);
+        UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker.id);
         return duration_today;
     }
 

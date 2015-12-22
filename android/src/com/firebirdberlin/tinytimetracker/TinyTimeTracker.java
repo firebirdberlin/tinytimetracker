@@ -126,7 +126,7 @@ public class TinyTimeTracker extends FragmentActivity {
         case R.id.action_edit:
 
             if (currentTracker != null) {
-                AddTrackerActivity.open(this, currentTracker.getID());
+                AddTrackerActivity.open(this, currentTracker.id);
             }
 
             return true;
@@ -160,7 +160,7 @@ public class TinyTimeTracker extends FragmentActivity {
 
         new AlertDialog.Builder(this)
         .setTitle(this.getResources().getString(R.string.confirm_delete)
-                  + " '" + currentTracker.getVerboseName() + "'")
+                  + " '" + currentTracker.verbose_name + "'")
         .setMessage(this.getResources().getString(R.string.confirm_delete_question))
         .setIcon(R.drawable.ic_delete)
         .setNegativeButton(android.R.string.no, null)

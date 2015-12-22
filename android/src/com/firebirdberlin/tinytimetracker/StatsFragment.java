@@ -59,8 +59,7 @@ public class StatsFragment extends ListFragment {
         LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
-            long tracker_id = currentTracker.getID();
-            List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(tracker_id, aggregation_type);
+            List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(currentTracker.id, aggregation_type);
 
             for (Pair<Long, Long> e : values) {
                 UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
@@ -99,8 +98,7 @@ public class StatsFragment extends ListFragment {
         LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
-            long tracker_id = currentTracker.getID();
-            List<LogEntry> values = datasource.getAllEntries(tracker_id);
+            List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
             String lastDate = "";
 
             for (LogEntry e : values) {

@@ -84,8 +84,6 @@ public class TrackerEntry {
         if (id != other.id) return false;
         if (!method.equals(other.method)) return false;
         if (!verbose_name.equals(other.verbose_name)) return false;
-        if (!ssid.equals(other.ssid)) return false;
-        if (working_hours != other.working_hours) return false;
         return true;
     }
 }

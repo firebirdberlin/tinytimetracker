@@ -51,7 +51,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 TrackerEntry tracker = (TrackerEntry) parentView.getItemAtPosition(position);
-                Log.i(TAG, "Tracker selected " + tracker.getVerboseName());
+                Log.i(TAG, "Tracker selected " + tracker.verbose_name);
                 EventBus bus = EventBus.getDefault();
                 bus.post(new OnTrackerSelected(tracker));
             }
