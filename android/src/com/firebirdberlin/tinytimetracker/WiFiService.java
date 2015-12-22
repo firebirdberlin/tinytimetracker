@@ -168,14 +168,21 @@ public class WiFiService extends Service {
         boolean network_found = (trackersToUpdate.size() > 0);
 
         if ( !network_found ) {
+            Log.i(TAG, "No network found.");
             // user has left the office for less than 90 mins
-            long seconds_today = settings.getLong("seconds_today", 0L);
-            long last_seen = settings.getLong("last_seen", 0L);
-            long delta = (now - last_seen) / 1000L;
-            long workingSeconds = 3600 * Long.parseLong(settings.getString("pref_key_working_hours", "8"));
+            long last_tracker_id = settings.getLong("last_tracker_id", -1L);
+            if ( last_tracker_id != -1L ) {
+                TrackerEntry tracker = datasource.getTracker(last_tracker_id);
+                if ( tracker != null ) {
+                    long last_seen = settings.getLong("last_seen", 0L);
+                    long delta = (now - last_seen) / 1000L;
+                    long seconds_today = settings.getLong("seconds_today", 0L);
+                    long workingSeconds = (long) (3600 * tracker.working_hours);
 
-            if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
-                formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
+                    if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
+                        formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
+                    }
+                }
             }
         }
         else {
@@ -244,7 +251,7 @@ public class WiFiService extends Service {
         editor.putLong("last_seen", now);
         editor.putLong("seconds_today", seconds_today);
         if ( tracker != null ) {
-            editor.putLong("last_tracker_id", tracker.getID());
+            editor.putLong("last_tracker_id", tracker.id);
         }
         editor.commit();
     }

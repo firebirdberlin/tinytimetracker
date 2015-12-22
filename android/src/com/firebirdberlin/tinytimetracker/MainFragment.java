@@ -42,7 +42,7 @@ public class MainFragment extends Fragment {
         spinner.setAdapter(adapter);
 
         long lastTrackerID = Settings.getLastTrackerID(getActivity());
-        if ( lastTrackerID != -1 ) {
+        if (trackerIDToSelectionIDMap.containsKey(lastTrackerID)) {
             int item = trackerIDToSelectionIDMap.get(lastTrackerID);
             spinner.setSelection(item);
         }

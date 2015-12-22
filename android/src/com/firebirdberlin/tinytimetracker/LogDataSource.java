@@ -47,8 +47,9 @@ public class LogDataSource {
         init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_NAME, tracker.getName());
-        values.put(SQLiteHandler.COLUMN_METHOD, tracker.getMethod());
-        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.getVerboseName());
+        values.put(SQLiteHandler.COLUMN_METHOD, tracker.method);
+        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.verbose_name);
+        values.put(SQLiteHandler.COLUMN_WORKING_HOURS, tracker.working_hours);
 
         if (tracker.getID() == TrackerEntry.NOT_SAVED) {
             long id = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
@@ -56,7 +57,7 @@ public class LogDataSource {
             bus.post(new OnTrackerAdded(tracker));
         }
         else {
-            values.put(SQLiteHandler.COLUMN_ID, tracker.getID());
+            values.put(SQLiteHandler.COLUMN_ID, tracker.id);
             database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
             bus.post(new OnTrackerChanged(tracker));
         }
@@ -139,7 +140,7 @@ public class LogDataSource {
         List<TrackerEntry> entries = new ArrayList<TrackerEntry>();
 
         try {
-            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method, working_hours FROM trackers",
                                        new String[] {});
             cursor.moveToFirst();
 
@@ -164,7 +165,7 @@ public class LogDataSource {
         TrackerEntry entry = null;
 
         try {
-            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers WHERE _id=?",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method, working_hours FROM trackers WHERE _id=?",
                                        new String[] {String.valueOf(id)});
 
             if(cursor.getCount() > 0) {
@@ -185,7 +186,7 @@ public class LogDataSource {
         TrackerEntry entry = null;
 
         try {
-            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers WHERE verbose_name=?",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method, working_hours FROM trackers WHERE verbose_name=?",
                                        new String[] {verbose_name});
 
             if(cursor.getCount() > 0) {
@@ -206,7 +207,7 @@ public class LogDataSource {
         TrackerEntry entry = null;
 
         try {
-            cursor = database.rawQuery("SELECT _id, name, verbose_name, method FROM trackers WHERE name=?",
+            cursor = database.rawQuery("SELECT _id, name, verbose_name, method, working_hours FROM trackers WHERE name=?",
                                        new String[] {name});
 
             if(cursor.getCount() > 0) {
@@ -222,7 +223,7 @@ public class LogDataSource {
     }
 
     public Set<TrackerEntry> getTrackersByBSSID(String bssid) {
-        final String query = "SELECT trackers._id, name, verbose_name, method FROM trackers " +
+        final String query = "SELECT trackers._id, name, verbose_name, method, working_hours FROM trackers " +
                              "INNER JOIN access_points ON trackers._id=access_points.tracker_id " +
                              "WHERE access_points.bssid=?";
         init();
@@ -246,10 +247,13 @@ public class LogDataSource {
     }
 
     private TrackerEntry getTrackerEntryFromCursor(Cursor cursor) {
-        return new TrackerEntry(cursor.getLong(0),
-                                cursor.getString(1),
-                                cursor.getString(2),
-                                cursor.getString(3));
+        TrackerEntry entry = new TrackerEntry();
+        entry.id = cursor.getLong(0);
+        entry.ssid = cursor.getString(1);
+        entry.verbose_name = cursor.getString(2);
+        entry.method = cursor.getString(3);
+        entry.working_hours = cursor.getFloat(4);
+        return entry;
     }
 
     public long getTrackerID(String name, String method) {
@@ -338,10 +342,11 @@ public class LogDataSource {
     public TrackerEntry replaceTrackerEntry(TrackerEntry tracker) {
         init();
         ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_ID, tracker.getID());
+        values.put(SQLiteHandler.COLUMN_ID, tracker.id);
         values.put(SQLiteHandler.COLUMN_METHOD, "WLAN");
-        values.put(SQLiteHandler.COLUMN_NAME, tracker.getSSID());
-        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.getVerboseName());
+        values.put(SQLiteHandler.COLUMN_NAME, tracker.ssid);
+        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.verbose_name);
+        values.put(SQLiteHandler.COLUMN_WORKING_HOURS, tracker.working_hours);
         long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
         bus.post(new OnTrackerChanged(tracker));
         return tracker;

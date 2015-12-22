@@ -2,10 +2,15 @@ package com.firebirdberlin.tinytimetracker;
 
 public class TrackerEntry {
     public final static long NOT_SAVED = -1L;
-    private long id;
-    private String ssid = "_deprecated_";
-    private String verbose_name;
-    private String method;
+    public long id;
+    public String ssid = "_deprecated_";
+    public String verbose_name;
+    public String method;
+    public float working_hours = 8.f;
+
+    public TrackerEntry() {
+
+    }
 
     public TrackerEntry(String verbose_name, String method){
         this.id = -1L;
@@ -80,6 +85,7 @@ public class TrackerEntry {
         if (!method.equals(other.method)) return false;
         if (!verbose_name.equals(other.verbose_name)) return false;
         if (!ssid.equals(other.ssid)) return false;
+        if (working_hours != other.working_hours) return false;
         return true;
     }
 }

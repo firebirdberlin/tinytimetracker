@@ -22,19 +22,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_worktime_settings"
-        android:key="pref_key_worktime_settings">
-
-        <EditTextPreference
-            android:key="pref_key_working_hours"
-            android:summary="@string/pref_summary_working_hours"
-            android:title="@string/pref_title_working_hours"
-            android:defaultValue="8"
-            android:inputType="numberDecimal"
-            />
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="@string/pref_data_export"
         android:key="pref_key_data_backup">
 

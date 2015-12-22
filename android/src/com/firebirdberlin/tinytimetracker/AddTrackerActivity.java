@@ -36,6 +36,7 @@ public class AddTrackerActivity extends ListActivity {
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
     private Button button_wifi = null;
     private EditText edit_tracker_verbose_name = null;
+    private EditText edit_tracker_working_hours = null;
 
     private final int RED = Color.parseColor("#AAC0392B");
     private final int BLUE = Color.parseColor("#3498db");
@@ -58,12 +59,14 @@ public class AddTrackerActivity extends ListActivity {
 
     private void init() {
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
+        edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
         button_wifi = (Button) findViewById(R.id.button_wifi);
         setWifiIconColor(BLUE);
 
         if (tracker != null) {
-            edit_tracker_verbose_name.setText(tracker.getVerboseName());
-            accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.getID());
+            edit_tracker_verbose_name.setText(tracker.verbose_name);
+            edit_tracker_working_hours.setText(String.valueOf(tracker.working_hours));
+            accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
         }
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
@@ -138,6 +141,7 @@ public class AddTrackerActivity extends ListActivity {
 
     public void onClickOk(View v) {
         String verbose_name = edit_tracker_verbose_name.getText().toString();
+        String working_hours = edit_tracker_working_hours.getText().toString();
 
         if (validateInputs(verbose_name) == false) {
             return;
@@ -146,14 +150,16 @@ public class AddTrackerActivity extends ListActivity {
         if (tracker == null) {
             tracker = new TrackerEntry(verbose_name, "WLAN");
         }
-        else {
-            tracker.setVerboseName(verbose_name);
-        }
+
 
         // when saving the account the deprecated fields shall no longer contain useful data
-        tracker.setSSID("_deprecated_");
+        tracker.ssid = "_deprecated_";
+        tracker.verbose_name = verbose_name;
+        tracker.working_hours = Float.parseFloat(working_hours);
+
         datasource.save(tracker);
-        long tracker_id = tracker.getID();
+
+        long tracker_id = tracker.id;
 
         for (int i = 0; i < accessPoints.size(); i++ ) {
             AccessPoint ap = accessPoints.get(i);
@@ -172,6 +178,13 @@ public class AddTrackerActivity extends ListActivity {
             return false;
         }
 
+        String working_hours = edit_tracker_working_hours.getText().toString();
+        if (working_hours.isEmpty()) {
+            edit_tracker_working_hours.setBackgroundColor(RED);
+            edit_tracker_working_hours.invalidate();
+            return false;
+        }
+
         if (accessPoints.size() == 0) {
             setWifiIconColor(RED);
             return false;
@@ -185,7 +198,7 @@ public class AddTrackerActivity extends ListActivity {
             return false;
         }
 
-        if (tracker != null && other != null && other.getID() != tracker.getID()) {
+        if (tracker != null && other != null && other.id != tracker.id) {
             edit_tracker_verbose_name.setBackgroundColor(RED);
             edit_tracker_verbose_name.invalidate();
             return false;
@@ -201,7 +214,9 @@ public class AddTrackerActivity extends ListActivity {
         button_wifi.setBackgroundResource(R.drawable.ic_wifi);
         button_wifi.invalidate();
         edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
+        edit_tracker_working_hours.setBackgroundColor(Color.TRANSPARENT);
         edit_tracker_verbose_name.invalidate();
+        edit_tracker_working_hours.invalidate();
     }
 
     public static void open(Context context) {

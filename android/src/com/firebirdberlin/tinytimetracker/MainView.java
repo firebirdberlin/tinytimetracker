@@ -59,9 +59,9 @@ public class MainView extends View {
             return;
         }
 
-        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.getID());
+        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.id);
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
-        workingHoursInSeconds = (int) (Settings.getWorkingHours(mContext) * 3600.f);
+        workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
         int angle = 360 * seconds_today.intValue() / workingHoursInSeconds;
         int x = getWidth();
         int y = getHeight();
