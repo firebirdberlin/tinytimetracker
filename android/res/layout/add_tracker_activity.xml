@@ -10,32 +10,56 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/layout_add"
-        android:paddingTop="10dip"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/layout_add"
+            android:paddingTop="10dip"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:drawableLeft="@drawable/ic_edit"
+                android:drawablePadding="15dip"
+                android:hint="@string/edit_tracker_verbose_name_hint"
+                android:id="@+id/edit_tracker_verbose_name"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:layout_width="match_parent"
+                android:padding="5dip"
+                android:singleLine="true" />
+
+            <Button
+                android:background="@drawable/ic_wifi"
+                android:id="@+id/button_wifi"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_width="wrap_content"
+                android:onClick="onChooseWifi"
+                android:text=""/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="15dip"
+            android:text="@string/edit_tracker_working_hours_hint"/>
 
         <EditText
-            android:drawableLeft="@drawable/ic_edit"
-            android:hint="@string/edit_tracker_verbose_name_hint"
-            android:id="@+id/edit_tracker_verbose_name"
+            android:drawableLeft="@drawable/ic_clock"
+            android:drawablePadding="15dip"
+            android:hint="@string/edit_tracker_working_hours_hint"
+            android:id="@+id/edit_tracker_working_hours"
+            android:inputType="numberDecimal"
             android:layout_height="wrap_content"
-            android:layout_weight="7"
             android:layout_width="match_parent"
             android:padding="5dip"
             android:singleLine="true" />
 
-        <Button
-            android:background="@drawable/ic_wifi"
-            android:id="@+id/button_wifi"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
+        <TextView
             android:layout_width="wrap_content"
-            android:onClick="onChooseWifi"
-            android:text=""/>
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:paddingTop="15dip"
+            android:text="Tracked access points"/>
 
         <ListView android:id="@id/android:list"
             android:layout_width="match_parent"

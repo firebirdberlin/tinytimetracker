@@ -21,6 +21,7 @@
     <string name="aggregation_year">Jahr</string>
     <string name="edit_tracker_name_hint">WLAN SSID</string>
     <string name="edit_tracker_verbose_name_hint">Anzeigename</string>
+    <string name="edit_tracker_working_hours_hint">tägliche Arbeitsstunden</string>
     <string name="pref_wifi_settings">WLAN</string>
     <string name="pref_worktime_settings">Arbeitszeit</string>
     <string name="pref_notification_settings">Benachrichtigungen</string>
