@@ -43,6 +43,11 @@ public class MainView extends View {
         invalidate();
     }
 
+    public void onEvent(OnTrackerChanged event) {
+        currentTracker = event.tracker;
+        invalidate();
+    }
+
     public void onEvent(OnTrackerDeleted event) {
         currentTracker = null;
         invalidate();
