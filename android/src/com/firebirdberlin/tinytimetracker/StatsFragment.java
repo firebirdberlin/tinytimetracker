@@ -31,21 +31,18 @@ public class StatsFragment extends ListFragment {
         super.onCreateView(inflater, container, savedInstanceState);
         mContext = (Context) getActivity();
         bus.register(this);
-
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
         radio_group_aggregation = (RadioGroup) v.findViewById(R.id.radio_group_aggregation);
-        radio_group_aggregation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener(){
+        radio_group_aggregation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 refresh(checkedId);
             }
         });
-
         two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1, svalues2);
         setListAdapter(two_column_adapter);
         radio_group_aggregation.check(R.id.radio_aggregation_detail);
         refresh_detail();
-
         return v;
     }
 
@@ -53,6 +50,7 @@ public class StatsFragment extends ListFragment {
         if (mContext == null) {
             return;
         }
+
         if (two_column_adapter == null) {
             return;
         }
@@ -61,24 +59,29 @@ public class StatsFragment extends ListFragment {
         LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
-            long tracker_id = currentTracker.getID();
-            List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(tracker_id, aggregation_type);
+            List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(currentTracker.id, aggregation_type);
+
             for (Pair<Long, Long> e : values) {
                 UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
                 UnixTimestamp duration = new UnixTimestamp(e.second.longValue());
                 String hours = duration.durationAsHours();
                 two_column_adapter.addRight(hours);
-                switch (aggregation_type){
-                    case LogDataSource.AGGRETATION_DAY:
-                    default:
-                        two_column_adapter.add(timestamp.toDateString()); break;
-                    case LogDataSource.AGGRETATION_WEEK:
-                        two_column_adapter.add(timestamp.toWeekString()); break;
-                    case LogDataSource.AGGRETATION_YEAR:
-                        two_column_adapter.add(timestamp.toYearString()); break;
+
+                switch (aggregation_type) {
+                case LogDataSource.AGGRETATION_DAY:
+                default:
+                    two_column_adapter.add(timestamp.toDateString());
+                    break;
+                case LogDataSource.AGGRETATION_WEEK:
+                    two_column_adapter.add(timestamp.toWeekString());
+                    break;
+                case LogDataSource.AGGRETATION_YEAR:
+                    two_column_adapter.add(timestamp.toYearString());
+                    break;
                 }
             }
         }
+
         two_column_adapter.notifyDataSetChanged();
     }
 
@@ -86,41 +89,51 @@ public class StatsFragment extends ListFragment {
         if (mContext == null) {
             return;
         }
+
         if (two_column_adapter == null) {
             return;
         }
 
         two_column_adapter.clear();
         LogDataSource datasource = new LogDataSource(mContext);
+
         if (currentTracker != null) {
-            long tracker_id = currentTracker.getID();
-            List<LogEntry> values = datasource.getAllEntries(tracker_id);
+            List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
             String lastDate = "";
+
             for (LogEntry e : values) {
                 String curDate = e.startAsDateString();
+
                 if (! curDate.equals(lastDate)) {
                     lastDate = curDate;
                     two_column_adapter.add(curDate);
-                } else {
+                }
+                else {
                     two_column_adapter.add("");
                 }
+
                 two_column_adapter.addRight(e.toString());
             }
         }
+
         two_column_adapter.notifyDataSetChanged();
     }
 
     public void refresh(int checkedId) {
-        switch(checkedId){
-            case R.id.radio_aggregation_detail:
-            default:
-                refresh_detail(); break;
-            case R.id.radio_aggregation_day:
-                refresh_aggregated(LogDataSource.AGGRETATION_DAY); break;
-            case R.id.radio_aggregation_week:
-                refresh_aggregated(LogDataSource.AGGRETATION_WEEK); break;
-            case R.id.radio_aggregation_year:
-                refresh_aggregated(LogDataSource.AGGRETATION_YEAR); break;
+        switch(checkedId) {
+        case R.id.radio_aggregation_detail:
+        default:
+            refresh_detail();
+            break;
+        case R.id.radio_aggregation_day:
+            refresh_aggregated(LogDataSource.AGGRETATION_DAY);
+            break;
+        case R.id.radio_aggregation_week:
+            refresh_aggregated(LogDataSource.AGGRETATION_WEEK);
+            break;
+        case R.id.radio_aggregation_year:
+            refresh_aggregated(LogDataSource.AGGRETATION_YEAR);
+            break;
         }
     }
 
@@ -128,6 +141,7 @@ public class StatsFragment extends ListFragment {
         if (radio_group_aggregation == null) {
             return;
         }
+
         int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
         refresh(checkedId);
     }
@@ -141,18 +155,22 @@ public class StatsFragment extends ListFragment {
 
     public void onEvent(OnTrackerSelected event) {
         this.currentTracker = event.newTracker;
+
         if (radio_group_aggregation == null) {
             return;
         }
+
         int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
         refresh(checkedId);
     }
 
     public void onEvent(OnTrackerDeleted event) {
         this.currentTracker = null;
+
         if (radio_group_aggregation == null) {
             return;
         }
+
         int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
         refresh(checkedId);
     }

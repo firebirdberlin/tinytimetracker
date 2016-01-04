@@ -16,40 +16,45 @@ import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MainFragment extends Fragment {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
     private Spinner spinner = null;
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
+    private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
     EventBus bus = EventBus.getDefault();
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         bus.register(this);
-
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
-
         loadTrackers();
         ArrayAdapter adapter = new ArrayAdapter(getActivity(),
                                                 R.layout.main_spinner,
                                                 trackers);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        long lastTrackerID = Settings.getLastTrackerID(getActivity());
+        if (trackerIDToSelectionIDMap.containsKey(lastTrackerID)) {
+            int item = trackerIDToSelectionIDMap.get(lastTrackerID);
+            spinner.setSelection(item);
+        }
+
         spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 TrackerEntry tracker = (TrackerEntry) parentView.getItemAtPosition(position);
-
-                Log.i(TAG, "Tracker selected " + tracker.getVerboseName());
+                Log.i(TAG, "Tracker selected " + tracker.verbose_name);
                 EventBus bus = EventBus.getDefault();
                 bus.post(new OnTrackerSelected(tracker));
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
             }
@@ -63,9 +68,13 @@ public class MainFragment extends Fragment {
         datasource.open();
         List<TrackerEntry> trackers_loaded = datasource.getTrackers();
         trackers.clear();
+        trackerIDToSelectionIDMap.clear();
+
         for (TrackerEntry e : trackers_loaded) {
+            trackerIDToSelectionIDMap.put(e.id, trackers.size());
             trackers.add(e);
         }
+
         datasource.close();
     }
 
@@ -87,6 +96,13 @@ public class MainFragment extends Fragment {
         Log.i(TAG, "OnTrackerDeleted");
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.remove(event.tracker);
+        adapter.notifyDataSetChanged();
+    }
+
+    public void onEvent(OnDatabaseImported event) {
+        Log.i(TAG, "OnDatabaseImported");
+        loadTrackers();
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.notifyDataSetChanged();
     }
 }

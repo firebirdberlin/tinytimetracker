@@ -11,50 +11,43 @@
             android:summary="@string/pref_summary_seconds_connection_lost"
             android:title="@string/pref_title_seconds_connection_lost"
             android:text="@string/pref_unit_notification_interval_minutes"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/pref_worktime_settings"
-        android:key="pref_key_worktime_settings">
-
-        <EditTextPreference
-            android:key="pref_key_working_hours"
-            android:summary="@string/pref_summary_working_hours"
-            android:title="@string/pref_title_working_hours"
-            android:defaultValue="8"
-            android:inputType="numberDecimal"
-            />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/pref_notification_settings"
-        android:key="pref_key_notification_settings">
 
         <CheckBoxPreference
             android:title="@string/pref_title_show_notifications"
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:summary="@string/pref_summary_show_notifications"
             android:key="pref_key_show_notifications"
             android:disableDependentsState="false" />
 
-        <firebirdberlin.com.tinytimetracker.SeekBarPreference
-            android:defaultValue="60"
-            android:dialogMessage="@string/pref_dialog_notification_interval_minutes"
-            android:key="pref_key_notification_interval_minutes"
-            android:max="360"
-            android:summary="@string/pref_summary_notification_interval_minutes"
-            android:text="@string/pref_unit_notification_interval_minutes"
-            android:title="@string/pref_title_notification_interval_minutes"
-            android:dependency="pref_key_show_notifications"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_data_export"
+        android:key="pref_key_data_backup">
+
+        <Preference
+            android:title="@string/pref_title_export"
+            android:key="pref_key_data_export"/>
+
+        <Preference
+            android:title="@string/pref_title_import"
+            android:key="pref_key_data_import"/>
+
+        <Preference
+            android:title="@string/pref_title_share"
+            android:key="pref_key_data_share"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/pref_credits"
         android:key="pref_key_credits">
-        <Preference
-            android:key="pref_static_credits"
+
+        <com.firebirdberlin.tinytimetracker.VersionPreference
+            android:key="version"
             android:selectable="false"
-            android:title="Stefan Fruhner (2015)" />
+            android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)"/>
+
         <Preference
             android:key="pref_static_credits2"
             android:title="SeekBarPreference"
