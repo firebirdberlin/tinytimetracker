@@ -65,10 +65,23 @@ public class UnixTimestamp {
         long hours = seconds / 3600;
         long minutes = (seconds % 3600) / 60;
         long sec = seconds % 60;
+
+        minutes = (minutes < 0) ? -minutes : minutes;
         return String.format("%02d:%02d", hours, minutes);
     }
 
     public static UnixTimestamp startOfToday() {
+        Calendar cal = startOfTodayAsCalendar();
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp todayThreeYearsAgo() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.add(Calendar.YEAR, -3);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static Calendar startOfTodayAsCalendar() {
         long now = System.currentTimeMillis();
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(now);
@@ -76,7 +89,7 @@ public class UnixTimestamp {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.HOUR_OF_DAY, 0);
-        return new UnixTimestamp(cal.getTimeInMillis());
+        return cal;
     }
 
 }

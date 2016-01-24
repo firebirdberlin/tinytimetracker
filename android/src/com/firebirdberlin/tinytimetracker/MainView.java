@@ -64,6 +64,7 @@ public class MainView extends View {
         super.onDraw(canvas);
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         UnixTimestamp today = UnixTimestamp.startOfToday();
+        UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker == null) {
@@ -98,11 +99,25 @@ public class MainView extends View {
         paint.setColor(Color.WHITE);
         paint.setTextSize(150);
         paint.setStrokeWidth(1);
+
         String text = duration.durationAsHours();
         Rect bounds = new Rect();
         paint.getTextBounds(text, 0, text.length(), bounds);
         int height = bounds.height();
         int width = bounds.width();
         canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
+
+        // draw overtime
+        if (workingHoursInSeconds > 0) {
+            UnixTimestamp overtime = datasource.getOvertimeSince(todayThreeYearsAgo.getTimestamp(), currentTracker);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setTextSize(52);
+            text = "Overtime: " + overtime.durationAsHours();
+            bounds = new Rect();
+            paint.getTextBounds(text, 0, text.length(), bounds);
+            canvas.drawText(text, (x - bounds.width()) / 2,
+                                  (y - bounds.height()), paint);
+        }
+
     }
 }

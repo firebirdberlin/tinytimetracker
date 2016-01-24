@@ -504,6 +504,43 @@ public class LogDataSource {
         return new UnixTimestamp(duration_millis);
     }
 
+    public UnixTimestamp getOvertimeSince(long timestamp, TrackerEntry tracker) {
+        init();
+        Cursor cursor = null;
+        long duration_millis = 0;
+        long distinct_date_count = 0;
+        long target_working_time_in_millis = 0;
+
+        cursor = database.rawQuery("SELECT SUM(timestamp_end - timestamp_start), " +
+                                   "       COUNT(DISTINCT DATE(timestamp_end/1000, " +
+                                   "                           'unixepoch', 'localtime')) " +
+                                   "FROM logs " +
+                                   "WHERE tracker_id=? and timestamp_end>=?",
+                                   new String[] {String.valueOf(tracker.id),
+                                                 String.valueOf(timestamp)});
+
+        try {
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                duration_millis = cursor.getLong(0);
+                distinct_date_count = cursor.getLong(1);
+
+                target_working_time_in_millis = (long) (tracker.working_hours * 3600L * 1000L *
+                                                        distinct_date_count);
+
+                Log.i(TAG, "overtime:" + String.valueOf(distinct_date_count) + ", " +
+                                         String.valueOf(target_working_time_in_millis));
+            }
+        }
+        finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return new UnixTimestamp(duration_millis - target_working_time_in_millis);
+    }
+
     public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long seconds_connection_lost) {
         init();
 
