@@ -65,7 +65,7 @@ public class UnixTimestamp {
         long hours = seconds / 3600;
         long minutes = (seconds % 3600) / 60;
         long sec = seconds % 60;
-
+        hours = (hours < 0) ? -hours : hours;
         minutes = (minutes < 0) ? -minutes : minutes;
         return String.format("%02d:%02d", hours, minutes);
     }

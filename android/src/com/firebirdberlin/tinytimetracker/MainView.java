@@ -75,6 +75,8 @@ public class MainView extends View {
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
         workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
 
+        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), currentTracker.id);
+
         int angle = 360;
         if (workingHoursInSeconds > 0) {
             angle = 360 * seconds_today.intValue() / workingHoursInSeconds;
@@ -100,23 +102,40 @@ public class MainView extends View {
         paint.setTextSize(150);
         paint.setStrokeWidth(1);
 
-        String text = duration.durationAsHours();
-        Rect bounds = new Rect();
-        paint.getTextBounds(text, 0, text.length(), bounds);
-        int height = bounds.height();
-        int width = bounds.width();
-        canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
+        {// draw the main circle
+            String text = duration.durationAsHours();
+            Rect bounds = new Rect();
+            paint.getTextBounds(text, 0, text.length(), bounds);
+            int height = bounds.height();
+            int width = bounds.width();
+            canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
+        }
 
-        // draw overtime
-        if (workingHoursInSeconds > 0) {
-            UnixTimestamp overtime = datasource.getOvertimeSince(todayThreeYearsAgo.getTimestamp(), currentTracker);
+        { // draw mean daily duration
+            long meanDurationMillis = currentTracker.getMeanDurationMillis(totalDurationPair.first, totalDurationPair.second);
+
+            UnixTimestamp meanDuration = new UnixTimestamp(meanDurationMillis);
+
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
             paint.setTextSize(52);
-            text = "Overtime: " + overtime.durationAsHours();
-            bounds = new Rect();
+            String text = meanDuration.durationAsHours();
+            Rect bounds = new Rect();
             paint.getTextBounds(text, 0, text.length(), bounds);
-            canvas.drawText(text, (x - bounds.width()) / 2,
-                                  (y - bounds.height()), paint);
+            canvas.drawText(text, 25, (y - bounds.height()), paint);
+        }
+
+        // draw overtime
+        if ( workingHoursInSeconds > 0 ) {
+            Long overTimeMillis = currentTracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
+            UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
+
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setTextSize(52);
+            String sign = (overTimeMillis < 0 ) ? "- ": "+ ";
+            String text = sign + overtime.durationAsHours();
+            Rect bounds = new Rect();
+            paint.getTextBounds(text, 0, text.length(), bounds);
+            canvas.drawText(text, (x - bounds.width() - 25), (y - bounds.height()), paint);
         }
 
     }
