@@ -114,8 +114,9 @@ public class TinyTimeTracker extends FragmentActivity {
         MenuItem item_pebble_app_store = menu.findItem(R.id.action_pebble_app_store);
         item_edit.setVisible(currentTracker != null);
         item_delete.setVisible(currentTracker != null);
-        boolean pebbleAppStoreIsInstalled = Utility.isPackageInstalled(this,
-                                            "com.getpebble.android");
+        boolean pebbleAppStoreIsInstalled =
+            Utility.isPackageInstalled(this, "com.getpebble.android") ||
+            Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
         return super.onCreateOptionsMenu(menu);
     }
