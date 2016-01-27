@@ -1,6 +1,7 @@
 package com.firebirdberlin.tinytimetracker;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.View;
 import de.greenrobot.event.EventBus;
 import java.util.List;
@@ -62,14 +64,16 @@ public class MainView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (currentTracker == null) {
+            return;
+        }
+
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(mContext);
-
-        if (currentTracker == null) {
-            return;
-        }
+        int highlightColor = getSystemColor(android.R.attr.colorActivatedHighlight);
+        int textColor = getSystemColor(android.R.attr.textColor);
 
         UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.id);
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
@@ -87,22 +91,28 @@ public class MainView extends View {
         int radius = x < y ? 8 * x / 20 : 8 * y / 20;
         Paint paint = new Paint();
         paint.setAntiAlias(true);
-        paint.setColor(Color.TRANSPARENT);
         paint.setStrokeWidth(4);
         paint.setStrokeCap(Paint.Cap.ROUND);
         final RectF rect = new RectF();
         rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
-        paint.setColor(Color.parseColor("#AA6AB4D7"));
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        canvas.drawArc(rect, -90, angle, true, paint);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.parseColor("#AA33A6DE"));
-        canvas.drawArc(rect, -90, 360, true, paint);
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(150);
-        paint.setStrokeWidth(1);
+
 
         {// draw the main circle
+            paint.setColor(highlightColor);
+            paint.setAlpha(100);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            canvas.drawArc(rect, -90, angle, true, paint);
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(highlightColor);
+            paint.setAlpha(255);
+            canvas.drawArc(rect, -90, 360, true, paint);
+
+            paint.setColor(textColor);
+            paint.setAlpha(255);
+            paint.setTextSize(150);
+            paint.setStrokeWidth(1);
+
             String text = duration.durationAsHours();
             Rect bounds = new Rect();
             paint.getTextBounds(text, 0, text.length(), bounds);
@@ -138,5 +148,13 @@ public class MainView extends View {
             canvas.drawText(text, (x - bounds.width() - 25), (y - bounds.height()), paint);
         }
 
+    }
+    private int getSystemColor(int colorID) {
+        Resources.Theme theme = mContext.getTheme();
+        TypedValue styleID = new TypedValue();
+        if (theme.resolveAttribute(colorID, styleID, true)) {
+            return styleID.data;
+        }
+        return Color.parseColor("#FFFFFF");
     }
 }
