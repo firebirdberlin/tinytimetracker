@@ -317,6 +317,16 @@ public class LogDataSource {
         return (rows_affected > 0);
     }
 
+    public boolean deleteLogEntry(long id) {
+        Log.i(TAG, "deleting LogEntry " + String.valueOf(id));
+        init();
+        int rows_affected = database.delete(SQLiteHandler.TABLE_LOGS, "_id=?",
+                                            new String[] {String.valueOf(id)});
+
+        bus.post(new OnLogEntryDeleted(id));
+        return (rows_affected > 0);
+    }
+
     public LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         init();
         ContentValues values = new ContentValues();

@@ -57,4 +57,20 @@ public class TwoColumnListAdapter extends ArrayAdapter<String> {
         values2.add(value);
         ids.add(id);
     }
+
+
+    public long getIDAtPosition(int position) {
+        if ( position < ids.size() ) {
+            return ids.get(position);
+        }
+        return -1L;
+    }
+
+    public void removeItemAtPosition(int position) {
+        if (position < values1.size()) values1.remove(position);
+        if (position < values2.size()) values2.remove(position);
+        if ( position < ids.size() ) ids.remove(position);
+        notifyDataSetChanged();
+    }
+
 }

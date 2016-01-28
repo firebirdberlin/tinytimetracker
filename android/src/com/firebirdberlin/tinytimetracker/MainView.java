@@ -61,6 +61,10 @@ public class MainView extends View {
         invalidate();
     }
 
+    public void onEvent(OnLogEntryDeleted event) {
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

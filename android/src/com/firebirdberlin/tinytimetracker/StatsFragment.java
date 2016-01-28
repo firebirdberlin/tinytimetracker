@@ -6,9 +6,15 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.util.Pair;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -47,6 +53,36 @@ public class StatsFragment extends ListFragment {
         radio_group_aggregation.check(R.id.radio_aggregation_detail);
         refresh_detail();
         return v;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        registerForContextMenu(getListView());
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_log_entries, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+
+        switch (item.getItemId()) {
+        case R.id.action_delete:
+            long logEntryID = two_column_adapter.getIDAtPosition(info.position);
+            LogDataSource datasource = new LogDataSource(mContext);
+            datasource.deleteLogEntry(logEntryID);
+            two_column_adapter.removeItemAtPosition(info.position);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+        }
     }
 
     public void refresh_aggregated(int aggregation_type) {
@@ -118,9 +154,12 @@ public class StatsFragment extends ListFragment {
     }
 
     public void refresh(int checkedId) {
+        unregisterForContextMenu(getListView());
+
         switch(checkedId) {
         case R.id.radio_aggregation_detail:
         default:
+            registerForContextMenu(getListView());
             refresh_detail();
             break;
         case R.id.radio_aggregation_day:
