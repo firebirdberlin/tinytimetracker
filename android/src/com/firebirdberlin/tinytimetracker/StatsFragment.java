@@ -27,7 +27,8 @@ public class StatsFragment extends ListFragment {
     EventBus bus = EventBus.getDefault();
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mContext = (Context) getActivity();
         bus.register(this);
@@ -39,7 +40,9 @@ public class StatsFragment extends ListFragment {
                 refresh(checkedId);
             }
         });
-        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1, svalues2);
+
+        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns,
+                                                      svalues1, svalues2);
         setListAdapter(two_column_adapter);
         radio_group_aggregation.check(R.id.radio_aggregation_detail);
         refresh_detail();
@@ -86,33 +89,28 @@ public class StatsFragment extends ListFragment {
     }
 
     public void refresh_detail() {
-        if (mContext == null) {
-            return;
-        }
-
-        if (two_column_adapter == null) {
+        if (mContext == null || two_column_adapter == null) {
             return;
         }
 
         two_column_adapter.clear();
-        LogDataSource datasource = new LogDataSource(mContext);
 
+        LogDataSource datasource = new LogDataSource(mContext);
         if (currentTracker != null) {
             List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
-            String lastDate = "";
 
+            String lastDate = "";
             for (LogEntry e : values) {
                 String curDate = e.startAsDateString();
 
-                if (! curDate.equals(lastDate)) {
+                if ( !curDate.equals(lastDate) ) {
                     lastDate = curDate;
                     two_column_adapter.add(curDate);
-                }
-                else {
+                } else {
                     two_column_adapter.add("");
                 }
 
-                two_column_adapter.addRight(e.toString());
+                two_column_adapter.addRight(e.toString(), e.id);
             }
         }
 

@@ -7,18 +7,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TwoColumnListAdapter extends ArrayAdapter<String> {
     private Context mContext = null;
     private List<String> values1 = null;
     private List<String> values2 = null;
+    private List<Long> ids = null;
 
-    public TwoColumnListAdapter(Context context, int viewid, List<String> values1, List<String> values2) {
+
+    public TwoColumnListAdapter(Context context, int viewid, List<String> values1,
+                                List<String> values2) {
         super(context, viewid, R.id.text1, values1);
         mContext = context;
         this.values1 = values1;
         this.values2 = values2;
+        this.ids = new ArrayList<Long>();
     }
 
     @Override
@@ -46,5 +51,10 @@ public class TwoColumnListAdapter extends ArrayAdapter<String> {
 
     public void addRight(String value) {
         values2.add(value);
+    }
+
+    public void addRight(String value, long id) {
+        values2.add(value);
+        ids.add(id);
     }
 }

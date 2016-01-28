@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 
 public class LogEntry {
     private static String TAG = TinyTimeTracker.TAG + ".LogEntry";
-    private long id;
+    public long id;
     private long tracker_id;
     private UnixTimestamp timestamp_start;
     private UnixTimestamp timestamp_end;
