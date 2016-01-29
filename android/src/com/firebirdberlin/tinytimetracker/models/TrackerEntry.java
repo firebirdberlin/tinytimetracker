@@ -41,6 +41,9 @@ public class TrackerEntry {
     }
 
     public long getMeanDurationMillis(long duration_millis, long distinct_date_count) {
-        return duration_millis / distinct_date_count;
+        if ( distinct_date_count > 0 ) {
+            return duration_millis / distinct_date_count;
+        }
+        return 0L;
     }
 }
