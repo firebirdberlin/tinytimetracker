@@ -92,19 +92,36 @@ public class MainView extends View {
 
         int x = getWidth();
         int y = getHeight();
-        int radius = x < y ? 8 * x / 20 : 8 * y / 20;
+
+        final RectF rect = new RectF();
         Paint paint = new Paint();
         paint.setAntiAlias(true);
-        paint.setStrokeWidth(4);
         paint.setStrokeCap(Paint.Cap.ROUND);
-        final RectF rect = new RectF();
-        rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
+
+        {// draw the page indicator
+            int radius = 6;
+            paint.setColor(textColor);
+            paint.setAlpha(255);
+
+            rect.set(x / 2 - 3 * radius, y - 5 * radius, x / 2 - radius, y - 3 * radius);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setStrokeWidth(3);
+            canvas.drawArc(rect, -90, 360, true, paint);
+
+            rect.set(x / 2 + radius, y - 5 * radius, x / 2 + 3 *  radius, y - 3 * radius);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(1);
+            canvas.drawArc(rect, -90, 360, true, paint);
+        }
 
 
         {// draw the main circle
+            int radius = x < y ? 8 * x / 20 : 8 * y / 20;
+            rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
             paint.setColor(highlightColor);
             paint.setAlpha(100);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setStrokeWidth(4);
             canvas.drawArc(rect, -90, angle, true, paint);
 
             paint.setStyle(Paint.Style.STROKE);
@@ -153,6 +170,7 @@ public class MainView extends View {
         }
 
     }
+
     private int getSystemColor(int colorID) {
         Resources.Theme theme = mContext.getTheme();
         TypedValue styleID = new TypedValue();
