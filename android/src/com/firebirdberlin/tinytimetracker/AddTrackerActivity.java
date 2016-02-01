@@ -226,9 +226,9 @@ public class AddTrackerActivity extends ListActivity {
 
     private void setWifiIconColor(int color) {
         Resources res = getResources();
-        Drawable icon = res.getDrawable(R.drawable.ic_wifi);
+        Drawable icon = res.getDrawable(R.drawable.ic_wifi_add);
         icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        button_wifi.setBackgroundResource(R.drawable.ic_wifi);
+        button_wifi.setBackgroundResource(R.drawable.ic_wifi_add);
         button_wifi.invalidate();
         edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
         edit_tracker_working_hours.setBackgroundColor(Color.TRANSPARENT);
