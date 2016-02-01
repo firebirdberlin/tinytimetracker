@@ -24,6 +24,11 @@ public class TrackerEntry {
     }
 
     @Override
+    public int hashCode() {
+        return (int) id;
+    }
+
+    @Override
     public boolean equals(Object other_object) {
         if (other_object == null) return false;
         if (other_object.getClass() != getClass()) return false;
