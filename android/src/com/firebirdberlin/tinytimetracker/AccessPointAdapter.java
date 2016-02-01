@@ -11,17 +11,19 @@ import java.util.List;
 
 public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
     private Context mContext = null;
+    private int viewid = -1;
 
     public AccessPointAdapter(Context context, int viewid, List<AccessPoint> values) {
         super(context, viewid, R.id.text1, values);
         mContext = context;
+        this.viewid = viewid;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent ) {
         super.getView(position, convertView, parent);
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-        View v = inflater.inflate(R.layout.list_2_lines, parent, false);
+        View v = inflater.inflate(viewid, parent, false);
         TextView text1 = ( TextView ) v.findViewById ( R.id.text1 );
         TextView text2 = ( TextView ) v.findViewById ( R.id.text2 );
 
