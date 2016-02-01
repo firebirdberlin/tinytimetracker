@@ -27,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import android.view.inputmethod.InputMethodManager;
 
 public class AddTrackerActivity extends ListActivity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
@@ -119,23 +120,38 @@ public class AddTrackerActivity extends ListActivity {
         new AlertDialog.Builder(this)
         .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
         .setIcon(R.drawable.ic_wifi)
-        .setAdapter(adapter,
+        .setSingleChoiceItems(adapter, 1,
         new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
                 AccessPoint accessPoint = adapter.getItem(item);
-                String ssid = accessPoint.ssid;
-                String bssid = accessPoint.bssid;
 
                 if (edit_tracker_verbose_name.length() == 0) {
-                    edit_tracker_verbose_name.setText(ssid);
+                    edit_tracker_verbose_name.setText(accessPoint.ssid);
                 }
 
                 accessPointAdapter.add(accessPoint);
+                adapter.remove(accessPoint);
+                adapter.notifyDataSetChanged();
                 setWifiIconColor(BLUE);
-                dialog.dismiss();
+
+                if (edit_tracker_working_hours.length() == 0) {
+                    edit_tracker_working_hours.requestFocus();
+                } else { // hide the soft keyboard
+                    View view = getCurrentFocus();
+                    if (view != null) {
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    }
+                }
+
+                if ( adapter.getCount() == 0 ) {
+                    dialog.dismiss();
+                }
             }
         })
-        .setNegativeButton(android.R.string.no, null).show();
+        .setNegativeButton(android.R.string.no, null)
+        .setPositiveButton(android.R.string.ok, null)
+        .show();
     }
 
     public void onClickOk(View v) {
@@ -173,6 +189,7 @@ public class AddTrackerActivity extends ListActivity {
     private boolean validateInputs(String verbose_name) {
         if (verbose_name.isEmpty()) {
             edit_tracker_verbose_name.setBackgroundColor(RED);
+            edit_tracker_verbose_name.requestFocus();
             edit_tracker_verbose_name.invalidate();
             return false;
         }
@@ -180,6 +197,7 @@ public class AddTrackerActivity extends ListActivity {
         String working_hours = edit_tracker_working_hours.getText().toString();
         if (working_hours.isEmpty()) {
             edit_tracker_working_hours.setBackgroundColor(RED);
+            edit_tracker_working_hours.requestFocus();
             edit_tracker_working_hours.invalidate();
             return false;
         }
