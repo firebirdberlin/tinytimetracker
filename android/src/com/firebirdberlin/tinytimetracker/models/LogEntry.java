@@ -1,9 +1,5 @@
 package com.firebirdberlin.tinytimetracker;
 
-import android.util.Log;
-import android.text.format.DateFormat;
-import java.util.Locale;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 
 
@@ -51,6 +47,11 @@ public class LogEntry {
     @Override
     public String toString() {
         return timestamp_start.toTimeString() + " - " + timestamp_end.toTimeString();
+    }
+
+    public String toString(SimpleDateFormat dateFormat) {
+        return timestamp_start.toTimeString(dateFormat) + " - " +
+               timestamp_end.toTimeString(dateFormat);
     }
 
     public String startAsDateString() {

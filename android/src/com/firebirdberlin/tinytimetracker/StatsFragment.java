@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.text.format.DateFormat;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -20,6 +21,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import de.greenrobot.event.EventBus;
 import java.lang.Runnable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,6 +131,11 @@ public class StatsFragment extends ListFragment {
             return;
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
+        if ( DateFormat.is24HourFormat(mContext) ) {
+            dateFormat = new SimpleDateFormat("HH:mm");
+        }
+
         two_column_adapter.clear();
 
         LogDataSource datasource = new LogDataSource(mContext);
@@ -146,7 +153,7 @@ public class StatsFragment extends ListFragment {
                     two_column_adapter.add("");
                 }
 
-                two_column_adapter.addRight(e.toString(), e.id);
+                two_column_adapter.addRight(e.toString(dateFormat), e.id);
             }
         }
 

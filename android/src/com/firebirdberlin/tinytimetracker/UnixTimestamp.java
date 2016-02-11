@@ -6,7 +6,6 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-
 public class UnixTimestamp {
     private static String TAG = TinyTimeTracker.TAG + ".UnixTimestamp";
     private long timestamp;
@@ -53,6 +52,11 @@ public class UnixTimestamp {
         Date date = new Date(timestamp);
         DateFormat df = DateFormat.getTimeInstance(DateFormat.SHORT);
         return df.format(date);
+    }
+
+    public String toTimeString(SimpleDateFormat dateFormat) {
+        Date date = new Date(timestamp);
+        return dateFormat.format(date);
     }
 
     public String durationAsMinutes() {
