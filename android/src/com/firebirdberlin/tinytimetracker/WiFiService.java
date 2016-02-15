@@ -34,7 +34,6 @@ public class WiFiService extends Service {
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
     private Context mContext = null;
-    private Notification note;
     private int NOTIFICATION_ID = 1337;
     private int NOTIFICATION_ID_WIFI = 1338;
     private int NOTIFICATION_ID_ERROR = 1339;
@@ -142,14 +141,13 @@ public class WiFiService extends Service {
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
-        note  = new Notification.Builder(this)
-        .setContentTitle(title)
-        .setContentText(text)
-        .setSmallIcon(R.drawable.ic_hourglass)
-        .setOngoing(true)
-        .setContentIntent(pIntent)
-        .setPriority(Notification.PRIORITY_MAX)
-        .build();
+        Notification note = new Notification.Builder(this).setContentTitle(title)
+                                                          .setContentText(text)
+                                                          .setSmallIcon(R.drawable.ic_hourglass)
+                                                          .setOngoing(true)
+                                                          .setContentIntent(pIntent)
+                                                          .setPriority(Notification.PRIORITY_MAX)
+                                                          .build();
         return note;
     }
 
@@ -261,7 +259,7 @@ public class WiFiService extends Service {
             return;
         }
 
-        note = buildNotification(title, text);
+        Notification note = buildNotification(title, text);
         notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
 
