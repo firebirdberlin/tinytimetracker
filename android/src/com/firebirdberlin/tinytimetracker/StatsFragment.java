@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
-import android.text.format.DateFormat;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -21,14 +20,15 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import de.greenrobot.event.EventBus;
 import java.lang.Runnable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StatsFragment extends ListFragment {
+    final List<LogEntry> log_entries = new ArrayList<LogEntry>();
     final List<String> svalues1 = new ArrayList<String>();
     final List<String> svalues2 = new ArrayList<String>();
     TwoColumnListAdapter two_column_adapter = null;
+    LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Context mContext = null;
     TrackerEntry currentTracker = null;
@@ -49,9 +49,10 @@ public class StatsFragment extends ListFragment {
             }
         });
 
-        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns,
-                                                      svalues1, svalues2);
-        setListAdapter(two_column_adapter);
+        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1,
+                                                      svalues2);
+        log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
+
         radio_group_aggregation.check(R.id.radio_aggregation_detail);
         refresh_detail();
         return v;
@@ -77,10 +78,10 @@ public class StatsFragment extends ListFragment {
 
         switch (item.getItemId()) {
         case R.id.action_delete:
-            long logEntryID = two_column_adapter.getIDAtPosition(info.position);
+            LogEntry entry = log_entry_adapter.getItem(info.position);
             LogDataSource datasource = new LogDataSource(mContext);
-            datasource.deleteLogEntry(logEntryID);
-            two_column_adapter.removeItemAtPosition(info.position);
+            datasource.deleteLogEntry(entry.id);
+            log_entry_adapter.remove(entry);
             return true;
         default:
             return super.onContextItemSelected(item);
@@ -97,6 +98,7 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
+        setListAdapter(two_column_adapter);
         LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
@@ -127,37 +129,23 @@ public class StatsFragment extends ListFragment {
     }
 
     public void refresh_detail() {
-        if (mContext == null || two_column_adapter == null) {
+        if (mContext == null || log_entry_adapter == null) {
             return;
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-        if ( DateFormat.is24HourFormat(mContext) ) {
-            dateFormat = new SimpleDateFormat("HH:mm");
-        }
-
-        two_column_adapter.clear();
+        log_entry_adapter.clear();
+        setListAdapter(log_entry_adapter);
 
         LogDataSource datasource = new LogDataSource(mContext);
         if (currentTracker != null) {
             List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
-
-            String lastDate = "";
-            for (LogEntry e : values) {
-                String curDate = e.startAsDateString();
-
-                if ( !curDate.equals(lastDate) ) {
-                    lastDate = curDate;
-                    two_column_adapter.add(curDate);
-                } else {
-                    two_column_adapter.add("");
-                }
-
-                two_column_adapter.addRight(e.toString(dateFormat), e.id);
-            }
+            log_entry_adapter.addAll(values);
+            //for (LogEntry e : values) {
+                //log_entry_adapter.add(e);
+            //}
         }
 
-        two_column_adapter.notifyDataSetChanged();
+        log_entry_adapter.notifyDataSetChanged();
     }
 
     public void refresh(int checkedId) {
