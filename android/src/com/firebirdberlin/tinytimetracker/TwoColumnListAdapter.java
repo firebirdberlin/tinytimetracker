@@ -47,6 +47,7 @@ public class TwoColumnListAdapter extends ArrayAdapter<String> {
         super.clear();
         values1.clear();
         values2.clear();
+        ids.clear();
     }
 
     public void addRight(String value) {
