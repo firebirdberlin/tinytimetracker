@@ -69,8 +69,9 @@ public class WiFiService extends Service {
             return Service.START_NOT_STICKY;
         }
 
+        Log.i(TAG, "WIFI SERVICE starts ...");
         if ( ! wifiManager.isWifiEnabled() ) {
-            Log.i(TAG, "WIFI disabled");
+            Log.i(TAG, "WIFI is currently disabled");
             wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
 
@@ -91,11 +92,11 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
-        Log.i(TAG, "WIFI SERVICE starts ...");
         return Service.START_NOT_STICKY;
     }
 
     private void stopUnsuccessfulStartAttempt() {
+        Log.w(TAG, "Unsuccessfully quiting WiFi service.");
         notificationManager.cancel(NOTIFICATION_ID_WIFI);
         stopSelf();
     }
