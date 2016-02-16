@@ -76,12 +76,23 @@ public class StatsFragment extends ListFragment {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 
+        LogEntry entry = log_entry_adapter.getItem(info.position);
+        LogDataSource datasource = new LogDataSource(mContext);
+
         switch (item.getItemId()) {
         case R.id.action_delete:
-            LogEntry entry = log_entry_adapter.getItem(info.position);
-            LogDataSource datasource = new LogDataSource(mContext);
-            datasource.deleteLogEntry(entry.id);
+            datasource.delete(entry);
             log_entry_adapter.remove(entry);
+            return true;
+        case R.id.action_join:
+            if ( info.position < log_entry_adapter.getCount() ) {
+                long new_end = entry.getTimestampEnd();
+                LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
+                nextEntry.setTimestampEnd(new_end);
+                datasource.save(nextEntry);
+                datasource.delete(entry);
+                log_entry_adapter.remove(entry);
+            }
             return true;
         default:
             return super.onContextItemSelected(item);

@@ -90,6 +90,26 @@ public class LogDataSource {
         return accessPoint;
     }
 
+    public LogEntry save(LogEntry log_entry) {
+        init();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
+        values.put(SQLiteHandler.COLUMN_TRACKER_ID, log_entry.getTrackerID());
+        values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, log_entry.getTimestampStart());
+        values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
+
+        if (log_entry.id == LogEntry.NOT_SAVED) {
+            long id = database.insert(SQLiteHandler.TABLE_LOGS, null, values);
+            log_entry.id = id;
+        }
+        else {
+            values.put(SQLiteHandler.COLUMN_ID, log_entry.id);
+            database.replace(SQLiteHandler.TABLE_LOGS, null, values);
+        }
+
+        return log_entry;
+    }
+
     public Set<String> getTrackedSSIDs(String method) {
         init();
         Cursor cursor = null;
@@ -317,13 +337,19 @@ public class LogDataSource {
         return (rows_affected > 0);
     }
 
-    public boolean deleteLogEntry(long id) {
-        Log.i(TAG, "deleting LogEntry " + String.valueOf(id));
+    public boolean delete(LogEntry logEntry) {
+        if (logEntry == null) {
+            return false;
+        }
+
+        if (logEntry.id == LogEntry.NOT_SAVED) {
+            return false;
+        }
+
         init();
         int rows_affected = database.delete(SQLiteHandler.TABLE_LOGS, "_id=?",
-                                            new String[] {String.valueOf(id)});
-
-        bus.post(new OnLogEntryDeleted(id));
+                                            new String[] {String.valueOf(logEntry.id)});
+        bus.post(new OnLogEntryDeleted(logEntry.id));
         return (rows_affected > 0);
     }
 
