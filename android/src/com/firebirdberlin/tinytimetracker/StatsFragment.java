@@ -3,7 +3,9 @@ package com.firebirdberlin.tinytimetracker;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.util.Pair;
 import android.view.ContextMenu;
@@ -83,6 +85,20 @@ public class StatsFragment extends ListFragment {
         case R.id.action_delete:
             datasource.delete(entry);
             log_entry_adapter.remove(entry);
+            return true;
+        case R.id.action_edit:
+            DialogFragment newFragment = new EditLogEntryDialogFragment();
+            newFragment.show(getFragmentManager(), "edit_log_entry_dialog");
+            //long prev = 0;
+            //long next = 0;
+            //if ( info.position > 0 ) {
+                //LogEntry prevEntry = log_entry_adapter.getItem(info.position - 1);
+                //prev = prevEntry.getTimestampEnd();
+            //}
+            //if ( info.position < log_entry_adapter.getCount() ) {
+                //LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
+                //next = nextEntry.getTimestampStart();
+            //}
             return true;
         case R.id.action_join:
             if ( info.position < log_entry_adapter.getCount() ) {
