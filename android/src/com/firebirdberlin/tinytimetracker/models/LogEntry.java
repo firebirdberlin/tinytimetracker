@@ -7,9 +7,9 @@ public class LogEntry {
     private static String TAG = TinyTimeTracker.TAG + ".LogEntry";
     public final static long NOT_SAVED = -1L;
     public long id;
-    private long tracker_id;
-    private UnixTimestamp timestamp_start;
-    private UnixTimestamp timestamp_end;
+    public long tracker_id;
+    public UnixTimestamp timestamp_start;
+    public UnixTimestamp timestamp_end;
 
 
     public LogEntry(long id, long tracker_id, long timestamp_start, long timestamp_end){
@@ -33,6 +33,11 @@ public class LogEntry {
 
     public long getTimestampEnd() {
         return timestamp_end.getTimestamp();
+    }
+
+    public void setTimestampStart(long timestamp) {
+        timestamp_start = new UnixTimestamp(timestamp);
+        return;
     }
 
     public void setTimestampEnd(long timestamp) {

@@ -105,6 +105,7 @@ public class LogDataSource {
         else {
             values.put(SQLiteHandler.COLUMN_ID, log_entry.id);
             database.replace(SQLiteHandler.TABLE_LOGS, null, values);
+            bus.post(new OnLogEntryChanged(log_entry));
         }
 
         return log_entry;

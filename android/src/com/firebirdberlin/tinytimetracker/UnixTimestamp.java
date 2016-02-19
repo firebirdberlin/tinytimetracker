@@ -10,7 +10,6 @@ public class UnixTimestamp {
     private static String TAG = TinyTimeTracker.TAG + ".UnixTimestamp";
     private long timestamp;
 
-
     public UnixTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
@@ -96,4 +95,19 @@ public class UnixTimestamp {
         return cal;
     }
 
+    public Calendar toCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+        return calendar;
+    }
+
+    public int getHourOfDay() {
+        Calendar cal = this.toCalendar();
+        return cal.get(Calendar.HOUR_OF_DAY);
+    }
+
+    public int getMinute() {
+        Calendar cal = this.toCalendar();
+        return cal.get(Calendar.MINUTE);
+    }
 }

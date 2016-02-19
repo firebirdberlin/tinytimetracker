@@ -35,6 +35,7 @@ public class MainView extends View {
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
+        if ( currentTracker == null ) return;
         if (event.success && currentTracker.equals(event.tracker)) {
             invalidate();
         }
@@ -63,6 +64,12 @@ public class MainView extends View {
 
     public void onEvent(OnLogEntryDeleted event) {
         invalidate();
+    }
+
+    public void onEvent(OnLogEntryChanged event) {
+        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
+            invalidate();
+        }
     }
 
     @Override
