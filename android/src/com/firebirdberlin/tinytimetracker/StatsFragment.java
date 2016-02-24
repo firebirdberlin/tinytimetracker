@@ -244,4 +244,10 @@ public class StatsFragment extends ListFragment {
             refresh();
         }
     }
+
+    public void onEvent(OnLogEntryDeleted event) {
+        if ( currentTracker != null ) {
+            refresh();
+        }
+    }
 }
