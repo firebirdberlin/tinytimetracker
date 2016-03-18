@@ -43,6 +43,7 @@ public class WiFiService extends Service {
     private boolean showNotifications = false;
     private LogDataSource datasource;
     private boolean wifiWasEnabled = false;
+    private boolean service_is_running = false;
 
 
     @Override
@@ -56,6 +57,11 @@ public class WiFiService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "WIFI SERVICE init ...");
+        if (service_is_running) {
+            unregister(wifiReceiver);
+        }
+        service_is_running = true;
+
         mContext = this;
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
@@ -96,7 +102,7 @@ public class WiFiService extends Service {
     }
 
     private void stopUnsuccessfulStartAttempt() {
-        Log.w(TAG, "Unsuccessfully quiting WiFi service.");
+        Log.w(TAG, "Unsuccessfully quitting WiFi service.");
         notificationManager.cancel(NOTIFICATION_ID_WIFI);
         stopSelf();
     }
@@ -110,12 +116,7 @@ public class WiFiService extends Service {
     public void onDestroy() {
         datasource.close();
 
-        try {
-            unregisterReceiver(wifiReceiver);
-        }
-        catch(IllegalArgumentException e) {
-            // receiver was not registered
-        }
+        unregister(wifiReceiver);
 
         if ( wifiWasEnabled && wifiManager.isWifiEnabled() ) {
             wifiManager.setWifiEnabled(false);
@@ -129,9 +130,19 @@ public class WiFiService extends Service {
         Log.i(TAG, "Bye bye.");
     }
 
+    private void unregister(BroadcastReceiver receiver) {
+        try {
+            unregisterReceiver(wifiReceiver);
+            Log.i(TAG, "Receiver unregistered.");
+        }
+        catch(IllegalArgumentException e) {
+            // receiver was not registered
+        }
+    }
 
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
+            Log.i(TAG, "WiFi Scan successfully completed");
             getWiFiNetworks();
         }
     };
