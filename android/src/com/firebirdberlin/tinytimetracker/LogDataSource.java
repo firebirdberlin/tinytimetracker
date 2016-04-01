@@ -128,7 +128,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return names;
@@ -150,7 +150,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return bssids;
@@ -173,9 +173,7 @@ public class LogDataSource {
             }
         }
         finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            if (cursor != null) cursor.close();
         }
 
         return entries;
@@ -196,7 +194,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return entry;
@@ -217,7 +215,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return entry;
@@ -238,7 +236,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return entry;
@@ -262,7 +260,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return entries;
@@ -293,7 +291,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return tracker_id;
@@ -397,22 +395,24 @@ public class LogDataSource {
         init();
         List<LogEntry> entries = new ArrayList<LogEntry>();
         Cursor cursor = null;
-        cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                   + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
-                                   new String[] {String.valueOf(tracker_id)});
-        cursor.moveToFirst();
+        try {
+            cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                       + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
+                                       new String[] {String.valueOf(tracker_id)});
+            cursor.moveToFirst();
 
-        while (!cursor.isAfterLast()) {
-            long log_id = cursor.getLong(0);
-            long time_start = cursor.getLong(1);
-            long time_end = cursor.getLong(2);
-            LogEntry logEntry = new LogEntry(log_id, tracker_id, time_start, time_end);
-            entries.add(logEntry);
-            cursor.moveToNext();
+            while (!cursor.isAfterLast()) {
+                long log_id = cursor.getLong(0);
+                long time_start = cursor.getLong(1);
+                long time_end = cursor.getLong(2);
+                LogEntry logEntry = new LogEntry(log_id, tracker_id, time_start, time_end);
+                entries.add(logEntry);
+                cursor.moveToNext();
+            }
         }
-
-        // make sure to close the cursor
-        cursor.close();
+        finally {
+            if (cursor != null) cursor.close();
+        }
         return entries;
     }
 
@@ -420,22 +420,25 @@ public class LogDataSource {
         init();
         List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
         Cursor cursor = null;
-        cursor = database.rawQuery("SELECT _id, ssid, bssid FROM access_points "
-                                   + "WHERE tracker_id=?",
-                                   new String[] {String.valueOf(tracker_id)});
-        cursor.moveToFirst();
+        try {
+            cursor = database.rawQuery("SELECT _id, ssid, bssid FROM access_points "
+                                       + "WHERE tracker_id=?",
+                                       new String[] {String.valueOf(tracker_id)});
+            cursor.moveToFirst();
 
-        while (!cursor.isAfterLast()) {
-            long log_id = cursor.getLong(0);
-            String ssid = cursor.getString(1);
-            String bssid = cursor.getString(2);
-            AccessPoint ap = new AccessPoint(log_id, tracker_id, ssid, bssid);
-            accessPoints.add(ap);
-            cursor.moveToNext();
+            while (!cursor.isAfterLast()) {
+                long log_id = cursor.getLong(0);
+                String ssid = cursor.getString(1);
+                String bssid = cursor.getString(2);
+                AccessPoint ap = new AccessPoint(log_id, tracker_id, ssid, bssid);
+                accessPoints.add(ap);
+                cursor.moveToNext();
+            }
+        }
+        finally {
+            if (cursor != null) cursor.close();
         }
 
-        // make sure to close the cursor
-        cursor.close();
         return accessPoints;
     }
 
@@ -458,7 +461,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return log;
@@ -511,7 +514,7 @@ public class LogDataSource {
             }
         }
         finally {
-            cursor.close();
+            if (cursor != null) cursor.close();
         }
 
         return results;
@@ -534,9 +537,7 @@ public class LogDataSource {
             }
         }
         finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            if (cursor != null) cursor.close();
         }
 
         return new UnixTimestamp(duration_millis);
@@ -563,9 +564,7 @@ public class LogDataSource {
             }
         }
         finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            if (cursor != null) cursor.close();
         }
 
         return new Pair(duration_millis, distinct_date_count);

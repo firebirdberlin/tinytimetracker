@@ -15,6 +15,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -30,6 +31,7 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 public class WiFiService extends Service {
     private static String TAG = TinyTimeTracker.TAG + ".WiFiService";
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
+    private final Handler handler = new Handler();
     private NotificationManager notificationManager = null;
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
@@ -41,7 +43,7 @@ public class WiFiService extends Service {
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private boolean showNotifications = false;
-    private LogDataSource datasource;
+    private LogDataSource datasource = null;
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
 
@@ -50,8 +52,6 @@ public class WiFiService extends Service {
     public void onCreate() {
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        datasource = new LogDataSource(this);
-        datasource.open();
     }
 
     @Override
@@ -81,11 +81,11 @@ public class WiFiService extends Service {
             wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
 
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
-        boolean success = wifiManager.startScan();
+        Log.i(TAG, "Receiver registered.");
 
+        boolean success = wifiManager.startScan();
         if (! success) {
             if ( isPebbleConnected()) {
                 sendDataToPebble("");
@@ -98,6 +98,8 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
+
+        handler.postDelayed(stopOnTimeout, 30000);
         return Service.START_NOT_STICKY;
     }
 
@@ -114,8 +116,7 @@ public class WiFiService extends Service {
 
     @Override
     public void onDestroy() {
-        datasource.close();
-
+        handler.removeCallbacks(stopOnTimeout);
         unregister(wifiReceiver);
 
         if ( wifiWasEnabled && wifiManager.isWifiEnabled() ) {
@@ -130,12 +131,20 @@ public class WiFiService extends Service {
         Log.i(TAG, "Bye bye.");
     }
 
+    private Runnable stopOnTimeout = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(TAG, "WIFI timeout");
+            stopSelf();
+        }
+    };
+
     private void unregister(BroadcastReceiver receiver) {
         try {
             unregisterReceiver(wifiReceiver);
             Log.i(TAG, "Receiver unregistered.");
         }
-        catch(IllegalArgumentException e) {
+        catch( IllegalArgumentException e) {
             // receiver was not registered
         }
     }
@@ -143,10 +152,10 @@ public class WiFiService extends Service {
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
             Log.i(TAG, "WiFi Scan successfully completed");
+            handler.removeCallbacks(stopOnTimeout);
             getWiFiNetworks();
         }
     };
-
 
     private Notification buildNotification(String title, String text) {
 
@@ -165,6 +174,9 @@ public class WiFiService extends Service {
 
     private void getWiFiNetworks() {
         EventBus bus = EventBus.getDefault();
+        datasource = new LogDataSource(this);
+        datasource.open();
+
         String formattedWorkTime = "";
         String trackerVerboseName = "";
         long now = System.currentTimeMillis();
@@ -211,6 +223,7 @@ public class WiFiService extends Service {
             sendDataToPebble(formattedWorkTime);
         }
 
+        datasource.close();
         stopSelf();
     }
 
