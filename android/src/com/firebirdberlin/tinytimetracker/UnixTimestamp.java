@@ -6,11 +6,9 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-
 public class UnixTimestamp {
     private static String TAG = TinyTimeTracker.TAG + ".UnixTimestamp";
     private long timestamp;
-
 
     public UnixTimestamp(long timestamp) {
         this.timestamp = timestamp;
@@ -55,6 +53,11 @@ public class UnixTimestamp {
         return df.format(date);
     }
 
+    public String toTimeString(SimpleDateFormat dateFormat) {
+        Date date = new Date(timestamp);
+        return dateFormat.format(date);
+    }
+
     public String durationAsMinutes() {
         long min = timestamp / 1000 / 60;
         return String.format("%dmin", min);
@@ -65,10 +68,23 @@ public class UnixTimestamp {
         long hours = seconds / 3600;
         long minutes = (seconds % 3600) / 60;
         long sec = seconds % 60;
+        hours = (hours < 0) ? -hours : hours;
+        minutes = (minutes < 0) ? -minutes : minutes;
         return String.format("%02d:%02d", hours, minutes);
     }
 
     public static UnixTimestamp startOfToday() {
+        Calendar cal = startOfTodayAsCalendar();
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp todayThreeYearsAgo() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.add(Calendar.YEAR, -3);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static Calendar startOfTodayAsCalendar() {
         long now = System.currentTimeMillis();
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(now);
@@ -76,7 +92,22 @@ public class UnixTimestamp {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.HOUR_OF_DAY, 0);
-        return new UnixTimestamp(cal.getTimeInMillis());
+        return cal;
     }
 
+    public Calendar toCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+        return calendar;
+    }
+
+    public int getHourOfDay() {
+        Calendar cal = this.toCalendar();
+        return cal.get(Calendar.HOUR_OF_DAY);
+    }
+
+    public int getMinute() {
+        Calendar cal = this.toCalendar();
+        return cal.get(Calendar.MINUTE);
+    }
 }

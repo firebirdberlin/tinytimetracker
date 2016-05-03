@@ -3,12 +3,20 @@ package com.firebirdberlin.tinytimetracker;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.util.Pair;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -17,33 +25,109 @@ import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.lang.IllegalStateException;
+
 public class StatsFragment extends ListFragment {
+    final List<LogEntry> log_entries = new ArrayList<LogEntry>();
     final List<String> svalues1 = new ArrayList<String>();
     final List<String> svalues2 = new ArrayList<String>();
     TwoColumnListAdapter two_column_adapter = null;
+    LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Context mContext = null;
     TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mContext = (Context) getActivity();
-        bus.register(this);
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
         radio_group_aggregation = (RadioGroup) v.findViewById(R.id.radio_group_aggregation);
+        return v;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        registerForContextMenu(getListView());
+
         radio_group_aggregation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 refresh(checkedId);
             }
         });
-        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1, svalues2);
-        setListAdapter(two_column_adapter);
+
+        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1,
+                                                      svalues2);
+        log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
+
         radio_group_aggregation.check(R.id.radio_aggregation_detail);
         refresh_detail();
-        return v;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bus.unregister(this);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bus.register(this);
+        refresh();
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_log_entries, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+
+        LogEntry entry = log_entry_adapter.getItem(info.position);
+        LogDataSource datasource = new LogDataSource(mContext);
+
+        switch (item.getItemId()) {
+        case R.id.action_delete:
+            datasource.delete(entry);
+            log_entry_adapter.remove(entry);
+            return true;
+        case R.id.action_edit:
+            EditLogEntryDialogFragment dialogFragment = new EditLogEntryDialogFragment();
+            dialogFragment.entry = entry;
+            dialogFragment.mContext = mContext;
+            if ( info.position > 0 ) {
+                dialogFragment.prevEntry = log_entry_adapter.getItem(info.position - 1);
+            }
+            if ( info.position < log_entry_adapter.getCount() ) {
+                dialogFragment.nextEntry = log_entry_adapter.getItem(info.position + 1);
+            }
+
+            dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
+            return true;
+        case R.id.action_join:
+            if ( info.position < log_entry_adapter.getCount() ) {
+                long new_end = entry.getTimestampEnd();
+                LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
+                nextEntry.setTimestampEnd(new_end);
+                datasource.save(nextEntry);
+                datasource.delete(entry);
+                log_entry_adapter.remove(entry);
+            }
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+        }
     }
 
     public void refresh_aggregated(int aggregation_type) {
@@ -56,6 +140,7 @@ public class StatsFragment extends ListFragment {
         }
 
         two_column_adapter.clear();
+        setListAdapter(two_column_adapter);
         LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
@@ -86,43 +171,34 @@ public class StatsFragment extends ListFragment {
     }
 
     public void refresh_detail() {
-        if (mContext == null) {
+        if (mContext == null || log_entry_adapter == null) {
             return;
         }
 
-        if (two_column_adapter == null) {
-            return;
-        }
+        log_entry_adapter.clear();
+        setListAdapter(log_entry_adapter);
 
-        two_column_adapter.clear();
         LogDataSource datasource = new LogDataSource(mContext);
-
         if (currentTracker != null) {
             List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
-            String lastDate = "";
-
-            for (LogEntry e : values) {
-                String curDate = e.startAsDateString();
-
-                if (! curDate.equals(lastDate)) {
-                    lastDate = curDate;
-                    two_column_adapter.add(curDate);
-                }
-                else {
-                    two_column_adapter.add("");
-                }
-
-                two_column_adapter.addRight(e.toString());
-            }
+            log_entry_adapter.addAll(values);
         }
 
-        two_column_adapter.notifyDataSetChanged();
+        log_entry_adapter.notifyDataSetChanged();
     }
 
     public void refresh(int checkedId) {
+
+        try {
+            unregisterForContextMenu(getListView());
+        } catch (IllegalStateException e) {
+            // pass
+        }
+
         switch(checkedId) {
         case R.id.radio_aggregation_detail:
         default:
+            registerForContextMenu(getListView());
             refresh_detail();
             break;
         case R.id.radio_aggregation_day:
@@ -147,31 +223,31 @@ public class StatsFragment extends ListFragment {
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
+        if ( currentTracker == null ) return;
         if (event.success && currentTracker.equals(event.tracker)) {
-            int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
-            refresh(checkedId);
+            refresh();
         }
     }
 
     public void onEvent(OnTrackerSelected event) {
         this.currentTracker = event.newTracker;
-
-        if (radio_group_aggregation == null) {
-            return;
-        }
-
-        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
-        refresh(checkedId);
+        refresh();
     }
 
     public void onEvent(OnTrackerDeleted event) {
         this.currentTracker = null;
+        refresh();
+    }
 
-        if (radio_group_aggregation == null) {
-            return;
+    public void onEvent(OnLogEntryChanged event) {
+        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
+            refresh();
         }
+    }
 
-        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
-        refresh(checkedId);
+    public void onEvent(OnLogEntryDeleted event) {
+        if ( currentTracker != null ) {
+            refresh();
+        }
     }
 }

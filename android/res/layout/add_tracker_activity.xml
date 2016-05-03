@@ -29,7 +29,7 @@
                 android:singleLine="true" />
 
             <Button
-                android:background="@drawable/ic_wifi"
+                android:background="@drawable/ic_wifi_add"
                 android:id="@+id/button_wifi"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"

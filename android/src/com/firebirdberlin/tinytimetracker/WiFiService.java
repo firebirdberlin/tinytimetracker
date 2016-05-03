@@ -15,6 +15,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -30,11 +31,11 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 public class WiFiService extends Service {
     private static String TAG = TinyTimeTracker.TAG + ".WiFiService";
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
+    private final Handler handler = new Handler();
     private NotificationManager notificationManager = null;
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
     private Context mContext = null;
-    private Notification note;
     private int NOTIFICATION_ID = 1337;
     private int NOTIFICATION_ID_WIFI = 1338;
     private int NOTIFICATION_ID_ERROR = 1339;
@@ -42,21 +43,25 @@ public class WiFiService extends Service {
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private boolean showNotifications = false;
-    private LogDataSource datasource;
+    private LogDataSource datasource = null;
     private boolean wifiWasEnabled = false;
+    private boolean service_is_running = false;
 
 
     @Override
     public void onCreate() {
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        datasource = new LogDataSource(this);
-        datasource.open();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "WIFI SERVICE init ...");
+        if (service_is_running) {
+            unregister(wifiReceiver);
+        }
+        service_is_running = true;
+
         mContext = this;
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
@@ -70,16 +75,17 @@ public class WiFiService extends Service {
             return Service.START_NOT_STICKY;
         }
 
+        Log.i(TAG, "WIFI SERVICE starts ...");
         if ( ! wifiManager.isWifiEnabled() ) {
-            Log.i(TAG, "WIFI disabled");
+            Log.i(TAG, "WIFI is currently disabled");
             wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
 
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
-        boolean success = wifiManager.startScan();
+        Log.i(TAG, "Receiver registered.");
 
+        boolean success = wifiManager.startScan();
         if (! success) {
             if ( isPebbleConnected()) {
                 sendDataToPebble("");
@@ -92,11 +98,13 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
-        Log.i(TAG, "WIFI SERVICE starts ...");
+
+        handler.postDelayed(stopOnTimeout, 30000);
         return Service.START_NOT_STICKY;
     }
 
     private void stopUnsuccessfulStartAttempt() {
+        Log.w(TAG, "Unsuccessfully quitting WiFi service.");
         notificationManager.cancel(NOTIFICATION_ID_WIFI);
         stopSelf();
     }
@@ -108,14 +116,8 @@ public class WiFiService extends Service {
 
     @Override
     public void onDestroy() {
-        datasource.close();
-
-        try {
-            unregisterReceiver(wifiReceiver);
-        }
-        catch(IllegalArgumentException e) {
-            // receiver was not registered
-        }
+        handler.removeCallbacks(stopOnTimeout);
+        unregister(wifiReceiver);
 
         if ( wifiWasEnabled && wifiManager.isWifiEnabled() ) {
             wifiManager.setWifiEnabled(false);
@@ -129,32 +131,52 @@ public class WiFiService extends Service {
         Log.i(TAG, "Bye bye.");
     }
 
-
-    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
-        public void onReceive(Context c, Intent i) {
-            getWiFiNetworks();
+    private Runnable stopOnTimeout = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(TAG, "WIFI timeout");
+            stopSelf();
         }
     };
 
+    private void unregister(BroadcastReceiver receiver) {
+        try {
+            unregisterReceiver(wifiReceiver);
+            Log.i(TAG, "Receiver unregistered.");
+        }
+        catch( IllegalArgumentException e) {
+            // receiver was not registered
+        }
+    }
+
+    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            Log.i(TAG, "WiFi Scan successfully completed");
+            handler.removeCallbacks(stopOnTimeout);
+            getWiFiNetworks();
+        }
+    };
 
     private Notification buildNotification(String title, String text) {
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
-        note  = new Notification.Builder(this)
-        .setContentTitle(title)
-        .setContentText(text)
-        .setSmallIcon(R.drawable.ic_hourglass)
-        .setOngoing(true)
-        .setContentIntent(pIntent)
-        .setPriority(Notification.PRIORITY_MAX)
-        .build();
+        Notification note = new Notification.Builder(this).setContentTitle(title)
+                                                          .setContentText(text)
+                                                          .setSmallIcon(R.drawable.ic_hourglass)
+                                                          .setOngoing(true)
+                                                          .setContentIntent(pIntent)
+                                                          .setPriority(Notification.PRIORITY_MAX)
+                                                          .build();
         return note;
     }
 
     private void getWiFiNetworks() {
         EventBus bus = EventBus.getDefault();
+        datasource = new LogDataSource(this);
+        datasource.open();
+
         String formattedWorkTime = "";
         String trackerVerboseName = "";
         long now = System.currentTimeMillis();
@@ -201,6 +223,7 @@ public class WiFiService extends Service {
             sendDataToPebble(formattedWorkTime);
         }
 
+        datasource.close();
         stopSelf();
     }
 
@@ -261,7 +284,7 @@ public class WiFiService extends Service {
             return;
         }
 
-        note = buildNotification(title, text);
+        Notification note = buildNotification(title, text);
         notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
 

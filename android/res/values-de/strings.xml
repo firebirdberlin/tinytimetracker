@@ -6,6 +6,9 @@
     <string name="action_delete">Tracker löschen</string>
     <string name="action_add_access_point">Access Point hinzufügen</string>
     <string name="action_delete_access_point">Access Point löschen</string>
+    <string name="action_delete_log_entry">Eintrag löschen</string>
+    <string name="action_edit_log_entry">Eintrag ändern</string>
+    <string name="action_join_log_entry">Einträge zusammenführen</string>
     <string name="action_settings">Einstellungen</string>
     <string name="action_donate">Spenden</string>
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>

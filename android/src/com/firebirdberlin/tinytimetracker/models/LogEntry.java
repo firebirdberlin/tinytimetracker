@@ -1,18 +1,15 @@
 package com.firebirdberlin.tinytimetracker;
 
-import android.util.Log;
-import android.text.format.DateFormat;
-import java.util.Locale;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 
 
 public class LogEntry {
     private static String TAG = TinyTimeTracker.TAG + ".LogEntry";
-    private long id;
-    private long tracker_id;
-    private UnixTimestamp timestamp_start;
-    private UnixTimestamp timestamp_end;
+    public final static long NOT_SAVED = -1L;
+    public long id;
+    public long tracker_id;
+    public UnixTimestamp timestamp_start;
+    public UnixTimestamp timestamp_end;
 
 
     public LogEntry(long id, long tracker_id, long timestamp_start, long timestamp_end){
@@ -38,6 +35,11 @@ public class LogEntry {
         return timestamp_end.getTimestamp();
     }
 
+    public void setTimestampStart(long timestamp) {
+        timestamp_start = new UnixTimestamp(timestamp);
+        return;
+    }
+
     public void setTimestampEnd(long timestamp) {
         timestamp_end = new UnixTimestamp(timestamp);
         return;
@@ -51,6 +53,11 @@ public class LogEntry {
     @Override
     public String toString() {
         return timestamp_start.toTimeString() + " - " + timestamp_end.toTimeString();
+    }
+
+    public String toString(SimpleDateFormat dateFormat) {
+        return timestamp_start.toTimeString(dateFormat) + " - " +
+               timestamp_end.toTimeString(dateFormat);
     }
 
     public String startAsDateString() {
