@@ -25,16 +25,18 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.support.v7.widget.Toolbar;
 import de.greenrobot.event.EventBus;
 import java.util.List;
 
 
-public class TinyTimeTracker extends FragmentActivity {
+public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
@@ -44,6 +46,10 @@ public class TinyTimeTracker extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
+
         bus.register(this);
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
@@ -84,6 +90,7 @@ public class TinyTimeTracker extends FragmentActivity {
         }
 
         List<TrackerEntry> trackers = datasource.getTrackers();
+        //getSupportActionBar().show();
     }
 
     @Override
@@ -118,6 +125,7 @@ public class TinyTimeTracker extends FragmentActivity {
             Utility.isPackageInstalled(this, "com.getpebble.android") ||
             Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
+
         return super.onCreateOptionsMenu(menu);
     }
 
