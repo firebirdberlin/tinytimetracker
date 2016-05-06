@@ -12,32 +12,36 @@ import android.graphics.PorterDuff;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import android.view.inputmethod.InputMethodManager;
 
-public class AddTrackerActivity extends ListActivity {
+public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
     private TrackerEntry tracker = null;
     private LogDataSource datasource = null;
     private AccessPointAdapter accessPointAdapter = null;
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
-    private Button button_wifi = null;
     private EditText edit_tracker_verbose_name = null;
     private EditText edit_tracker_working_hours = null;
+    private ListView listView = null;
 
     private final int RED = Color.parseColor("#AAC0392B");
     private final int BLUE = Color.parseColor("#3498db");
@@ -46,7 +50,16 @@ public class AddTrackerActivity extends ListActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
-        registerForContextMenu(this.getListView());
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(getResources().getString(R.string.action_edit));
+
+        setSupportActionBar(toolbar);
+
+        // Enable the Up button
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+
         datasource = new LogDataSource(this);
         Intent intent = getIntent();
         long tracker_id = intent.getLongExtra("tracker_id", -1L);
@@ -56,14 +69,13 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         init();
+        registerForContextMenu(listView);
     }
 
     private void init() {
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
         edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
-        button_wifi = (Button) findViewById(R.id.button_wifi);
-        setWifiIconColor(BLUE);
-
+        listView = (ListView) findViewById(R.id.wifi_list_view);
         if (tracker != null) {
             edit_tracker_verbose_name.setText(tracker.verbose_name);
             edit_tracker_working_hours.setText(String.valueOf(tracker.working_hours));
@@ -71,7 +83,25 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
-        setListAdapter(accessPointAdapter);
+        listView.setAdapter(accessPointAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.add_tracker_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_ok:
+                onClickOk(null);
+                return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -87,7 +117,7 @@ public class AddTrackerActivity extends ListActivity {
 
         switch (item.getItemId()) {
         case R.id.action_add:
-            onChooseWifi(button_wifi);
+            onChooseWifi(null);
             return true;
         case R.id.action_delete:
             AccessPoint accessPoint = accessPoints.remove(info.position);
@@ -132,7 +162,6 @@ public class AddTrackerActivity extends ListActivity {
                 accessPointAdapter.add(accessPoint);
                 adapter.remove(accessPoint);
                 adapter.notifyDataSetChanged();
-                setWifiIconColor(BLUE);
 
                 if (edit_tracker_working_hours.length() == 0) {
                     edit_tracker_working_hours.requestFocus();
@@ -203,7 +232,6 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         if (accessPoints.size() == 0) {
-            setWifiIconColor(RED);
             return false;
         }
 
@@ -222,18 +250,6 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         return true;
-    }
-
-    private void setWifiIconColor(int color) {
-        Resources res = getResources();
-        Drawable icon = res.getDrawable(R.drawable.ic_wifi_add);
-        icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        button_wifi.setBackgroundResource(R.drawable.ic_wifi_add);
-        button_wifi.invalidate();
-        edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
-        edit_tracker_working_hours.setBackgroundColor(Color.TRANSPARENT);
-        edit_tracker_verbose_name.invalidate();
-        edit_tracker_working_hours.invalidate();
     }
 
     public static void open(Context context) {

@@ -15,8 +15,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <application android:label="@string/app_name" 
-        android:icon="@drawable/ic_launcher" 
+    <application android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
         android:theme="@style/Theme.AppCompat.NoActionBar" >
 
         <activity android:name="TinyTimeTracker"
@@ -27,7 +27,14 @@
             </intent-filter>
         </activity>
         <activity android:name="Settings"></activity>
-        <activity android:name="AddTrackerActivity"></activity>
+        <activity android:name="AddTrackerActivity"
+                  android:parentActivityName="TinyTimeTracker" >
+
+        <!-- Parent activity meta-data to support 4.0 and lower -->
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="TinyTimeTracker" />
+        </activity>
 
         <service android:enabled="true" android:name=".WiFiService" />
 
