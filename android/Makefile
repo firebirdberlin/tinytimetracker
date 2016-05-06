@@ -8,7 +8,7 @@ installdebug: debug
 	adb -d install -r bin/TinyTimeTracker-debug.apk
 
 install: release
-	adb -d install -r bin/TinyTimeTracker-release.apk
+	adb install -r bin/TinyTimeTracker-release.apk
 
 uninstall:
 	adb uninstall com.firebirdberlin.tinytimetracker
