@@ -90,7 +90,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         }
 
         List<TrackerEntry> trackers = datasource.getTrackers();
-        //getSupportActionBar().show();
     }
 
     @Override
