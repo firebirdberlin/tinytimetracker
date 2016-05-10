@@ -1,11 +1,13 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.PorterDuff;
@@ -45,6 +47,7 @@ public class AddTrackerActivity extends AppCompatActivity {
 
     private final int RED = Color.parseColor("#AAC0392B");
     private final int BLUE = Color.parseColor("#3498db");
+    private final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +132,31 @@ public class AddTrackerActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_COARSE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "permission ACCESS_COARSE_LOCATION granted");
+                    onChooseWifi(null);
+                } else {
+                    Log.e(TAG, "permission ACCESS_COARSE_LOCATION denied");
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
     public void onChooseWifi(View v) {
+        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 
+                                                  PERMISSIONS_REQUEST_COARSE_LOCATION);
+        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return; 
+
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
                 accessPoints);

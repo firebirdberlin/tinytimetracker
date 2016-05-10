@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -20,10 +21,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.System;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -47,6 +50,9 @@ public class TinyTimeTracker extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        // runtime permissions for the WifiService
+        requestServicePermissions();
+
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
@@ -56,6 +62,7 @@ public class TinyTimeTracker extends AppCompatActivity {
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
+
     }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
@@ -199,10 +206,34 @@ public class TinyTimeTracker extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public static void startService(Context context) {
-        Intent intent = new Intent(context, WiFiService.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startService(intent);
+    public static boolean startService(Context context) {
+        if (hasPermission(context, Manifest.permission.WAKE_LOCK) 
+                && hasPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+            Intent intent = new Intent(context, WiFiService.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startService(intent);
+            return true;
+        } 
+        return false;
+    }
+
+    private void requestServicePermissions() {
+        checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
+        checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
+        checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 1);
+    }
+
+    public static void checkAndRequestPermission(Activity activity, String permission, 
+                                                 int requestCode) {
+        if (! hasPermission((Context) activity, permission) ) {
+            ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
+        }
+    }
+
+    public static boolean hasPermission(Context context, String permission) {
+        return (ContextCompat.checkSelfPermission(context, permission)
+                 == PackageManager.PERMISSION_GRANTED);
     }
 
     public static void scheduleWiFiService(Context context) {
