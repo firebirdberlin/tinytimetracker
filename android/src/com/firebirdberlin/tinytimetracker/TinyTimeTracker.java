@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -36,6 +37,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.support.v7.widget.Toolbar;
 import de.greenrobot.event.EventBus;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -221,7 +223,23 @@ public class TinyTimeTracker extends AppCompatActivity {
     private void requestServicePermissions() {
         checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
         checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
-        checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 1);
+
+        try {
+            long installed = getPackageManager().getPackageInfo(getPackageName(), 0).firstInstallTime;
+            if (installed < getDateAsLong(2016, 6, 1)) {
+                checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 1);
+            }
+        }
+        catch (NameNotFoundException e ) {
+        }
+    }
+
+    public long getDateAsLong(int year, int month, int day) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH, day);
+            calendar.set(Calendar.MONTH, month - 1);
+            calendar.set(Calendar.YEAR, year);
+            return calendar.getTimeInMillis();
     }
 
     public static void checkAndRequestPermission(Activity activity, String permission, 
