@@ -100,7 +100,6 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-
     private void toggleEnabledState() {
         boolean enabled = false;
         Preference pref_data_import = (Preference) findPreference("pref_key_data_import");

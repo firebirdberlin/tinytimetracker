@@ -14,6 +14,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.text.format.DateFormat;
 import android.util.Log;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class DbImportExport {
 
@@ -31,7 +33,6 @@ public class DbImportExport {
     protected static final String DATABASE_NAME_EXT = ".db";
 
     private static final int MIN_NUMBER_OF_BACKUPS_TO_KEEP = 10;
-    private static final long MAX_FILE_AGE = 31 * 24 * 60 * 60 * 1000;
 
 
     /** Contains: /data/data/com.example.app/databases/example.db **/
@@ -142,10 +143,11 @@ public class DbImportExport {
             return;
         }
 
+        // drop the first elements from the list
+        files = Arrays.copyOfRange(files, MIN_NUMBER_OF_BACKUPS_TO_KEEP, files.length);
+        // delete the remaining files
         for (File file: files) {
-            if (file.lastModified() + MAX_FILE_AGE < System.currentTimeMillis()) {
-                file.delete();
-            }
+            file.delete();
         }
     }
 
@@ -159,7 +161,15 @@ public class DbImportExport {
             }
         };
         createDatabaseDirectory();
-        return DbImportExport.DATABASE_DIRECTORY.listFiles(filter);
+
+        File[] files = DbImportExport.DATABASE_DIRECTORY.listFiles(filter);
+        // sort by descending modified time
+        Arrays.sort(files, new Comparator<File>() {
+            public int compare(File f1, File f2) {
+                return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
+            }
+        });
+        return files;
     }
 
 
