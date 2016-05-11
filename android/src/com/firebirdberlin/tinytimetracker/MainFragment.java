@@ -63,7 +63,7 @@ public class MainFragment extends Fragment {
     void setSelection(long trackerID) {
         if (trackerIDToSelectionIDMap.containsKey(trackerID)) {
             int item = trackerIDToSelectionIDMap.get(trackerID);
-            spinner.setSelection(item, true);
+            spinner.setSelection(item);
         }
     }
 
@@ -104,8 +104,11 @@ public class MainFragment extends Fragment {
         adapter.remove(event.tracker);
 
         if (adapter.getCount() > 0) {
+            spinner.setSelection(0, true);
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
-            setSelection(tracker.id);
+            Log.i(TAG, "Tracker selected " + tracker.verbose_name);
+            EventBus bus = EventBus.getDefault();
+            bus.post(new OnTrackerSelected(tracker));
         }
 
         adapter.notifyDataSetChanged();
