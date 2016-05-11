@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tiny Time Tracker</string>
-    <string name="action_add">Tracker hinzufügen</string>
-    <string name="action_edit">Tracker editieren</string>
-    <string name="action_delete">Tracker löschen</string>
+    <string name="app_name">TinyTimeTracker</string>
+    <string name="action_add">Konto hinzufügen</string>
+    <string name="action_edit">Konto editieren</string>
+    <string name="action_delete">Konto löschen</string>
     <string name="action_add_access_point">Access Point hinzufügen</string>
     <string name="action_delete_access_point">Access Point löschen</string>
     <string name="action_delete_log_entry">Eintrag löschen</string>
@@ -14,7 +14,7 @@
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_open_github">Beitragen</string>
     <string name="confirm_delete">Lösche</string>
-    <string name="confirm_delete_question">Soll dieser Tracker mit allen Daten wirklich gelöscht werden ?</string>
+    <string name="confirm_delete_question">Soll dieses Konto mit allen Daten wirklich gelöscht werden ?</string>
     <string name="dialog_title_wifi_networks">Aktive WLAN Netzwerke</string>
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
