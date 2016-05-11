@@ -45,7 +45,6 @@ public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
-    private static LogDataSource datasource = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,17 +93,13 @@ public class TinyTimeTracker extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        if (datasource == null) {
-            datasource = new LogDataSource(this);
-        }
-
+        LogDataSource datasource = new LogDataSource(this);
         List<TrackerEntry> trackers = datasource.getTrackers();
+        datasource.close();
     }
 
     @Override
     public void onPause() {
-        datasource.close();
-        datasource = null;
         super.onPause();
     }
 
@@ -175,6 +170,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             return;
         }
 
+        final Context mContext = this;
         new AlertDialog.Builder(this)
         .setTitle(this.getResources().getString(R.string.confirm_delete)
                   + " '" + currentTracker.verbose_name + "'")
@@ -183,7 +179,9 @@ public class TinyTimeTracker extends AppCompatActivity {
         .setNegativeButton(android.R.string.no, null)
         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
+                LogDataSource datasource = new LogDataSource(mContext);
                 datasource.delete(currentTracker);
+                datasource.close();
             }
         }).show();
     }
