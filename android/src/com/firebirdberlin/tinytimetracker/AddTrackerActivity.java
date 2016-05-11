@@ -146,9 +146,6 @@ public class AddTrackerActivity extends AppCompatActivity {
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -225,7 +222,7 @@ public class AddTrackerActivity extends AppCompatActivity {
 
         // when saving the account the deprecated fields shall no longer contain useful data
         tracker.ssid = "_deprecated_";
-        tracker.verbose_name = verbose_name;
+        tracker.verbose_name = verbose_name.trim();
         tracker.working_hours = Float.parseFloat(working_hours);
 
         datasource.save(tracker);
@@ -255,10 +252,6 @@ public class AddTrackerActivity extends AppCompatActivity {
             edit_tracker_working_hours.setBackgroundColor(RED);
             edit_tracker_working_hours.requestFocus();
             edit_tracker_working_hours.invalidate();
-            return false;
-        }
-
-        if (accessPoints.size() == 0) {
             return false;
         }
 
