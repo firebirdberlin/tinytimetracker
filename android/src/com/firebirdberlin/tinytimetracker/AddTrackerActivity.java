@@ -38,7 +38,6 @@ import android.view.inputmethod.InputMethodManager;
 public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
     private TrackerEntry tracker = null;
-    private LogDataSource datasource = null;
     private AccessPointAdapter accessPointAdapter = null;
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
     private EditText edit_tracker_verbose_name = null;
@@ -63,19 +62,20 @@ public class AddTrackerActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
 
-        datasource = new LogDataSource(this);
         Intent intent = getIntent();
         long tracker_id = intent.getLongExtra("tracker_id", -1L);
 
+        LogDataSource datasource = new LogDataSource(this);
         if (tracker_id > -1L) {
             tracker = datasource.getTracker(tracker_id);
         }
 
-        init();
+        init(datasource);
+        datasource.close();
         registerForContextMenu(listView);
     }
 
-    private void init() {
+    private void init(LogDataSource datasource) {
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
         edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
         listView = (ListView) findViewById(R.id.wifi_list_view);
@@ -124,7 +124,9 @@ public class AddTrackerActivity extends AppCompatActivity {
             return true;
         case R.id.action_delete:
             AccessPoint accessPoint = accessPoints.remove(info.position);
+            LogDataSource datasource = new LogDataSource(this);
             datasource.delete(accessPoint);
+            datasource.close();
             accessPointAdapter.notifyDataSetChanged();
             return true;
         default:
@@ -225,6 +227,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         tracker.verbose_name = verbose_name.trim();
         tracker.working_hours = Float.parseFloat(working_hours);
 
+        LogDataSource datasource = new LogDataSource(this);
         datasource.save(tracker);
 
         long tracker_id = tracker.id;
@@ -255,8 +258,9 @@ public class AddTrackerActivity extends AppCompatActivity {
             return false;
         }
 
+        LogDataSource datasource = new LogDataSource(this);
         TrackerEntry other = datasource.getTracker(verbose_name);
-
+        datasource.close();
         if (tracker == null && other != null) { // a tracker with this name already exists
             edit_tracker_verbose_name.setBackgroundColor(RED);
             edit_tracker_verbose_name.invalidate();
