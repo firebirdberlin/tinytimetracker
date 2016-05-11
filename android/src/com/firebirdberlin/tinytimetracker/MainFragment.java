@@ -96,6 +96,15 @@ public class MainFragment extends Fragment {
         Log.i(TAG, "OnTrackerDeleted");
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.remove(event.tracker);
+
+        if (adapter.getCount() > 0) {
+            spinner.setSelection(0, true);
+            TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
+            Log.i(TAG, "Tracker selected " + tracker.verbose_name);
+            EventBus bus = EventBus.getDefault();
+            bus.post(new OnTrackerSelected(tracker));
+        }
+
         adapter.notifyDataSetChanged();
     }
 
