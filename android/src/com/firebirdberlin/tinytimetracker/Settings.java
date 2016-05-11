@@ -8,8 +8,14 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
-public class Settings extends Activity {
+public class Settings extends AppCompatActivity {
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
     public static final String PREF_KEY_LAST_TRACKER_ID = "last_tracker_id";
 
@@ -22,6 +28,21 @@ public class Settings extends Activity {
         .commit();
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
+        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar, root, false);
+        root.addView(toolbar, 0); // insert at top
+
+        toolbar.setTitle(getResources().getString(R.string.action_settings));
+        setSupportActionBar(toolbar);
+
+        // Enable the Up button
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+    }
 
     public static void openSettings(Context context) {
         Intent myIntent = new Intent(context, Settings.class);
