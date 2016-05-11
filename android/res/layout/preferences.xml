@@ -45,8 +45,11 @@
 
         <com.firebirdberlin.tinytimetracker.VersionPreference
             android:key="version"
-            android:selectable="false"
-            android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)"/>
+            android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)">
+            
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
+        </com.firebirdberlin.tinytimetracker.VersionPreference>
 
         <Preference
             android:key="pref_static_credits2"
