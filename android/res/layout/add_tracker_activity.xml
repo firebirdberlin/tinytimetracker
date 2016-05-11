@@ -17,6 +17,7 @@
         <EditText
             android:drawableLeft="@drawable/ic_edit"
             android:drawablePadding="15dip"
+            android:elegantTextHeight="true"
             android:hint="@string/edit_tracker_verbose_name_hint"
             android:id="@+id/edit_tracker_verbose_name"
             android:layout_height="wrap_content"
@@ -33,6 +34,7 @@
         <EditText
             android:drawableLeft="@drawable/ic_clock"
             android:drawablePadding="15dip"
+            android:elegantTextHeight="true"
             android:hint="@string/edit_tracker_working_hours_hint"
             android:id="@+id/edit_tracker_working_hours"
             android:inputType="numberDecimal"
@@ -66,6 +68,7 @@
         android:layout_margin="16dp"
         android:clickable="true"
         android:onClick="onChooseWifi"
-        android:src="@drawable/ic_wifi_add" />
+        android:src="@drawable/ic_wifi_add"/>
+
 </RelativeLayout>
 
