@@ -498,7 +498,7 @@ public class LogDataSource {
             while (!cursor.isAfterLast()) {
                 long timestamp = cursor.getLong(0);
                 long duration_millis = cursor.getLong(1);
-                results.add(new Pair(timestamp, duration_millis));
+                results.add(new Pair<Long, Long>(timestamp, duration_millis));
                 cursor.moveToNext();
             }
         }
@@ -556,7 +556,7 @@ public class LogDataSource {
             if (cursor != null) cursor.close();
         }
 
-        return new Pair(duration_millis, distinct_date_count);
+        return new Pair<Long, Long>(duration_millis, distinct_date_count);
     }
 
     public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long seconds_connection_lost) {

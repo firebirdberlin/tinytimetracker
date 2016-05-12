@@ -35,9 +35,9 @@ public class MainFragment extends Fragment {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         loadTrackers();
-        ArrayAdapter adapter = new ArrayAdapter(getActivity(),
-                                                R.layout.main_spinner,
-                                                trackers);
+        ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
+                                                                            R.layout.main_spinner,
+                                                                            trackers);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -82,9 +82,10 @@ public class MainFragment extends Fragment {
         datasource.close();
     }
 
+    @SuppressWarnings("unchecked")
     public void onEvent(OnTrackerAdded event) {
         Log.i(TAG, "OnTrackerAdded");
-        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);
         adapter.notifyDataSetChanged();
@@ -98,9 +99,10 @@ public class MainFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    @SuppressWarnings("unchecked")
     public void onEvent(OnTrackerDeleted event) {
         Log.i(TAG, "OnTrackerDeleted");
-        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         adapter.remove(event.tracker);
 
         if (adapter.getCount() > 0) {
