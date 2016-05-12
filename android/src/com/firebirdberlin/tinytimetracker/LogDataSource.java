@@ -375,20 +375,6 @@ public class LogDataSource {
         return log_entry;
     }
 
-    public TrackerEntry replaceTrackerEntry(TrackerEntry tracker) {
-        init();
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_ID, tracker.id);
-        values.put(SQLiteHandler.COLUMN_METHOD, "WLAN");
-        values.put(SQLiteHandler.COLUMN_NAME, tracker.ssid);
-        values.put(SQLiteHandler.COLUMN_VERBOSE, tracker.verbose_name);
-        values.put(SQLiteHandler.COLUMN_WORKING_HOURS, tracker.working_hours);
-        values.put(SQLiteHandler.COLUMN_OPERATION_STATE, tracker.operation_state);
-        long id = database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
-        bus.post(new OnTrackerChanged(tracker));
-        return tracker;
-    }
-
     public List<LogEntry> getAllEntries(String name) {
         long tracker_id = getTrackerID(name, "WLAN");
         return getAllEntries(tracker_id);
