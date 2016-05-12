@@ -2,11 +2,18 @@ package com.firebirdberlin.tinytimetracker;
 
 public class TrackerEntry {
     public final static long NOT_SAVED = -1L;
+    public final static int OPERATION_STATE_AUTOMATIC = 0;
+    public final static int OPERATION_STATE_AUTOMATIC_PAUSED = 1;
+    public final static int OPERATION_STATE_AUTOMATIC_RESUMED = 2;
+    public final static int OPERATION_STATE_MANUAL_ACTIVE = 3;
+    public final static int OPERATION_STATE_MANUAL_PAUSED = 4;
+
     public long id;
     public String ssid = "_deprecated_";
     public String verbose_name;
     public String method;
     public float working_hours = 8.f;
+    public int operation_state = OPERATION_STATE_AUTOMATIC;
 
     public TrackerEntry() {
 
