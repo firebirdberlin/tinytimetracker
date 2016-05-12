@@ -95,12 +95,13 @@ public class StatsFragment extends ListFragment {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 
         LogEntry entry = log_entry_adapter.getItem(info.position);
-        LogDataSource datasource = new LogDataSource(mContext);
 
+        LogDataSource datasource = new LogDataSource(mContext);
         switch (item.getItemId()) {
         case R.id.action_delete:
             datasource.delete(entry);
             log_entry_adapter.remove(entry);
+            datasource.close();
             return true;
         case R.id.action_edit:
             EditLogEntryDialogFragment dialogFragment = new EditLogEntryDialogFragment();
@@ -114,6 +115,7 @@ public class StatsFragment extends ListFragment {
             }
 
             dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
+            datasource.close();
             return true;
         case R.id.action_join:
             if ( info.position < log_entry_adapter.getCount() ) {
@@ -124,8 +126,10 @@ public class StatsFragment extends ListFragment {
                 datasource.delete(entry);
                 log_entry_adapter.remove(entry);
             }
+            datasource.close();
             return true;
         default:
+            datasource.close();
             return super.onContextItemSelected(item);
         }
     }
@@ -141,10 +145,11 @@ public class StatsFragment extends ListFragment {
 
         two_column_adapter.clear();
         setListAdapter(two_column_adapter);
-        LogDataSource datasource = new LogDataSource(mContext);
 
         if (currentTracker != null) {
+            LogDataSource datasource = new LogDataSource(mContext);
             List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(currentTracker.id, aggregation_type);
+            datasource.close();
 
             for (Pair<Long, Long> e : values) {
                 UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
@@ -178,9 +183,10 @@ public class StatsFragment extends ListFragment {
         log_entry_adapter.clear();
         setListAdapter(log_entry_adapter);
 
-        LogDataSource datasource = new LogDataSource(mContext);
         if (currentTracker != null) {
+            LogDataSource datasource = new LogDataSource(mContext);
             List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
+            datasource.close();
             log_entry_adapter.addAll(values);
         }
 

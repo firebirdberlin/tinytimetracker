@@ -42,10 +42,7 @@ public class MainFragment extends Fragment {
         spinner.setAdapter(adapter);
 
         long lastTrackerID = Settings.getLastTrackerID(getActivity());
-        if (trackerIDToSelectionIDMap.containsKey(lastTrackerID)) {
-            int item = trackerIDToSelectionIDMap.get(lastTrackerID);
-            spinner.setSelection(item);
-        }
+        setSelection(lastTrackerID);
 
         spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -61,6 +58,13 @@ public class MainFragment extends Fragment {
         });
         timeView = (MainView) v.findViewById(R.id.main_time_view);
         return v;
+    }
+
+    void setSelection(long trackerID) {
+        if (trackerIDToSelectionIDMap.containsKey(trackerID)) {
+            int item = trackerIDToSelectionIDMap.get(trackerID);
+            spinner.setSelection(item);
+        }
     }
 
     private void loadTrackers() {
@@ -81,8 +85,10 @@ public class MainFragment extends Fragment {
     public void onEvent(OnTrackerAdded event) {
         Log.i(TAG, "OnTrackerAdded");
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);
         adapter.notifyDataSetChanged();
+        setSelection(event.tracker.id);
     }
 
     public void onEvent(OnTrackerChanged event) {
@@ -96,6 +102,15 @@ public class MainFragment extends Fragment {
         Log.i(TAG, "OnTrackerDeleted");
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.remove(event.tracker);
+
+        if (adapter.getCount() > 0) {
+            spinner.setSelection(0, true);
+            TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
+            Log.i(TAG, "Tracker selected " + tracker.verbose_name);
+            EventBus bus = EventBus.getDefault();
+            bus.post(new OnTrackerSelected(tracker));
+        }
+
         adapter.notifyDataSetChanged();
     }
 

@@ -1,9 +1,12 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Build;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
@@ -21,6 +24,7 @@ interface FileChooserListener {
 public class SettingsFragment extends PreferenceFragment {
     public static final String TAG = TinyTimeTracker.TAG + ".SettingsFragment";
     private String result = null;
+    private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
 
 
     @Override
@@ -31,8 +35,15 @@ public class SettingsFragment extends PreferenceFragment {
         Preference pref_data_export = (Preference) findPreference("pref_key_data_export");
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                DbImportExport.exportDb();
-                toggleEnabledState();
+               
+                if ( ! hasPermissionWriteExternalStorage() ) {
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
+                                       PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                } else {
+                    DbImportExport.exportDb();
+                    toggleEnabledState();
+                }
+
                 return true;
             }
         });
@@ -62,12 +73,46 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
     }
+    
+    private boolean hasPermissionWriteExternalStorage() {
+        if (Build.VERSION.SDK_INT >= 23 ) {
+            return ( getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED );
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "permission WRITE_EXTERNAL_STORAGE granted");
+                    DbImportExport.exportDb();
+                    toggleEnabledState();
+                } else {
+                    Log.e(TAG, "permission WRITE_EXTERNAL_STORAGE denied");
+                }
+                return;
+            }
+        }
+    }
 
     private void toggleEnabledState() {
+        boolean enabled = false;
         Preference pref_data_import = (Preference) findPreference("pref_key_data_import");
         Preference pref_data_share = (Preference) findPreference("pref_key_data_share");
-        File[] files = DbImportExport.listFiles();
-        boolean enabled = (files.length > 0);
+        if (hasPermissionWriteExternalStorage() ) {
+            Log.d(TAG, "YES");
+            File[] files = DbImportExport.listFiles();
+            enabled = (files.length > 0);
+        } else {
+        
+            Log.d(TAG, "NO");
+        }
+
         pref_data_share.setEnabled(enabled);
         pref_data_import.setEnabled(enabled);
     }

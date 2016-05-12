@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -12,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -20,36 +22,48 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.System;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.support.v7.widget.Toolbar;
 import de.greenrobot.event.EventBus;
+import java.util.Calendar;
 import java.util.List;
 
 
-public class TinyTimeTracker extends FragmentActivity {
+public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
-    private static LogDataSource datasource = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        // runtime permissions for the WifiService
+        requestServicePermissions();
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
+
         bus.register(this);
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
+
     }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
@@ -79,17 +93,13 @@ public class TinyTimeTracker extends FragmentActivity {
     public void onResume() {
         super.onResume();
 
-        if (datasource == null) {
-            datasource = new LogDataSource(this);
-        }
-
+        LogDataSource datasource = new LogDataSource(this);
         List<TrackerEntry> trackers = datasource.getTrackers();
+        datasource.close();
     }
 
     @Override
     public void onPause() {
-        datasource.close();
-        datasource = null;
         super.onPause();
     }
 
@@ -118,6 +128,7 @@ public class TinyTimeTracker extends FragmentActivity {
             Utility.isPackageInstalled(this, "com.getpebble.android") ||
             Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -159,6 +170,7 @@ public class TinyTimeTracker extends FragmentActivity {
             return;
         }
 
+        final Context mContext = this;
         new AlertDialog.Builder(this)
         .setTitle(this.getResources().getString(R.string.confirm_delete)
                   + " '" + currentTracker.verbose_name + "'")
@@ -167,7 +179,9 @@ public class TinyTimeTracker extends FragmentActivity {
         .setNegativeButton(android.R.string.no, null)
         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
+                LogDataSource datasource = new LogDataSource(mContext);
                 datasource.delete(currentTracker);
+                datasource.close();
             }
         }).show();
     }
@@ -192,10 +206,50 @@ public class TinyTimeTracker extends FragmentActivity {
         startActivity(intent);
     }
 
-    public static void startService(Context context) {
-        Intent intent = new Intent(context, WiFiService.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startService(intent);
+    public static boolean startService(Context context) {
+        if (hasPermission(context, Manifest.permission.WAKE_LOCK) 
+                && hasPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+            Intent intent = new Intent(context, WiFiService.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startService(intent);
+            return true;
+        } 
+        return false;
+    }
+
+    private void requestServicePermissions() {
+        checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
+        checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
+
+        try {
+            long installed = getPackageManager().getPackageInfo(getPackageName(), 0).firstInstallTime;
+            if (installed < getDateAsLong(2016, 6, 1)) {
+                checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 1);
+            }
+        }
+        catch (NameNotFoundException e ) {
+        }
+    }
+
+    public long getDateAsLong(int year, int month, int day) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.DAY_OF_MONTH, day);
+            calendar.set(Calendar.MONTH, month - 1);
+            calendar.set(Calendar.YEAR, year);
+            return calendar.getTimeInMillis();
+    }
+
+    public static void checkAndRequestPermission(Activity activity, String permission, 
+                                                 int requestCode) {
+        if (! hasPermission((Context) activity, permission) ) {
+            ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
+        }
+    }
+
+    public static boolean hasPermission(Context context, String permission) {
+        return (ContextCompat.checkSelfPermission(context, permission)
+                 == PackageManager.PERMISSION_GRANTED);
     }
 
     public static void scheduleWiFiService(Context context) {

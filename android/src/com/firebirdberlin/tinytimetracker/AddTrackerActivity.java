@@ -1,69 +1,84 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.PorterDuff;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import android.view.inputmethod.InputMethodManager;
 
-public class AddTrackerActivity extends ListActivity {
+public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
     private TrackerEntry tracker = null;
-    private LogDataSource datasource = null;
     private AccessPointAdapter accessPointAdapter = null;
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
-    private Button button_wifi = null;
     private EditText edit_tracker_verbose_name = null;
     private EditText edit_tracker_working_hours = null;
+    private ListView listView = null;
 
     private final int RED = Color.parseColor("#AAC0392B");
     private final int BLUE = Color.parseColor("#3498db");
+    private final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
-        registerForContextMenu(this.getListView());
-        datasource = new LogDataSource(this);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(getResources().getString(R.string.action_edit));
+
+        setSupportActionBar(toolbar);
+
+        // Enable the Up button
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+
         Intent intent = getIntent();
         long tracker_id = intent.getLongExtra("tracker_id", -1L);
 
+        LogDataSource datasource = new LogDataSource(this);
         if (tracker_id > -1L) {
             tracker = datasource.getTracker(tracker_id);
         }
 
-        init();
+        init(datasource);
+        datasource.close();
+        registerForContextMenu(listView);
     }
 
-    private void init() {
+    private void init(LogDataSource datasource) {
         edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
         edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
-        button_wifi = (Button) findViewById(R.id.button_wifi);
-        setWifiIconColor(BLUE);
-
+        listView = (ListView) findViewById(R.id.wifi_list_view);
         if (tracker != null) {
             edit_tracker_verbose_name.setText(tracker.verbose_name);
             edit_tracker_working_hours.setText(String.valueOf(tracker.working_hours));
@@ -71,7 +86,25 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
-        setListAdapter(accessPointAdapter);
+        listView.setAdapter(accessPointAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.add_tracker_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_ok:
+                onClickOk(null);
+                return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -87,11 +120,13 @@ public class AddTrackerActivity extends ListActivity {
 
         switch (item.getItemId()) {
         case R.id.action_add:
-            onChooseWifi(button_wifi);
+            onChooseWifi(null);
             return true;
         case R.id.action_delete:
             AccessPoint accessPoint = accessPoints.remove(info.position);
+            LogDataSource datasource = new LogDataSource(this);
             datasource.delete(accessPoint);
+            datasource.close();
             accessPointAdapter.notifyDataSetChanged();
             return true;
         default:
@@ -99,7 +134,28 @@ public class AddTrackerActivity extends ListActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_COARSE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "permission ACCESS_COARSE_LOCATION granted");
+                    onChooseWifi(null);
+                } else {
+                    Log.e(TAG, "permission ACCESS_COARSE_LOCATION denied");
+                }
+                return;
+            }
+        }
+    }
+
     public void onChooseWifi(View v) {
+        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 
+                                                  PERMISSIONS_REQUEST_COARSE_LOCATION);
+        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return; 
+
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
                 accessPoints);
@@ -132,7 +188,6 @@ public class AddTrackerActivity extends ListActivity {
                 accessPointAdapter.add(accessPoint);
                 adapter.remove(accessPoint);
                 adapter.notifyDataSetChanged();
-                setWifiIconColor(BLUE);
 
                 if (edit_tracker_working_hours.length() == 0) {
                     edit_tracker_working_hours.requestFocus();
@@ -169,9 +224,10 @@ public class AddTrackerActivity extends ListActivity {
 
         // when saving the account the deprecated fields shall no longer contain useful data
         tracker.ssid = "_deprecated_";
-        tracker.verbose_name = verbose_name;
+        tracker.verbose_name = verbose_name.trim();
         tracker.working_hours = Float.parseFloat(working_hours);
 
+        LogDataSource datasource = new LogDataSource(this);
         datasource.save(tracker);
 
         long tracker_id = tracker.id;
@@ -202,13 +258,9 @@ public class AddTrackerActivity extends ListActivity {
             return false;
         }
 
-        if (accessPoints.size() == 0) {
-            setWifiIconColor(RED);
-            return false;
-        }
-
+        LogDataSource datasource = new LogDataSource(this);
         TrackerEntry other = datasource.getTracker(verbose_name);
-
+        datasource.close();
         if (tracker == null && other != null) { // a tracker with this name already exists
             edit_tracker_verbose_name.setBackgroundColor(RED);
             edit_tracker_verbose_name.invalidate();
@@ -222,18 +274,6 @@ public class AddTrackerActivity extends ListActivity {
         }
 
         return true;
-    }
-
-    private void setWifiIconColor(int color) {
-        Resources res = getResources();
-        Drawable icon = res.getDrawable(R.drawable.ic_wifi_add);
-        icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        button_wifi.setBackgroundResource(R.drawable.ic_wifi_add);
-        button_wifi.invalidate();
-        edit_tracker_verbose_name.setBackgroundColor(Color.TRANSPARENT);
-        edit_tracker_working_hours.setBackgroundColor(Color.TRANSPARENT);
-        edit_tracker_verbose_name.invalidate();
-        edit_tracker_working_hours.invalidate();
     }
 
     public static void open(Context context) {
