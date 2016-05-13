@@ -27,6 +27,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private ImageButton button_toggle_wifi = null;
     private Spinner spinner = null;
     private MainView timeView = null;
+    private View trackerToolbar = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
     EventBus bus = EventBus.getDefault();
@@ -38,8 +39,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         bus.register(this);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
+        trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = (ImageButton) v.findViewById(R.id.button_toggle_wifi);
         button_toggle_wifi.setOnClickListener(this);
+        trackerToolbar.setVisibility(View.GONE);
         loadTrackers();
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
                                                                             R.layout.main_spinner,
@@ -149,6 +152,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         if ( event == null || event.newTracker == null) return;
+
+        trackerToolbar.setVisibility(View.VISIBLE);
+
         setWifiIndicator(event.newTracker);
     }
 
@@ -157,6 +163,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         Log.i(TAG, "OnTrackerDeleted");
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         adapter.remove(event.tracker);
+        trackerToolbar.setVisibility(View.GONE);
 
         if (adapter.getCount() > 0) {
             spinner.setSelection(0, true);
