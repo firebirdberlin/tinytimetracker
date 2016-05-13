@@ -18,6 +18,8 @@
     <string name="dialog_title_wifi_networks">Aktive WLAN Netzwerke</string>
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
+    <string name="label_auto_detection_on">Auto-Erkennung an</string>
+    <string name="label_auto_detection_off">Auto-Erkennung aus</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Tag</string>
     <string name="aggregation_week">Woche</string>

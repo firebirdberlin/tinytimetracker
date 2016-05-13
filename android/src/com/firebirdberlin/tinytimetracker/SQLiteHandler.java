@@ -13,6 +13,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_WORKING_HOURS = "working_hours";
     public static final String COLUMN_VERBOSE = "verbose_name";
+    public static final String COLUMN_OPERATION_STATE = "operation_state";
 
     public static final String TABLE_LOGS = "logs";
     public static final String COLUMN_TIMESTAMP_END = "timestamp_end";
@@ -24,7 +25,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String COLUMN_BSSID = "bssid";
 
     private static final String DATABASE_NAME = "trackers.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRACKERS =
@@ -33,7 +34,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         + COLUMN_METHOD + " TEXT not null, "
         + COLUMN_NAME + " TEXT not null, "
         + COLUMN_WORKING_HOURS + " REAL not null, "
-        + COLUMN_VERBOSE + " TEXT not null);";
+        + COLUMN_VERBOSE + " TEXT not null, "
+        + COLUMN_OPERATION_STATE + " INTEGER not null);";
 
     private static final String DATABASE_CREATE_LOGS =
         "CREATE TABLE " + TABLE_LOGS + "("
@@ -77,6 +79,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         if (oldVersion < 4 && newVersion >= 4) {
             db.execSQL("ALTER TABLE " + TABLE_TRACKERS + " ADD COLUMN " + COLUMN_WORKING_HOURS + " REAL DEFAULT 8 NOT NULL");
+        }
+
+        if (oldVersion < 5 && newVersion >= 5) {
+            db.execSQL("ALTER TABLE " + TABLE_TRACKERS + " ADD COLUMN " + COLUMN_OPERATION_STATE + " INTEGER DEFAULT 0 NOT NULL");
             return;
         }
 

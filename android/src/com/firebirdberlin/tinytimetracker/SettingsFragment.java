@@ -35,9 +35,9 @@ public class SettingsFragment extends PreferenceFragment {
         Preference pref_data_export = (Preference) findPreference("pref_key_data_export");
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-               
+
                 if ( ! hasPermissionWriteExternalStorage() ) {
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                        PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                 } else {
                     DbImportExport.exportDb();
@@ -73,7 +73,7 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
     }
-    
+
     private boolean hasPermissionWriteExternalStorage() {
         if (Build.VERSION.SDK_INT >= 23 ) {
             return ( getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -105,12 +105,8 @@ public class SettingsFragment extends PreferenceFragment {
         Preference pref_data_import = (Preference) findPreference("pref_key_data_import");
         Preference pref_data_share = (Preference) findPreference("pref_key_data_share");
         if (hasPermissionWriteExternalStorage() ) {
-            Log.d(TAG, "YES");
             File[] files = DbImportExport.listFiles();
-            enabled = (files.length > 0);
-        } else {
-        
-            Log.d(TAG, "NO");
+            enabled = (files != null && files.length > 0);
         }
 
         pref_data_share.setEnabled(enabled);
@@ -120,7 +116,7 @@ public class SettingsFragment extends PreferenceFragment {
     public void chooseFile(final FileChooserListener fileChooserListener) {
         final File file_list[] = DbImportExport.listFiles();
 
-        if (file_list.length == 0) {
+        if (file_list == null || file_list.length == 0) {
             return;
         }
 

@@ -9,6 +9,22 @@
         android:layout_width="match_parent"
         android:layout_height="80dip"/>
 
+    <RelativeLayout android:id="@+id/tracker_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+        <Button
+            android:id="@+id/button_toggle_wifi"
+            android:layout_centerInParent="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:drawableLeft="@drawable/ic_wifi"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:text="@string/label_auto_detection_on"
+            weight="5"
+            />
+    </RelativeLayout>
+
     <com.firebirdberlin.tinytimetracker.MainView
         android:id="@+id/main_time_view"
         android:layout_width="wrap_content"

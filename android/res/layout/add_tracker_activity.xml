@@ -14,6 +14,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_tracker_verbose_name_hint"/>
+
         <EditText
             android:drawableLeft="@drawable/ic_edit"
             android:drawablePadding="15dip"

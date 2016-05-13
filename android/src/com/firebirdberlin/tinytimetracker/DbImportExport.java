@@ -47,6 +47,7 @@ public class DbImportExport {
         Log.d(TAG, "exportDb()");
 
         if( ! SdIsPresent() ) {
+            Log.d(TAG, "Failure: Storage device is not writable.");
             return false;
         }
 
@@ -164,11 +165,13 @@ public class DbImportExport {
 
         File[] files = DbImportExport.DATABASE_DIRECTORY.listFiles(filter);
         // sort by descending modified time
-        Arrays.sort(files, new Comparator<File>() {
-            public int compare(File f1, File f2) {
-                return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
-            }
-        });
+        if (files != null) {
+            Arrays.sort(files, new Comparator<File>() {
+                public int compare(File f1, File f2) {
+                    return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
+                }
+            });
+        }
         return files;
     }
 

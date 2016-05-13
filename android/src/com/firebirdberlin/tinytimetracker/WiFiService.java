@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -173,20 +174,16 @@ public class WiFiService extends Service {
     }
 
     private void getWiFiNetworks() {
-        EventBus bus = EventBus.getDefault();
         datasource = new LogDataSource(this);
         datasource.open();
 
         String formattedWorkTime = "";
         String trackerVerboseName = "";
-        long now = System.currentTimeMillis();
+
         Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate();
+        updateTrackers(trackersToUpdate);
 
-        for (TrackerEntry tracker: trackersToUpdate) {
-            LogEntry log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
-            bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
-        }
-
+        long now = System.currentTimeMillis();
         boolean network_found = (trackersToUpdate.size() > 0);
 
         if ( !network_found ) {
@@ -216,6 +213,7 @@ public class WiFiService extends Service {
             trackerVerboseName = tracker.verbose_name;
         }
 
+        EventBus bus = EventBus.getDefault();
         bus.post(new OnWifiUpdateCompleted());
         updateNotification(formattedWorkTime, trackerVerboseName);
 
@@ -259,6 +257,31 @@ public class WiFiService extends Service {
         }
 
         return trackersToUpdate;
+    }
+
+    private void updateTrackers(Set<TrackerEntry> trackersToUpdate) {
+        EventBus bus = EventBus.getDefault();
+        long now = System.currentTimeMillis();
+        for (TrackerEntry tracker: trackersToUpdate) {
+            LogEntry log_entry = null;
+            switch (tracker.operation_state) {
+
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC:
+                    log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
+                    break;
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+                    log_entry = datasource.addTimeStamp(tracker, now, 0);
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
+                    datasource.save(tracker);
+                    break;
+                default: // obviously the operation state is 'manual'
+                    break;
+            }
+
+            if (log_entry != null) {
+                bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
+            }
+        }
     }
 
     private UnixTimestamp evaluateDurationToday(TrackerEntry tracker) {
