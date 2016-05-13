@@ -566,7 +566,8 @@ public class LogDataSource {
             return null;
         }
 
-        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker.id) + ", " + String.valueOf(timestamp) + ", " + String.valueOf(seconds_connection_lost) + ")");
+        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker.id) + ", " + String.valueOf(timestamp) +
+                   ", " + String.valueOf(seconds_connection_lost) + ")");
         LogEntry log = getLatestLogEntry(tracker.id);
 
         if (log != null) {
