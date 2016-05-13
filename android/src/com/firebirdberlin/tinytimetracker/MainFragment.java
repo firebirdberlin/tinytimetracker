@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import de.greenrobot.event.EventBus;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
-    private ImageButton button_toggle_wifi = null;
+    private Button button_toggle_wifi = null;
     private Spinner spinner = null;
     private MainView timeView = null;
     private View trackerToolbar = null;
@@ -40,7 +40,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
-        button_toggle_wifi = (ImageButton) v.findViewById(R.id.button_toggle_wifi);
+        button_toggle_wifi = (Button) v.findViewById(R.id.button_toggle_wifi);
         button_toggle_wifi.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
         loadTrackers();
@@ -100,12 +100,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
             switch (tracker.operation_state) {
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                    button_toggle_wifi.setImageResource(R.drawable.ic_wifi);
+                    button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi, 0, 0, 0);
+                    button_toggle_wifi.setText(R.string.label_auto_detection_on);
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED;
                     break;
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC:
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                    button_toggle_wifi.setImageResource(R.drawable.ic_no_wifi);
+                    button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
+                    button_toggle_wifi.setText(R.string.label_auto_detection_off);
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
                 default:
                     break;
@@ -121,11 +123,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private void setWifiIndicator(TrackerEntry tracker) {
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                button_toggle_wifi.setImageResource(R.drawable.ic_no_wifi);
+                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
+                button_toggle_wifi.setText(R.string.label_auto_detection_off);
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC:
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                button_toggle_wifi.setImageResource(R.drawable.ic_wifi);
+                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi, 0, 0, 0);
+                button_toggle_wifi.setText(R.string.label_auto_detection_on);
             default:
                 break;
         }

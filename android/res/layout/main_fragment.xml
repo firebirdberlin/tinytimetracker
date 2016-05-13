@@ -13,24 +13,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         xmlns:android="http://schemas.android.com/apk/res/android">
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_play"
-            android:layout_centerInParent="true"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            weight="5"
-            />
-
-
-        <ImageButton
+        <Button
             android:id="@+id/button_toggle_wifi"
-            android:layout_width="wrap_content"
+            android:layout_centerInParent="true"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_wifi"
-            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:drawableLeft="@drawable/ic_wifi"
             style="@style/Widget.AppCompat.Button.Borderless"
+            android:text="@string/label_auto_detection_on"
             weight="5"
             />
     </RelativeLayout>

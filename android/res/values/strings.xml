@@ -18,6 +18,8 @@
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
     <string name="dialog_title_database_backup">Database files</string>
     <string name="dialog_title_share_database">Select an application</string>
+    <string name="label_auto_detection_on">Auto detection ON</string>
+    <string name="label_auto_detection_off">Auto detection OFF</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Day</string>
     <string name="aggregation_week">Week</string>
