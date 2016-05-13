@@ -6,10 +6,12 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import de.greenrobot.event.EventBus;
@@ -19,8 +21,10 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 
-public class MainFragment extends Fragment {
+
+public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
+    private ImageButton button_toggle_wifi = null;
     private Spinner spinner = null;
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
@@ -34,6 +38,8 @@ public class MainFragment extends Fragment {
         bus.register(this);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
+        button_toggle_wifi = (ImageButton) v.findViewById(R.id.button_toggle_wifi);
+        button_toggle_wifi.setOnClickListener(this);
         loadTrackers();
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
                                                                             R.layout.main_spinner,
@@ -82,6 +88,47 @@ public class MainFragment extends Fragment {
         datasource.close();
     }
 
+    @Override
+    public void onClick(View v) {
+        if ( v.equals(button_toggle_wifi) ) {
+            Log.i(TAG, "onClickToggleWifi clicked");
+            TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
+            if (tracker == null) return;
+
+            switch (tracker.operation_state) {
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
+                    button_toggle_wifi.setImageResource(R.drawable.ic_wifi);
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED;
+                    break;
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC:
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+                    button_toggle_wifi.setImageResource(R.drawable.ic_no_wifi);
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
+                default:
+                    break;
+            }
+            LogDataSource datasource = new LogDataSource(getActivity());
+            datasource.save(tracker);
+            datasource.close();
+            button_toggle_wifi.invalidate();
+            Log.i(TAG, "onClickToggleWifi click done ...");
+        }
+    }
+
+    private void setWifiIndicator(TrackerEntry tracker) {
+        switch (tracker.operation_state) {
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
+                button_toggle_wifi.setImageResource(R.drawable.ic_no_wifi);
+                break;
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC:
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+                button_toggle_wifi.setImageResource(R.drawable.ic_wifi);
+            default:
+                break;
+        }
+        button_toggle_wifi.invalidate();
+    }
+
     @SuppressWarnings("unchecked")
     public void onEvent(OnTrackerAdded event) {
         Log.i(TAG, "OnTrackerAdded");
@@ -97,6 +144,12 @@ public class MainFragment extends Fragment {
         loadTrackers();
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.notifyDataSetChanged();
+    }
+
+    public void onEvent(OnTrackerSelected event) {
+        Log.i(TAG, "OnTrackerSelected");
+        if ( event == null || event.newTracker == null) return;
+        setWifiIndicator(event.newTracker);
     }
 
     @SuppressWarnings("unchecked")
