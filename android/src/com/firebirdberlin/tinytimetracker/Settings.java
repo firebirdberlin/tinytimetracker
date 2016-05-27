@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 public class Settings extends AppCompatActivity {
+    public static final String PREF_KEY_AUTO_DISABLE_WIFI = "pref_key_auto_disable_wifi";
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
     public static final String PREF_KEY_LAST_TRACKER_ID = "last_tracker_id";
 
@@ -53,6 +54,11 @@ public class Settings extends AppCompatActivity {
     public static boolean showNotifications(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);
+    }
+
+    public static boolean autoDisableWifi(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return settings.getBoolean(Settings.PREF_KEY_AUTO_DISABLE_WIFI, false);
     }
 
     public static long getLastTrackerID(Context context) {
