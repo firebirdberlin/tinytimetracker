@@ -47,7 +47,7 @@ public class WiFiService extends Service {
     private LogDataSource datasource = null;
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
-
+    boolean tracked_wifi_network_found = false;
 
     @Override
     public void onCreate() {
@@ -120,7 +120,7 @@ public class WiFiService extends Service {
         handler.removeCallbacks(stopOnTimeout);
         unregister(wifiReceiver);
 
-        if ( wifiWasEnabled && wifiManager.isWifiEnabled() ) {
+        if ( shallDisableWifi() ) {
             wifiManager.setWifiEnabled(false);
         }
 
@@ -131,6 +131,19 @@ public class WiFiService extends Service {
         wifiLock = null;
         Log.i(TAG, "Bye bye.");
     }
+
+    private boolean shallDisableWifi() {
+        boolean autoDisableWifi = Settings.autoDisableWifi(mContext);
+
+        if ( autoDisableWifi && !tracked_wifi_network_found ) {
+            return true;
+        } else
+        if ( !autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled() ) {
+            return true;
+        }
+        return false;
+    }
+
 
     private Runnable stopOnTimeout = new Runnable() {
         @Override
@@ -184,9 +197,9 @@ public class WiFiService extends Service {
         updateTrackers(trackersToUpdate);
 
         long now = System.currentTimeMillis();
-        boolean network_found = (trackersToUpdate.size() > 0);
+        this.tracked_wifi_network_found = (trackersToUpdate.size() > 0);
 
-        if ( !network_found ) {
+        if ( !this.tracked_wifi_network_found ) {
             Log.i(TAG, "No network found.");
             // user has left the office for less than 90 mins
             long last_tracker_id = settings.getLong("last_tracker_id", -1L);

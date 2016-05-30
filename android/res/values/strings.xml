@@ -38,6 +38,7 @@
     <string name="pref_title_seconds_connection_lost">Absence time</string>
     <string name="pref_summary_seconds_connection_lost">Time after which absence is detected.</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
+    <string name="pref_title_auto_disable_wifi">Automatically disable WiFi</string>
     <string name="pref_title_show_notifications">Notifications</string>
     <string name="pref_summary_show_notifications">Show notifications in the notification area.</string>
     <string name="pref_title_working_hours">Working hours</string>

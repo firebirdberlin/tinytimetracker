@@ -30,7 +30,6 @@
     <string name="edit_tracker_access_point_list">Zugeordnete Access Points</string>
     <string name="pref_wifi_settings">WLAN</string>
     <string name="pref_worktime_settings">Arbeitszeit</string>
-    <string name="pref_notification_settings">Benachrichtigungen</string>
     <string name="pref_data_export">Sichern und Wiederherstellen</string>
     <string name="pref_title_export">Datenbankexport</string>
     <string name="pref_title_import">Datenbankimport</string>
@@ -38,8 +37,8 @@
     <string name="pref_credits">Über</string>
     <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
     <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
-    <string name="pref_summary_notification_interval_minutes">Wie oft möchten Sie benachrichtigt werden ?</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
+    <string name="pref_title_auto_disable_wifi">WLAN automatisch ausschalten</string>
     <string name="pref_title_show_notifications">Benachrichtigungen</string>
     <string name="pref_summary_show_notifications">Zeige Benachrichtigungen an.</string>
     <string name="pref_title_working_hours">Arbeitsstunden</string>

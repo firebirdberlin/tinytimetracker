@@ -19,6 +19,11 @@
             android:key="pref_key_show_notifications"
             android:disableDependentsState="false" />
 
+        <SwitchPreference
+            android:key="pref_key_auto_disable_wifi"
+            android:title="@string/pref_title_auto_disable_wifi"
+            android:defaultValue="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -46,7 +51,7 @@
         <com.firebirdberlin.tinytimetracker.VersionPreference
             android:key="version"
             android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)">
-            
+
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
         </com.firebirdberlin.tinytimetracker.VersionPreference>
