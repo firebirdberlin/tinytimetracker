@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,6 +28,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Button button_toggle_wifi = null;
     private Spinner spinner = null;
     private MainView timeView = null;
+    private TextView textviewMeanDuration = null;
+    private TextView textviewSaldo = null;
+    private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
@@ -39,6 +43,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         bus.register(this);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
+        textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
+        textviewSaldo = (TextView) v.findViewById(R.id.textview_saldo);
         trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = (Button) v.findViewById(R.id.button_toggle_wifi);
         button_toggle_wifi.setOnClickListener(this);
@@ -150,16 +156,29 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         Log.i(TAG, "OnTrackerChanged");
         loadTrackers();
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+
         adapter.notifyDataSetChanged();
+        if (currentTracker != null && currentTracker.id == event.tracker.id) {
+            updateStatisticalValues(currentTracker);
+        }
     }
 
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         if ( event == null || event.newTracker == null) return;
-
+        currentTracker = event.newTracker;
         trackerToolbar.setVisibility(View.VISIBLE);
 
         setWifiIndicator(event.newTracker);
+        updateStatisticalValues(event.newTracker);
+
+    }
+
+    public void onEvent(OnWifiUpdateCompleted event) {
+        if ( currentTracker == null ) return;
+        if (event.success && currentTracker.equals(event.tracker)) {
+            updateStatisticalValues(event.tracker);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -180,10 +199,46 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         adapter.notifyDataSetChanged();
     }
 
+    public void onEvent(OnLogEntryDeleted event) {
+        if ( currentTracker != null && currentTracker.id == event.tracker_id ) {
+            updateStatisticalValues(currentTracker);
+        }
+    }
+
+    public void onEvent(OnLogEntryChanged event) {
+        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
+            updateStatisticalValues(currentTracker);
+        }
+    }
     public void onEvent(OnDatabaseImported event) {
         Log.i(TAG, "OnDatabaseImported");
         loadTrackers();
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.notifyDataSetChanged();
+    }
+
+    private void updateStatisticalValues(TrackerEntry tracker){
+        UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
+        LogDataSource datasource = new LogDataSource(getActivity());
+        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), tracker.id);
+        datasource.close();
+        long meanDurationMillis = tracker.getMeanDurationMillis(totalDurationPair.first, totalDurationPair.second);
+        UnixTimestamp meanDuration = new UnixTimestamp(meanDurationMillis);
+        String text = meanDuration.durationAsHours();
+        textviewMeanDuration.setText(text);
+
+
+        int workingHoursInSeconds = (int) (tracker.working_hours * 3600.f);
+        if ( workingHoursInSeconds > 0 ) {
+            Long overTimeMillis = tracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
+            UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
+
+            String sign = (overTimeMillis < 0 ) ? "- ": "+ ";
+            String textSaldo = sign + overtime.durationAsHours();
+            textviewSaldo.setText(textSaldo);
+            textviewSaldo.setVisibility(View.VISIBLE);
+        } else {
+            textviewSaldo.setVisibility(View.INVISIBLE);
+        }
     }
 }

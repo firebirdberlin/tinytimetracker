@@ -350,7 +350,7 @@ public class LogDataSource {
         init();
         int rows_affected = database.delete(SQLiteHandler.TABLE_LOGS, "_id=?",
                                             new String[] {String.valueOf(logEntry.id)});
-        bus.post(new OnLogEntryDeleted(logEntry.id));
+        bus.post(new OnLogEntryDeleted(logEntry.tracker_id, logEntry.id));
         return (rows_affected > 0);
     }
 
