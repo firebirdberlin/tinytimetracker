@@ -79,6 +79,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if (trackerIDToSelectionIDMap.containsKey(trackerID)) {
             int item = trackerIDToSelectionIDMap.get(trackerID);
             spinner.setSelection(item);
+            TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(item);
+            Log.i(TAG, "Tracker selected " + tracker.verbose_name);
+            EventBus bus = EventBus.getDefault();
+            bus.post(new OnTrackerSelected(tracker));
         }
     }
 
@@ -171,7 +175,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         setWifiIndicator(event.newTracker);
         updateStatisticalValues(event.newTracker);
-
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
@@ -210,6 +213,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             updateStatisticalValues(currentTracker);
         }
     }
+
     public void onEvent(OnDatabaseImported event) {
         Log.i(TAG, "OnDatabaseImported");
         loadTrackers();
