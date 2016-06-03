@@ -207,14 +207,14 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     public static boolean startService(Context context) {
-        if (hasPermission(context, Manifest.permission.WAKE_LOCK) 
+        if (hasPermission(context, Manifest.permission.WAKE_LOCK)
                 && hasPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)) {
 
             Intent intent = new Intent(context, WiFiService.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startService(intent);
             return true;
-        } 
+        }
         return false;
     }
 
@@ -240,7 +240,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             return calendar.getTimeInMillis();
     }
 
-    public static void checkAndRequestPermission(Activity activity, String permission, 
+    public static void checkAndRequestPermission(Activity activity, String permission,
                                                  int requestCode) {
         if (! hasPermission((Context) activity, permission) ) {
             ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);

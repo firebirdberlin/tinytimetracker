@@ -65,7 +65,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 TrackerEntry tracker = (TrackerEntry) parentView.getItemAtPosition(position);
                 Log.i(TAG, "Tracker selected " + tracker.verbose_name);
                 EventBus bus = EventBus.getDefault();
-                bus.post(new OnTrackerSelected(tracker));
+                bus.postSticky(new OnTrackerSelected(tracker));
             }
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
@@ -82,7 +82,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(item);
             Log.i(TAG, "Tracker selected " + tracker.verbose_name);
             EventBus bus = EventBus.getDefault();
-            bus.post(new OnTrackerSelected(tracker));
+            bus.postSticky(new OnTrackerSelected(tracker));
         }
     }
 
@@ -196,7 +196,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
             Log.i(TAG, "Tracker selected " + tracker.verbose_name);
             EventBus bus = EventBus.getDefault();
-            bus.post(new OnTrackerSelected(tracker));
+            bus.postSticky(new OnTrackerSelected(tracker));
         }
 
         adapter.notifyDataSetChanged();
