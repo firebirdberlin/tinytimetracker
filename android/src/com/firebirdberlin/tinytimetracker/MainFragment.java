@@ -157,6 +157,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
             datasource.save(tracker);
             datasource.close();
+
             setClockinStateIndicator(tracker);
             setWifiIndicator(tracker);
             Log.i(TAG, "button_toggle_clockin_state click done ...");

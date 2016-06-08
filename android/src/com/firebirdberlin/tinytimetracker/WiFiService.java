@@ -70,6 +70,9 @@ public class WiFiService extends Service {
             wifiLock.acquire();
         }
 
+        // manually tracked accounts can be updated even if the device is complety in flight mode
+        updateTrackersInManualMode();
+
         if ( TinyTimeTracker.isAirplaneModeOn(mContext) ) {
             Log.i(TAG, "Airplane mode enabled");
             stopUnsuccessfulStartAttempt();
@@ -102,6 +105,37 @@ public class WiFiService extends Service {
 
         handler.postDelayed(stopOnTimeout, 30000);
         return Service.START_NOT_STICKY;
+    }
+
+    private void updateTrackersInManualMode() {
+        LogDataSource datasource = new LogDataSource(this);
+        datasource.open();
+        Set<TrackerEntry> trackersToUpdate = getTrackersInManualMode(datasource);
+        for (TrackerEntry tracker : trackersToUpdate ) {
+            updateTrackerInManualMode(datasource, tracker);
+        }
+        datasource.close();
+    }
+
+    private Set<TrackerEntry> getTrackersInManualMode(LogDataSource datasource) {
+        Set<TrackerEntry> trackers = new HashSet<TrackerEntry>();
+        List<TrackerEntry> allTrackers = datasource.getTrackers();
+        for (TrackerEntry tracker : allTrackers) {
+            if (tracker.operation_state == TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE ) {
+                trackers.add(tracker);
+            }
+        }
+        return trackers;
+    }
+
+    private void updateTrackerInManualMode(LogDataSource datasource, TrackerEntry tracker) {
+        if (tracker.operation_state != TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE ) {
+            return;
+        }
+        LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
+        long now = System.currentTimeMillis();
+        logEntry.setTimestampEnd(now);
+        datasource.save(logEntry);
     }
 
     private void stopUnsuccessfulStartAttempt() {
