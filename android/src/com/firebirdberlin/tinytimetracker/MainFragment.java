@@ -1,14 +1,20 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -17,10 +23,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class MainFragment extends Fragment implements View.OnClickListener {
@@ -173,11 +179,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setWifiIndicator(TrackerEntry tracker) {
-        int visibility = View.VISIBLE;
+        boolean visible = true;
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
-                visibility = View.INVISIBLE;
+                visible = false;
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                 button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
@@ -190,23 +196,60 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             default:
                 break;
         }
-        button_toggle_wifi.setVisibility(visibility);
+
+        if (visible) {
+            ViewPropertyAnimator animator = button_toggle_wifi.animate().setStartDelay(300).setDuration(300).alpha(1.f);
+            animator.setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    button_toggle_wifi.setVisibility(View.VISIBLE);
+                }
+            }).start();
+        } else {
+            ViewPropertyAnimator animator = button_toggle_wifi.animate().setDuration(300).alpha(0.f);
+            animator.setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    button_toggle_wifi.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                }
+            }).start();
+        }
         button_toggle_wifi.invalidate();
     }
+
 
     private void setClockinStateIndicator(TrackerEntry tracker) {
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
+                int new_x = (getDisplaySize().x - button_toggle_clockin_state.getWidth()) / 2;
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
+                button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
                 break;
             default:
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
+                button_toggle_clockin_state.animate().setStartDelay(0).setDuration(300).x(0);
                 break;
         }
         button_toggle_clockin_state.invalidate();
+    }
+
+   public Point getDisplaySize(){
+        Point size = new Point();
+        WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        display.getSize(size);
+        return size;
     }
 
     @SuppressWarnings("unchecked")
