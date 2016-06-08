@@ -6,7 +6,7 @@ public class TrackerEntry {
     public final static int OPERATION_STATE_AUTOMATIC_PAUSED = 1;
     public final static int OPERATION_STATE_AUTOMATIC_RESUMED = 2;
     public final static int OPERATION_STATE_MANUAL_ACTIVE = 3;
-    public final static int OPERATION_STATE_MANUAL_PAUSED = 4;
+    public final static int OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI = 4;
 
     public long id;
     public String ssid = "_deprecated_";
@@ -14,7 +14,6 @@ public class TrackerEntry {
     public String method;
     public float working_hours = 8.f;
     public int operation_state = OPERATION_STATE_AUTOMATIC;
-    public int last_operation_state = OPERATION_STATE_AUTOMATIC;
 
     public TrackerEntry() {
 

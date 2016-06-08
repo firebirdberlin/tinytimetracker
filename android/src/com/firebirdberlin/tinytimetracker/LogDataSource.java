@@ -180,6 +180,29 @@ public class LogDataSource {
         return entries;
     }
 
+    public Set<TrackerEntry> getTrackersInManualMode() {
+        Set<TrackerEntry> trackers = new HashSet<TrackerEntry>();
+        List<TrackerEntry> allTrackers = getTrackers();
+        for (TrackerEntry tracker : allTrackers) {
+            if (tracker.operation_state == TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE
+                    || tracker.operation_state == TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI ) {
+                trackers.add(tracker);
+            }
+        }
+        return trackers;
+    }
+
+    public void updateTrackerInManualMode(TrackerEntry tracker) {
+        if (tracker.operation_state != TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE
+                && tracker.operation_state != TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI ) {
+            return;
+        }
+        LogEntry logEntry = getLatestLogEntry(tracker.id);
+        long now = System.currentTimeMillis();
+        logEntry.setTimestampEnd(now);
+        save(logEntry);
+    }
+
     public TrackerEntry getTracker(long id) {
         init();
         Cursor cursor = null;

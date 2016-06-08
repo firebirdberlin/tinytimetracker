@@ -110,32 +110,11 @@ public class WiFiService extends Service {
     private void updateTrackersInManualMode() {
         LogDataSource datasource = new LogDataSource(this);
         datasource.open();
-        Set<TrackerEntry> trackersToUpdate = getTrackersInManualMode(datasource);
+        Set<TrackerEntry> trackersToUpdate = datasource.getTrackersInManualMode();
         for (TrackerEntry tracker : trackersToUpdate ) {
-            updateTrackerInManualMode(datasource, tracker);
+            datasource.updateTrackerInManualMode(tracker);
         }
         datasource.close();
-    }
-
-    private Set<TrackerEntry> getTrackersInManualMode(LogDataSource datasource) {
-        Set<TrackerEntry> trackers = new HashSet<TrackerEntry>();
-        List<TrackerEntry> allTrackers = datasource.getTrackers();
-        for (TrackerEntry tracker : allTrackers) {
-            if (tracker.operation_state == TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE ) {
-                trackers.add(tracker);
-            }
-        }
-        return trackers;
-    }
-
-    private void updateTrackerInManualMode(LogDataSource datasource, TrackerEntry tracker) {
-        if (tracker.operation_state != TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE ) {
-            return;
-        }
-        LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
-        long now = System.currentTimeMillis();
-        logEntry.setTimestampEnd(now);
-        datasource.save(logEntry);
     }
 
     private void stopUnsuccessfulStartAttempt() {

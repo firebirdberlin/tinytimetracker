@@ -135,22 +135,29 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             long now = System.currentTimeMillis();
             switch (tracker.operation_state) {
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC:
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
                     // set start timestamp
                     datasource.addTimeStamp(tracker, now, 0);
-                    tracker.last_operation_state = tracker.operation_state;
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
+                    break;
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
+                    // set start timestamp
+                    datasource.addTimeStamp(tracker, now, 0);
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
                     break;
                 case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
                     // set end timestamp and return to previous mode
                     LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
                     logEntry.setTimestampEnd(now);
                     datasource.save(logEntry);
-                    tracker.operation_state = tracker.last_operation_state;
-                    if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED ) {
-                        tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
-                    }
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
+                    break;
+                case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
+                    // set end timestamp and return to previous mode
+                    LogEntry logEntry2 = datasource.getLatestLogEntry(tracker.id);
+                    logEntry2.setTimestampEnd(now);
+                    datasource.save(logEntry2);
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
                     break;
                 default:
                     break;
@@ -169,6 +176,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         int visibility = View.VISIBLE;
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
                 visibility = View.INVISIBLE;
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
@@ -189,6 +197,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private void setClockinStateIndicator(TrackerEntry tracker) {
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
                 break;
