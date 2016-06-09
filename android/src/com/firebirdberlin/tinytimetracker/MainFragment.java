@@ -3,18 +3,15 @@ package com.firebirdberlin.tinytimetracker;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -230,7 +227,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
-                int new_x = (getDisplaySize().x - button_toggle_clockin_state.getWidth()) / 2;
+                View parent = (View) button_toggle_clockin_state.getParent();
+                int parent_width = parent.getWidth();
+                int new_x = (parent_width - button_toggle_clockin_state.getWidth()) / 2;
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
                 button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
@@ -242,14 +241,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 break;
         }
         button_toggle_clockin_state.invalidate();
-    }
-
-   public Point getDisplaySize(){
-        Point size = new Point();
-        WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        display.getSize(size);
-        return size;
     }
 
     @SuppressWarnings("unchecked")
