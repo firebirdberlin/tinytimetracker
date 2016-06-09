@@ -26,6 +26,7 @@ import java.util.HashMap;
 public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
     private Button button_toggle_wifi = null;
+    private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
     private MainView timeView = null;
     private TextView textviewMeanDuration = null;
@@ -47,7 +48,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         textviewSaldo = (TextView) v.findViewById(R.id.textview_saldo);
         trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = (Button) v.findViewById(R.id.button_toggle_wifi);
+        button_toggle_clockin_state = (Button) v.findViewById(R.id.button_toggle_clockin_state);
         button_toggle_wifi.setOnClickListener(this);
+        button_toggle_clockin_state.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
         loadTrackers();
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
@@ -103,21 +106,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if ( v.equals(button_toggle_wifi) ) {
-            Log.i(TAG, "onClickToggleWifi clicked");
-            TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
-            if (tracker == null) return;
+        TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
+        if (tracker == null) return;
 
+        if ( v.equals(button_toggle_wifi) ) {
+            Log.i(TAG, "button_toggle_wifi clicked");
             switch (tracker.operation_state) {
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                    button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi, 0, 0, 0);
-                    button_toggle_wifi.setText(R.string.label_auto_detection_on);
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED;
                     break;
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC:
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                    button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
-                    button_toggle_wifi.setText(R.string.label_auto_detection_off);
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
                 default:
                     break;
@@ -125,13 +124,52 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             LogDataSource datasource = new LogDataSource(getActivity());
             datasource.save(tracker);
             datasource.close();
-            button_toggle_wifi.invalidate();
-            Log.i(TAG, "onClickToggleWifi click done ...");
+            setWifiIndicator(tracker);
+            Log.i(TAG, "button_toggle_wifi click done ...");
+            return;
+        }
+
+        if ( v.equals(button_toggle_clockin_state) ) {
+            Log.i(TAG, "button_toggle_clockin_state clicked");
+            LogDataSource datasource = new LogDataSource(getActivity());
+            long now = System.currentTimeMillis();
+            switch (tracker.operation_state) {
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC:
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
+                case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+                    // set start timestamp
+                    datasource.addTimeStamp(tracker, now, 0);
+                    tracker.last_operation_state = tracker.operation_state;
+                    tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
+                    break;
+                case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+                    // set end timestamp and return to previous mode
+                    LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
+                    logEntry.setTimestampEnd(now);
+                    datasource.save(logEntry);
+                    tracker.operation_state = tracker.last_operation_state;
+                    if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED ) {
+                        tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            datasource.save(tracker);
+            datasource.close();
+            setClockinStateIndicator(tracker);
+            setWifiIndicator(tracker);
+            Log.i(TAG, "button_toggle_clockin_state click done ...");
+            return;
         }
     }
 
     private void setWifiIndicator(TrackerEntry tracker) {
+        int visibility = View.VISIBLE;
         switch (tracker.operation_state) {
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+                visibility = View.INVISIBLE;
+                break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                 button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
                 button_toggle_wifi.setText(R.string.label_auto_detection_off);
@@ -143,7 +181,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             default:
                 break;
         }
+        button_toggle_wifi.setVisibility(visibility);
         button_toggle_wifi.invalidate();
+    }
+
+    private void setClockinStateIndicator(TrackerEntry tracker) {
+        switch (tracker.operation_state) {
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
+                button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
+                break;
+            default:
+                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
+                button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
+                break;
+        }
+        button_toggle_clockin_state.invalidate();
     }
 
     @SuppressWarnings("unchecked")
@@ -174,6 +227,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         trackerToolbar.setVisibility(View.VISIBLE);
 
         setWifiIndicator(event.newTracker);
+        setClockinStateIndicator(event.newTracker);
         updateStatisticalValues(event.newTracker);
     }
 

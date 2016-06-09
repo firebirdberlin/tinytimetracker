@@ -65,4 +65,9 @@ public class Settings extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getLong(Settings.PREF_KEY_LAST_TRACKER_ID, -1);
     }
+
+    public static long getSecondsUntilConnectionLost(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return 60L * settings.getInt("pref_key_absence_time", 20);
+    }
 }

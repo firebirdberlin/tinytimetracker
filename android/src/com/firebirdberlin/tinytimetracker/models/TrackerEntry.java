@@ -14,6 +14,7 @@ public class TrackerEntry {
     public String method;
     public float working_hours = 8.f;
     public int operation_state = OPERATION_STATE_AUTOMATIC;
+    public int last_operation_state = OPERATION_STATE_AUTOMATIC;
 
     public TrackerEntry() {
 
