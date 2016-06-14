@@ -221,7 +221,7 @@ public class WiFiService extends Service {
                 if ( tracker != null ) {
                     long last_seen = settings.getLong("last_seen", 0L);
                     long delta = (now - last_seen) / 1000L;
-                    long seconds_today = settings.getLong("seconds_today", 0L);
+                    long seconds_today = evaluateDurationToday(tracker).toSeconds();
                     long workingSeconds = (long) (3600 * tracker.working_hours);
 
                     if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
@@ -233,8 +233,8 @@ public class WiFiService extends Service {
         else {
             // use the first result for notifications
             TrackerEntry tracker = trackersToUpdate.iterator().next();
+            saveTimestampLastSeen(tracker, now);
             UnixTimestamp duration_today = evaluateDurationToday(tracker);
-            saveTimestampLastSeen(tracker, duration_today, now);
             formattedWorkTime = duration_today.durationAsHours();
             trackerVerboseName = tracker.verbose_name;
         }
@@ -316,11 +316,9 @@ public class WiFiService extends Service {
         return duration_today;
     }
 
-    private void saveTimestampLastSeen(TrackerEntry tracker, UnixTimestamp duration_today, long now) {
-        long seconds_today = duration_today.getTimestamp() / 1000L;
+    private void saveTimestampLastSeen(TrackerEntry tracker, long now) {
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_seen", now);
-        editor.putLong("seconds_today", seconds_today);
         if ( tracker != null ) {
             editor.putLong("last_tracker_id", tracker.id);
         }
