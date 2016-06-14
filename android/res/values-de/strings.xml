@@ -35,7 +35,8 @@
     <string name="pref_title_export">Datenbankexport</string>
     <string name="pref_title_import">Datenbankimport</string>
     <string name="pref_title_share">Teilen</string>
-    <string name="pref_credits">Über</string>
+    <string name="pref_about">Über</string>
+    <string name="pref_credits">Quellen</string>
     <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
     <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
