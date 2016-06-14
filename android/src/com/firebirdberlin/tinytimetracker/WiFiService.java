@@ -44,10 +44,10 @@ public class WiFiService extends Service {
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private boolean showNotifications = false;
-    private LogDataSource datasource = null;
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
     boolean tracked_wifi_network_found = false;
+    private TrackerEntry active_tracker = null;
 
     @Override
     public void onCreate() {
@@ -114,6 +114,9 @@ public class WiFiService extends Service {
         for (TrackerEntry tracker : trackersToUpdate ) {
             datasource.updateTrackerInManualMode(tracker);
         }
+        if (trackersToUpdate.size() > 0 ) {
+            active_tracker = trackersToUpdate.iterator().next();
+        }
         datasource.close();
     }
 
@@ -136,6 +139,8 @@ public class WiFiService extends Service {
         if ( shallDisableWifi() ) {
             wifiManager.setWifiEnabled(false);
         }
+
+        updateNotifications();
 
         if (wifiLock.isHeld()) {
             wifiLock.release();
@@ -200,58 +205,28 @@ public class WiFiService extends Service {
     }
 
     private void getWiFiNetworks() {
-        datasource = new LogDataSource(this);
+        LogDataSource datasource = new LogDataSource(this);
         datasource.open();
+        Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate(datasource);
+        updateTrackers(datasource, trackersToUpdate);
+        datasource.close();
 
-        String formattedWorkTime = "";
-        String trackerVerboseName = "";
-
-        Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate();
-        updateTrackers(trackersToUpdate);
-
-        long now = System.currentTimeMillis();
         this.tracked_wifi_network_found = (trackersToUpdate.size() > 0);
 
-        if ( !this.tracked_wifi_network_found ) {
-            Log.i(TAG, "No network found.");
-            // user has left the office for less than 90 mins
-            long last_tracker_id = settings.getLong("last_tracker_id", -1L);
-            if ( last_tracker_id != -1L ) {
-                TrackerEntry tracker = datasource.getTracker(last_tracker_id);
-                if ( tracker != null ) {
-                    long last_seen = settings.getLong("last_seen", 0L);
-                    long delta = (now - last_seen) / 1000L;
-                    long seconds_today = evaluateDurationToday(tracker).toSeconds();
-                    long workingSeconds = (long) (3600 * tracker.working_hours);
-
-                    if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
-                        formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
-                    }
-                }
-            }
-        }
-        else {
+        if ( this.tracked_wifi_network_found && active_tracker == null) {
             // use the first result for notifications
-            TrackerEntry tracker = trackersToUpdate.iterator().next();
-            saveTimestampLastSeen(tracker, now);
-            UnixTimestamp duration_today = evaluateDurationToday(tracker);
-            formattedWorkTime = duration_today.durationAsHours();
-            trackerVerboseName = tracker.verbose_name;
+            active_tracker = trackersToUpdate.iterator().next();
+        } else {
+            Log.i(TAG, "No network found.");
         }
 
         EventBus bus = EventBus.getDefault();
         bus.post(new OnWifiUpdateCompleted());
-        updateNotification(formattedWorkTime, trackerVerboseName);
 
-        if ( isPebbleConnected() ) {
-            sendDataToPebble(formattedWorkTime);
-        }
-
-        datasource.close();
         stopSelf();
     }
 
-    private Set<TrackerEntry> getTrackersToUpdate() {
+    private Set<TrackerEntry> getTrackersToUpdate(LogDataSource datasource) {
         Set<TrackerEntry> trackersToUpdate = new HashSet<TrackerEntry>();
         List<ScanResult> networkList = wifiManager.getScanResults();
         Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
@@ -285,7 +260,7 @@ public class WiFiService extends Service {
         return trackersToUpdate;
     }
 
-    private void updateTrackers(Set<TrackerEntry> trackersToUpdate) {
+    private void updateTrackers(LogDataSource datasource, Set<TrackerEntry> trackersToUpdate) {
         EventBus bus = EventBus.getDefault();
         long now = System.currentTimeMillis();
         for (TrackerEntry tracker: trackersToUpdate) {
@@ -310,10 +285,57 @@ public class WiFiService extends Service {
         }
     }
 
+    private void updateNotifications() {
+        long now = System.currentTimeMillis();
+        String formattedWorkTime = "";
+        String trackerVerboseName = "";
+        if (active_tracker != null) {
+            saveTimestampLastSeen(active_tracker, now);
+            UnixTimestamp duration_today = evaluateDurationToday(active_tracker);
+            formattedWorkTime = duration_today.durationAsHours();
+            trackerVerboseName = active_tracker.verbose_name;
+
+        } else {
+            // user has left the office for less than 90 mins
+            long last_tracker_id = settings.getLong("last_tracker_id", -1L);
+            if ( last_tracker_id != -1L ) {
+                TrackerEntry tracker = fetchTrackerByID(last_tracker_id);
+                if ( tracker != null ) {
+                    long last_seen = settings.getLong("last_seen", 0L);
+                    long delta = (now - last_seen) / 1000L;
+                    long seconds_today = evaluateDurationToday(tracker).toSeconds();
+                    long workingSeconds = (long) (3600 * tracker.working_hours);
+
+                    if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
+                        formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
+                    }
+                }
+            }
+        }
+
+        updateNotification(formattedWorkTime, trackerVerboseName);
+
+        if ( isPebbleConnected() ) {
+            sendDataToPebble(formattedWorkTime);
+        }
+    }
+
     private UnixTimestamp evaluateDurationToday(TrackerEntry tracker) {
+        LogDataSource datasource = new LogDataSource(this);
+        datasource.open();
+
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker.id);
+        datasource.close();
         return duration_today;
+    }
+
+    private TrackerEntry fetchTrackerByID(long tracker_id) {
+        LogDataSource datasource = new LogDataSource(this);
+        datasource.open();
+        TrackerEntry tracker = datasource.getTracker(tracker_id);
+        datasource.close();
+        return tracker;
     }
 
     private void saveTimestampLastSeen(TrackerEntry tracker, long now) {
