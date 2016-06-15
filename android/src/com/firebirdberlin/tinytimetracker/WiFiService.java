@@ -60,9 +60,11 @@ public class WiFiService extends Service {
         if (service_is_running) {
             unregister(wifiReceiver);
         }
-        service_is_running = true;
 
         mContext = this;
+        service_is_running = true;
+        showNotifications = Settings.showNotifications(mContext);
+
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
         if ( ! wifiLock.isHeld()) {
@@ -98,7 +100,6 @@ public class WiFiService extends Service {
             return Service.START_NOT_STICKY;
         }
 
-        showNotifications = Settings.showNotifications(mContext);
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
@@ -111,6 +112,7 @@ public class WiFiService extends Service {
         datasource.open();
         Set<TrackerEntry> trackersToUpdate = datasource.getTrackersInManualMode();
         for (TrackerEntry tracker : trackersToUpdate ) {
+            Log.i(TAG, "Updating tracker in manual mode: " + tracker.verbose_name);
             datasource.updateTrackerInManualMode(tracker);
         }
         if (trackersToUpdate.size() > 0 ) {
@@ -289,11 +291,11 @@ public class WiFiService extends Service {
         String formattedWorkTime = "";
         String trackerVerboseName = "";
         if (active_tracker != null) {
+            Log.d(TAG, "Updating notification for tracker " + active_tracker.verbose_name);
             saveTimestampLastSeen(active_tracker, now);
             UnixTimestamp duration_today = evaluateDurationToday(active_tracker);
             formattedWorkTime = duration_today.durationAsHours();
             trackerVerboseName = active_tracker.verbose_name;
-
         } else {
             // user has left the office for less than 90 mins
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -354,6 +356,7 @@ public class WiFiService extends Service {
             return;
         }
 
+        Log.d(TAG, "Notification: " + title + " : " + text);
         Notification note = buildNotification(title, text);
         notificationManager.notify(NOTIFICATION_ID_WIFI, note);
     }
