@@ -40,7 +40,6 @@ public class WiFiService extends Service {
     private int NOTIFICATION_ID = 1337;
     private int NOTIFICATION_ID_WIFI = 1338;
     private int NOTIFICATION_ID_ERROR = 1339;
-    private SharedPreferences settings = null;
 
     private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private boolean showNotifications = false;
@@ -100,7 +99,7 @@ public class WiFiService extends Service {
         }
 
         showNotifications = Settings.showNotifications(mContext);
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
         handler.postDelayed(stopOnTimeout, 30000);
@@ -297,6 +296,7 @@ public class WiFiService extends Service {
 
         } else {
             // user has left the office for less than 90 mins
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
             long last_tracker_id = settings.getLong("last_tracker_id", -1L);
             if ( last_tracker_id != -1L ) {
                 TrackerEntry tracker = fetchTrackerByID(last_tracker_id);
@@ -339,6 +339,7 @@ public class WiFiService extends Service {
     }
 
     private void saveTimestampLastSeen(TrackerEntry tracker, long now) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_seen", now);
         if ( tracker != null ) {
