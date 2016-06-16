@@ -86,7 +86,9 @@ public class StatsFragment extends ListFragment {
         bus.register(this);
 
         OnTrackerSelected event = bus.getStickyEvent(OnTrackerSelected.class);
-        this.currentTracker = event.newTracker;
+        if ( event != null ) {
+            this.currentTracker = event.newTracker;
+        }
         refresh();
     }
 
