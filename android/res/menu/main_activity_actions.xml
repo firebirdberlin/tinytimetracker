@@ -25,4 +25,7 @@
     <item android:id="@+id/action_donate"
         android:title="@string/action_donate"
         app:showAsAction="never" />
+    <item android:id="@+id/action_recommend"
+        android:title="@string/action_recommend"
+        app:showAsAction="never" />
 </menu>

@@ -160,6 +160,9 @@ public class TinyTimeTracker extends AppCompatActivity {
         case R.id.action_open_github:
             openGitHub();
             return true;
+        case R.id.action_recommend:
+            recommendApp();
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -206,15 +209,26 @@ public class TinyTimeTracker extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void recommendApp() {
+     String body = "https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker";
+     String subject = getResources().getString(R.string.recommend_app_subject);
+     String description = getResources().getString(R.string.recommend_app_desc);
+     Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+     sharingIntent.setType("text/plain");
+     sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
+     sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, body);
+     startActivity(Intent.createChooser(sharingIntent, description));
+    }
+
     public static boolean startService(Context context) {
-        if (hasPermission(context, Manifest.permission.WAKE_LOCK) 
+        if (hasPermission(context, Manifest.permission.WAKE_LOCK)
                 && hasPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)) {
 
             Intent intent = new Intent(context, WiFiService.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startService(intent);
             return true;
-        } 
+        }
         return false;
     }
 
@@ -240,7 +254,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             return calendar.getTimeInMillis();
     }
 
-    public static void checkAndRequestPermission(Activity activity, String permission, 
+    public static void checkAndRequestPermission(Activity activity, String permission,
                                                  int requestCode) {
         if (! hasPermission((Context) activity, permission) ) {
             ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);

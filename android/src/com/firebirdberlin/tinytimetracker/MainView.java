@@ -148,34 +148,6 @@ public class MainView extends View {
             int width = bounds.width();
             canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
         }
-
-        { // draw mean daily duration
-            long meanDurationMillis = currentTracker.getMeanDurationMillis(totalDurationPair.first, totalDurationPair.second);
-
-            UnixTimestamp meanDuration = new UnixTimestamp(meanDurationMillis);
-
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTextSize(52);
-            String text = meanDuration.durationAsHours();
-            Rect bounds = new Rect();
-            paint.getTextBounds(text, 0, text.length(), bounds);
-            canvas.drawText(text, 25, (y - bounds.height()), paint);
-        }
-
-        // draw overtime
-        if ( workingHoursInSeconds > 0 ) {
-            Long overTimeMillis = currentTracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
-            UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
-
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTextSize(52);
-            String sign = (overTimeMillis < 0 ) ? "- ": "+ ";
-            String text = sign + overtime.durationAsHours();
-            Rect bounds = new Rect();
-            paint.getTextBounds(text, 0, text.length(), bounds);
-            canvas.drawText(text, (x - bounds.width() - 25), (y - bounds.height()), paint);
-        }
-
     }
 
     private int getSystemColor(int colorID) {

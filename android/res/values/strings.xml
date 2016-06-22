@@ -11,8 +11,9 @@
     <string name="action_join_log_entry">join</string>
     <string name="action_settings">Settings</string>
     <string name="action_donate">Donate</string>
-    <string name="action_pebble_app_store">Open Pebble App Store</string>
     <string name="action_open_github">Contribute</string>
+    <string name="action_recommend">Recommend</string>
+    <string name="action_pebble_app_store">Open Pebble App Store</string>
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
@@ -20,6 +21,8 @@
     <string name="dialog_title_share_database">Select an application</string>
     <string name="label_auto_detection_on">Auto detection ON</string>
     <string name="label_auto_detection_off">Auto detection OFF</string>
+    <string name="label_toggle_clockin_state_start">Start</string>
+    <string name="label_toggle_clockin_state_end">Stop</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Day</string>
     <string name="aggregation_week">Week</string>
@@ -34,6 +37,7 @@
     <string name="pref_title_export">Data export</string>
     <string name="pref_title_import">Data import</string>
     <string name="pref_title_share">Share</string>
+    <string name="pref_about">About</string>
     <string name="pref_credits">Credits</string>
     <string name="pref_title_seconds_connection_lost">Absence time</string>
     <string name="pref_summary_seconds_connection_lost">Time after which absence is detected.</string>
@@ -43,5 +47,7 @@
     <string name="pref_summary_show_notifications">Show notifications in the notification area.</string>
     <string name="pref_title_working_hours">Working hours</string>
     <string name="pref_summary_working_hours">Your daily working hours.</string>
+    <string name="recommend_app_subject">I would like to recommend this time tracking app to you.</string>
+    <string name="recommend_app_desc">Choose an app to share your recommendation.</string>
     <string-array name="empty_array"/>
 </resources>

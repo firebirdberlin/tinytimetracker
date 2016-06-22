@@ -3,8 +3,10 @@ package com.firebirdberlin.tinytimetracker;
 public class OnLogEntryDeleted {
 
   public long id;
+  public long tracker_id;
 
-  public OnLogEntryDeleted(long id) {
+  public OnLogEntryDeleted(long tracker_id, long id) {
       this.id = id;
+      this.tracker_id = tracker_id;
   }
 }

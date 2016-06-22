@@ -11,6 +11,7 @@
     <string name="action_join_log_entry">Einträge zusammenführen</string>
     <string name="action_settings">Einstellungen</string>
     <string name="action_donate">Spenden</string>
+    <string name="action_recommend">Weiterempfehlen</string>
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_open_github">Beitragen</string>
     <string name="confirm_delete">Lösche</string>
@@ -34,7 +35,8 @@
     <string name="pref_title_export">Datenbankexport</string>
     <string name="pref_title_import">Datenbankimport</string>
     <string name="pref_title_share">Teilen</string>
-    <string name="pref_credits">Über</string>
+    <string name="pref_about">Über</string>
+    <string name="pref_credits">Quellen</string>
     <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
     <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
@@ -43,5 +45,7 @@
     <string name="pref_summary_show_notifications">Zeige Benachrichtigungen an.</string>
     <string name="pref_title_working_hours">Arbeitsstunden</string>
     <string name="pref_summary_working_hours">Ihre tägliche Arbeitszeit in Stunden.</string>
+    <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
+    <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
     <string-array name="empty_array"/>
 </resources>

@@ -14,8 +14,17 @@
         android:layout_height="wrap_content"
         xmlns:android="http://schemas.android.com/apk/res/android">
         <Button
+            android:id="@+id/button_toggle_clockin_state"
+            android:layout_alignParentLeft="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:drawableLeft="@drawable/ic_play"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:text="@string/label_toggle_clockin_state_start"
+            />
+        <Button
             android:id="@+id/button_toggle_wifi"
-            android:layout_centerInParent="true"
+            android:layout_alignParentRight="true"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:drawableLeft="@drawable/ic_wifi"
@@ -28,7 +37,33 @@
     <com.firebirdberlin.tinytimetracker.MainView
         android:id="@+id/main_time_view"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0px"
         />
+
+    <RelativeLayout
+        android:id="@+id/bottom_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+        <TextView
+            android:id="@+id/textview_mean_value"
+            android:layout_alignParentLeft="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="00:00"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp"
+            android:textStyle="normal"/>
+        <TextView
+            android:id="@+id/textview_saldo"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text=" + 00:00 "
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp"
+            android:textStyle="normal"/>
+    </RelativeLayout>
 </LinearLayout>
 

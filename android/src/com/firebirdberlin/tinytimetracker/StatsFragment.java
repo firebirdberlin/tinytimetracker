@@ -7,6 +7,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.lang.IllegalStateException;
 
 public class StatsFragment extends ListFragment {
+    private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
     final List<LogEntry> log_entries = new ArrayList<LogEntry>();
     final List<String> svalues1 = new ArrayList<String>();
     final List<String> svalues2 = new ArrayList<String>();
@@ -79,7 +81,14 @@ public class StatsFragment extends ListFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        Log.i(TAG, "onResume()");
         bus.register(this);
+
+        OnTrackerSelected event = bus.getStickyEvent(OnTrackerSelected.class);
+        if ( event != null ) {
+            this.currentTracker = event.newTracker;
+        }
         refresh();
     }
 
@@ -236,7 +245,14 @@ public class StatsFragment extends ListFragment {
     }
 
     public void onEvent(OnTrackerSelected event) {
+        Log.i(TAG, "OnTrackerSelected");
         this.currentTracker = event.newTracker;
+        refresh();
+    }
+
+    public void onEvent(OnTrackerAdded event) {
+        Log.i(TAG, "OnTrackerAdded");
+        this.currentTracker = event.tracker;
         refresh();
     }
 

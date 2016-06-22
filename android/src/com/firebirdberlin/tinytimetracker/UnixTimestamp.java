@@ -58,6 +58,10 @@ public class UnixTimestamp {
         return dateFormat.format(date);
     }
 
+    public long toSeconds() {
+        return timestamp / 1000L;
+    }
+
     public String durationAsMinutes() {
         long min = timestamp / 1000 / 60;
         return String.format("%dmin", min);
