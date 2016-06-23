@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.System;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -45,6 +46,8 @@ public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
+    private FloatingActionButton action_button_add = null;
+    ViewPager pager = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,9 +60,11 @@ public class TinyTimeTracker extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-        bus.register(this);
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        action_button_add = (FloatingActionButton) findViewById(R.id.action_button_add);
+        pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+
+        bus.register(this);
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
@@ -129,6 +134,13 @@ public class TinyTimeTracker extends AppCompatActivity {
             Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
 
+        if (currentTracker == null) {
+            action_button_add.show();
+            pager.setVisibility(View.GONE);
+        } else {
+            action_button_add.hide();
+            pager.setVisibility(View.VISIBLE);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -160,6 +172,10 @@ public class TinyTimeTracker extends AppCompatActivity {
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void onAddTracker(View v) {
+        AddTrackerActivity.open(this);
     }
 
     private void confirmDeletion() {
