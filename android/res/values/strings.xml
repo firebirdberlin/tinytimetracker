@@ -19,8 +19,8 @@
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
     <string name="dialog_title_database_backup">Database files</string>
     <string name="dialog_title_share_database">Select an application</string>
-    <string name="label_auto_detection_on">Auto detection ON</string>
-    <string name="label_auto_detection_off">Auto detection OFF</string>
+    <string name="label_auto_detection_on">WiFi ON</string>
+    <string name="label_auto_detection_off">WiFi OFF</string>
     <string name="label_toggle_clockin_state_start">Start</string>
     <string name="label_toggle_clockin_state_end">Stop</string>
     <string name="aggregation_detail">Detail</string>
