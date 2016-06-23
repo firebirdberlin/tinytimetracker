@@ -50,11 +50,30 @@
 
         <com.firebirdberlin.tinytimetracker.VersionPreference
             android:key="version"
+            android:icon="@drawable/ic_hourglass"
             android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)">
 
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
         </com.firebirdberlin.tinytimetracker.VersionPreference>
+
+        <Preference
+            android:icon="@drawable/ic_github"
+            android:title="@string/action_open_github">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://github.com/firebirdberlin/tinytimetracker"/>
+
+        </Preference>
+
+        <Preference
+            android:key="pref_key_donation"
+            android:icon="@drawable/ic_paypal"
+            android:title="@string/action_donate"/>
+
+        <Preference
+            android:key="pref_key_recommendation"
+            android:icon="@drawable/ic_share"
+            android:title="@string/action_recommend"/>
 
         <PreferenceScreen
             android:title="@string/pref_credits"

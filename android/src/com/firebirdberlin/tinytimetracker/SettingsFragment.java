@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
 import android.preference.Preference;
@@ -69,6 +70,31 @@ public class SettingsFragment extends PreferenceFragment {
                         DbImportExport.shareFile(getActivity(), absoluteFilePath);
                     }
                 } );
+                return true;
+            }
+        });
+
+        Preference pref_donate = (Preference) findPreference("pref_key_donation");
+        pref_donate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
+                getActivity().startActivity(browserIntent);
+                return true;
+            }
+        });
+
+        Preference pref_key_recommendation = (Preference) findPreference("pref_key_recommendation");
+        pref_key_recommendation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                String body = "https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker";
+                String subject = getResources().getString(R.string.recommend_app_subject);
+                String description = getResources().getString(R.string.recommend_app_desc);
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, body);
+                getActivity().startActivity(Intent.createChooser(sharingIntent, description));
                 return true;
             }
         });

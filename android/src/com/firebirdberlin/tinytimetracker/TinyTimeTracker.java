@@ -151,14 +151,8 @@ public class TinyTimeTracker extends AppCompatActivity {
         case R.id.action_settings:
             Settings.openSettings(this);
             return true;
-        case R.id.action_donate:
-            openDonationPage();
-            return true;
         case R.id.action_pebble_app_store:
             openPebbleAppStore();
-            return true;
-        case R.id.action_open_github:
-            openGitHub();
             return true;
         case R.id.action_recommend:
             recommendApp();
@@ -189,12 +183,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         }).show();
     }
 
-    private void openDonationPage() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                          Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
-        startActivity(browserIntent);
-    }
-
     private void openPebbleAppStore() {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
@@ -202,11 +190,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         }
         catch ( ActivityNotFoundException e) {
         }
-    }
-
-    private void openGitHub() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/firebirdberlin/tinytimetracker"));
-        startActivity(intent);
     }
 
     private void recommendApp() {
