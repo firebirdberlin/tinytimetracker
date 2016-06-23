@@ -19,8 +19,8 @@
     <string name="dialog_title_wifi_networks">Aktive WLAN Netzwerke</string>
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
-    <string name="label_auto_detection_on">Auto-Erkennung an</string>
-    <string name="label_auto_detection_off">Auto-Erkennung aus</string>
+    <string name="label_auto_detection_on">WLAN an</string>
+    <string name="label_auto_detection_off">WLAN aus</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Tag</string>
     <string name="aggregation_week">Woche</string>
@@ -47,5 +47,10 @@
     <string name="pref_summary_working_hours">Ihre tägliche Arbeitszeit in Stunden.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
+    <string name="welcome_text_pt1">Diese App zeichnet ihrer täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.
+
+Starten und stoppen Sie die Aufzeichnung mit den folgenden Buttons: </string>
+    <string name="welcome_text_pt2">Die automatische Überwachung von WLAN Netzwerken starten und pausieren sie mit diesen Symbolen: </string>
+    <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen,</string>
     <string-array name="empty_array"/>
 </resources>
