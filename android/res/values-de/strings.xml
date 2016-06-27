@@ -51,6 +51,6 @@
 
 Starten und stoppen Sie die Aufzeichnung mit den folgenden Buttons: </string>
     <string name="welcome_text_pt2">Die automatische Überwachung von WLAN Netzwerken starten und pausieren sie mit diesen Symbolen: </string>
-    <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen,</string>
+    <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen.</string>
     <string-array name="empty_array"/>
 </resources>
