@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.System;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -45,6 +46,8 @@ public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
+    private FloatingActionButton action_button_add = null;
+    ViewPager pager = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,9 +60,11 @@ public class TinyTimeTracker extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-        bus.register(this);
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
+        action_button_add = (FloatingActionButton) findViewById(R.id.action_button_add);
+        pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+
+        bus.register(this);
         enableBootReceiver(this);
         scheduleWiFiService(this);
         startService(this);
@@ -129,6 +134,13 @@ public class TinyTimeTracker extends AppCompatActivity {
             Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
 
+        if (currentTracker == null) {
+            action_button_add.show();
+            pager.setVisibility(View.GONE);
+        } else {
+            action_button_add.hide();
+            pager.setVisibility(View.VISIBLE);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -151,14 +163,8 @@ public class TinyTimeTracker extends AppCompatActivity {
         case R.id.action_settings:
             Settings.openSettings(this);
             return true;
-        case R.id.action_donate:
-            openDonationPage();
-            return true;
         case R.id.action_pebble_app_store:
             openPebbleAppStore();
-            return true;
-        case R.id.action_open_github:
-            openGitHub();
             return true;
         case R.id.action_recommend:
             recommendApp();
@@ -166,6 +172,10 @@ public class TinyTimeTracker extends AppCompatActivity {
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void onAddTracker(View v) {
+        AddTrackerActivity.open(this);
     }
 
     private void confirmDeletion() {
@@ -189,12 +199,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         }).show();
     }
 
-    private void openDonationPage() {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                          Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
-        startActivity(browserIntent);
-    }
-
     private void openPebbleAppStore() {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
@@ -202,11 +206,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         }
         catch ( ActivityNotFoundException e) {
         }
-    }
-
-    private void openGitHub() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/firebirdberlin/tinytimetracker"));
-        startActivity(intent);
     }
 
     private void recommendApp() {

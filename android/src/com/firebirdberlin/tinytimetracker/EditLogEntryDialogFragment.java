@@ -19,7 +19,6 @@ public class EditLogEntryDialogFragment extends DialogFragment {
 
     public Context mContext = null;
     public LogEntry prevEntry = null;
-    public LogEntry nextEntry = null;
     public LogEntry entry = null;
     private Calendar cal_start = null;
     private Calendar cal_end = null;

@@ -119,10 +119,6 @@ public class StatsFragment extends ListFragment {
             if ( info.position > 0 ) {
                 dialogFragment.prevEntry = log_entry_adapter.getItem(info.position - 1);
             }
-            if ( info.position < log_entry_adapter.getCount() ) {
-                dialogFragment.nextEntry = log_entry_adapter.getItem(info.position + 1);
-            }
-
             dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
             datasource.close();
             return true;

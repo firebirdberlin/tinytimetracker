@@ -50,7 +50,6 @@ public class Settings extends AppCompatActivity {
         context.startActivity(myIntent);
     }
 
-
     public static boolean showNotifications(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);

@@ -285,6 +285,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @SuppressWarnings("unchecked")
     public void onEvent(OnTrackerDeleted event) {
         Log.i(TAG, "OnTrackerDeleted");
+        textviewMeanDuration.setText("");
+        textviewSaldo.setText("");
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         adapter.remove(event.tracker);
         trackerToolbar.setVisibility(View.GONE);
