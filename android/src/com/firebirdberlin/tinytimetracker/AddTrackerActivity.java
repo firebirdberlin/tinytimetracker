@@ -2,6 +2,7 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,6 +40,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     private EditText edit_tracker_working_hours = null;
     private ListView listView = null;
     private WifiManager wifiManager = null;
+    private ProgressDialog progress = null;
 
     private final int RED = Color.parseColor("#AAC0392B");
     private final int BLUE = Color.parseColor("#3498db");
@@ -103,6 +105,9 @@ public class AddTrackerActivity extends AppCompatActivity {
             Log.i(TAG, "WiFi Scan successfully completed");
             unregister(wifiReceiver);
             showAddWifiDialog();
+            if (progress != null) {
+                progress.dismiss();
+            }
         }
     };
 
@@ -190,6 +195,9 @@ public class AddTrackerActivity extends AppCompatActivity {
         boolean res = wifiManager.setWifiEnabled(true);
         Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
         boolean success = wifiManager.startScan();
+        String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
+        String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
+        progress = ProgressDialog.show(this,title, msg, true);
     }
 
     private void showAddWifiDialog() {

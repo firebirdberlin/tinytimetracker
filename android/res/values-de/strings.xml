@@ -16,6 +16,8 @@
     <string name="action_open_github">Beitragen</string>
     <string name="confirm_delete">Lösche</string>
     <string name="confirm_delete_question">Soll dieses Konto mit allen Daten wirklich gelöscht werden ?</string>
+    <string name="dialog_title_wifi_networks_progress">Suche</string>
+    <string name="dialog_msg_wifi_networks_progress">Suche aktive WLAN Netzwerken.</string>
     <string name="dialog_title_wifi_networks">Aktive WLAN Netzwerke</string>
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
