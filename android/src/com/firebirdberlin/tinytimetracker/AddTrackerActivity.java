@@ -1,16 +1,15 @@
 package com.firebirdberlin.tinytimetracker;
 
 import android.Manifest;
-import android.app.ListActivity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.graphics.PorterDuff;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -25,11 +24,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
-import java.util.LinkedHashSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,6 +39,8 @@ public class AddTrackerActivity extends AppCompatActivity {
     private EditText edit_tracker_verbose_name = null;
     private EditText edit_tracker_working_hours = null;
     private ListView listView = null;
+    private WifiManager wifiManager = null;
+    private ProgressDialog progress = null;
 
     private final int RED = Color.parseColor("#AAC0392B");
     private final int BLUE = Color.parseColor("#3498db");
@@ -52,6 +50,8 @@ public class AddTrackerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
+
+        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.action_edit));
@@ -87,6 +87,38 @@ public class AddTrackerActivity extends AppCompatActivity {
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         listView.setAdapter(accessPointAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregister(wifiReceiver);
+    }
+
+    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            Log.i(TAG, "WiFi Scan successfully completed");
+            unregister(wifiReceiver);
+            showAddWifiDialog();
+            if (progress != null) {
+                progress.dismiss();
+            }
+        }
+    };
+
+    private void unregister(BroadcastReceiver receiver) {
+        try {
+            unregisterReceiver(receiver);
+            Log.i(TAG, "Receiver unregistered.");
+        }
+        catch( IllegalArgumentException e) {
+            // receiver was not registered
+        }
     }
 
     @Override
@@ -152,16 +184,28 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     public void onChooseWifi(View v) {
-        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 
+        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION,
                                                   PERMISSIONS_REQUEST_COARSE_LOCATION);
-        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return; 
+        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
 
+        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(wifiReceiver, filter);
+        Log.i(TAG, "Receiver registered.");
+
+        boolean res = wifiManager.setWifiEnabled(true);
+        Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
+        boolean success = wifiManager.startScan();
+        String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
+        String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
+        progress = ProgressDialog.show(this,title, msg, true);
+    }
+
+    private void showAddWifiDialog() {
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
                 accessPoints);
-        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        List<ScanResult> networkList = wifiManager.getScanResults();
 
+        List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList == null) {
             return;
         }

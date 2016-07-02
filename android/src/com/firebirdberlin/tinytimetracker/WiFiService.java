@@ -1,6 +1,5 @@
 package com.firebirdberlin.tinytimetracker;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,7 +20,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -174,7 +172,7 @@ public class WiFiService extends Service {
 
     private void unregister(BroadcastReceiver receiver) {
         try {
-            unregisterReceiver(wifiReceiver);
+            unregisterReceiver(receiver);
             Log.i(TAG, "Receiver unregistered.");
         }
         catch( IllegalArgumentException e) {
