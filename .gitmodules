@@ -1,0 +1,3 @@
+[submodule "android/externals/android-preferences"]
+	path = android/externals/android-preferences
+	url = git@github.com:firebirdberlin/android-preferences.git

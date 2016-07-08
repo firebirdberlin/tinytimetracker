@@ -3,7 +3,7 @@
         android:title="@string/pref_wifi_settings"
         android:key="pref_key_worktime_settings">
 
-        <firebirdberlin.com.tinytimetracker.SeekBarPreference
+        <de.firebirdberlin.preference.SeekBarPreference
             android:dialogMessage="@string/pref_summary_seconds_connection_lost"
             android:key="pref_key_absence_time"
             android:defaultValue="20"
@@ -48,14 +48,15 @@
         android:title="@string/pref_about"
         android:key="pref_key_credits">
 
-        <com.firebirdberlin.tinytimetracker.VersionPreference
+        <de.firebirdberlin.preference.VersionPreference
             android:key="version"
             android:icon="@drawable/ic_hourglass"
+            android:title="TinyTimeTracker"
             android:summary="2016 - Stefan Fruhner (stefan.fruhner@gmail.com)">
 
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
-        </com.firebirdberlin.tinytimetracker.VersionPreference>
+        </de.firebirdberlin.preference.VersionPreference>
 
         <Preference
             android:icon="@drawable/ic_github"
@@ -78,13 +79,6 @@
         <PreferenceScreen
             android:title="@string/pref_credits"
             android:key="pref_key_credits_detail">
-            <Preference
-                android:key="pref_static_credits2"
-                android:title="SeekBarPreference"
-                android:summary="Matthew Wiggins">
-                <intent android:action="android.intent.action.VIEW"
-                    android:data="http://android.hlidskialf.com/blog/code/android-seekbar-preference" />
-            </Preference>
             <Preference
                 android:key="pref_static_icon_1"
                 android:title="Icon: hourglass"
