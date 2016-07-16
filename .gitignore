@@ -11,8 +11,8 @@ pebble/build
 *.iml
 .gradle
 local.properties
-/.idea/workspace.xml
-/.idea/libraries
+android/.idea/workspace.xml
+android/.idea/libraries
 .DS_Store
 /build
 android/build/
