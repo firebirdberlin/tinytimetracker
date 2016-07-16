@@ -1,4 +1,4 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.pebble;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 
 public class PebbleMessageReceiver extends BroadcastReceiver {
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");

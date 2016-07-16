@@ -1,6 +1,14 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.util.Calendar;
+import java.util.List;
+
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -26,15 +34,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.support.v7.widget.Toolbar;
 import de.greenrobot.event.EventBus;
-import java.util.Calendar;
-import java.util.List;
 
 
 public class TinyTimeTracker extends AppCompatActivity {
@@ -283,7 +289,8 @@ public class TinyTimeTracker extends AppCompatActivity {
                                       PackageManager.DONT_KILL_APP);
     }
 
-    public static boolean isAirplaneModeOn(Context context) {
+    @SuppressLint("NewApi")
+	public static boolean isAirplaneModeOn(Context context) {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
         }

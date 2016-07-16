@@ -43,7 +43,7 @@
         <receiver android:name=".AlarmReceiver" android:enabled="true">
         </receiver>
 
-        <receiver android:name=".PebbleMessageReceiver"
+        <receiver android:name=".pebble.PebbleMessageReceiver"
             android:enabled="true"
             android:priority="1000">
             <intent-filter android:priority="1000">

@@ -1,5 +1,10 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+
 import android.app.Activity;
 import android.content.Context;
 import android.text.format.DateFormat;
@@ -8,9 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LogEntryListAdapter extends ArrayAdapter<LogEntry> {
     private Context mContext = null;

@@ -2,3 +2,8 @@ android/bin
 android/gen
 pebble/build
 *.sw*
+
+# Eclipse ADT
+.classpath
+.project
+.settings/

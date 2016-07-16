@@ -1,8 +1,16 @@
 package com.firebirdberlin.tinytimetracker;
 
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,7 +22,6 @@ import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
 import de.greenrobot.event.EventBus;
-import java.util.List;
 
 public class MainView extends View {
     private Context mContext;

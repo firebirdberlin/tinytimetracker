@@ -1,4 +1,7 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.events;
+
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 
 public class OnWifiUpdateCompleted {
 

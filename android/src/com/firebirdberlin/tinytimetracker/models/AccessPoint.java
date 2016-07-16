@@ -1,5 +1,6 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.models;
 
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 
 public class AccessPoint {
     private static String TAG = TinyTimeTracker.TAG + ".AccessPoint";
