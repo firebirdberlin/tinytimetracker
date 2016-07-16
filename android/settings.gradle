@@ -1,0 +1,4 @@
+include ':external_libraries:appcompat'
+include ':external_libraries:design'
+include ':'
+include ':externals:android-preferences'

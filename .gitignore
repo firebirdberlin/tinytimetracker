@@ -7,3 +7,14 @@ pebble/build
 .classpath
 .project
 .settings/
+
+*.iml
+.gradle
+local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+android/build/
+android/external_libraries/appcompat/build/
+android/external_libraries/design/build/
