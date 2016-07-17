@@ -1,32 +1,32 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import de.greenrobot.event.EventBus;
-import java.lang.Runnable;
-import java.util.ArrayList;
-import java.util.List;
-
-import java.lang.IllegalStateException;
 
 public class StatsFragment extends ListFragment {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";

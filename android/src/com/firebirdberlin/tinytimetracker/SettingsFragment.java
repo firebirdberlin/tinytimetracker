@@ -1,21 +1,23 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.io.File;
+import java.util.ArrayList;
+
+import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.util.Log;
-import android.view.View;
 import de.greenrobot.event.EventBus;
-import java.io.File;
-import java.util.ArrayList;
 
 // The callback interface
 interface FileChooserListener {
@@ -35,7 +37,8 @@ public class SettingsFragment extends PreferenceFragment {
         toggleEnabledState();
         Preference pref_data_export = (Preference) findPreference("pref_key_data_export");
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
+            @SuppressLint("NewApi")
+			public boolean onPreferenceClick(Preference preference) {
 
                 if ( ! hasPermissionWriteExternalStorage() ) {
                     requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -100,7 +103,8 @@ public class SettingsFragment extends PreferenceFragment {
         });
     }
 
-    private boolean hasPermissionWriteExternalStorage() {
+    @SuppressLint("NewApi")
+	private boolean hasPermissionWriteExternalStorage() {
         if (Build.VERSION.SDK_INT >= 23 ) {
             return ( getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED );

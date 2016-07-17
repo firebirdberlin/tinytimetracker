@@ -1,6 +1,9 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.models;
 
 import java.text.SimpleDateFormat;
+
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.UnixTimestamp;
 
 
 public class LogEntry {

@@ -1,4 +1,4 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.models;
 
 public class TrackerEntry {
     public final static long NOT_SAVED = -1L;

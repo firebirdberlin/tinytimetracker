@@ -1,5 +1,20 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.List;
+import java.util.Set;
+
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.models.AccessPoint;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,11 +23,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.Pair;
 import de.greenrobot.event.EventBus;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";

@@ -1,4 +1,4 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.events;
 
 public class OnLogEntryDeleted {
 

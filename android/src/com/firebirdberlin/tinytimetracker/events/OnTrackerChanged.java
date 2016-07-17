@@ -1,4 +1,6 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.events;
+
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 
 public class OnTrackerChanged {
 

@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
@@ -188,7 +192,8 @@ public class WiFiService extends Service {
         }
     };
 
-    private Notification buildNotification(String title, String text) {
+    @SuppressLint("NewApi")
+	private Notification buildNotification(String title, String text) {
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);

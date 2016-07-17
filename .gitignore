@@ -2,3 +2,19 @@ android/bin
 android/gen
 pebble/build
 *.sw*
+
+# Eclipse ADT
+.classpath
+.project
+.settings/
+
+*.iml
+.gradle
+local.properties
+android/.idea/workspace.xml
+android/.idea/libraries
+.DS_Store
+/build
+android/build/
+android/external_libraries/appcompat/build/
+android/external_libraries/design/build/

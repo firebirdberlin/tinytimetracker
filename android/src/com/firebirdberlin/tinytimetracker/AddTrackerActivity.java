@@ -1,5 +1,12 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import com.firebirdberlin.tinytimetracker.models.AccessPoint;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -17,19 +24,16 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ListView;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.EditText;
+import android.widget.ListView;
 
 public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
