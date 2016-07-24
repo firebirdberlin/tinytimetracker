@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 
-import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
