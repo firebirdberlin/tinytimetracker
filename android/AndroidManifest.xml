@@ -57,5 +57,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.firebirdberlin.tinytimetracker.receivers.LocationModeReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>

@@ -5,6 +5,17 @@
     android:layout_height="match_parent"
     >
 
+    <TextView
+        android:id="@+id/textview_warn_gps_off"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="10dp"
+        android:background="#b71c1c"
+        android:text="@string/warning_location_services_off"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:visibility="gone"/>
+
     <Spinner android:id="@+id/spinner_trackers"
         android:layout_width="match_parent"
         android:layout_height="80dip"/>
