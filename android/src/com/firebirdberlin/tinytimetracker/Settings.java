@@ -1,15 +1,12 @@
 package com.firebirdberlin.tinytimetracker;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;

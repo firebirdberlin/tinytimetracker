@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
+import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
@@ -18,7 +19,11 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings.Secure;
+import android.provider.Settings.SettingNotFoundException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
@@ -43,6 +48,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private MainView timeView = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
+    private TextView textviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
@@ -58,6 +64,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
         textviewSaldo = (TextView) v.findViewById(R.id.textview_saldo);
+        textviewLocationProviderOff = (TextView) v.findViewById(R.id.textview_warn_gps_off);
         trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = (Button) v.findViewById(R.id.button_toggle_wifi);
         button_toggle_clockin_state = (Button) v.findViewById(R.id.button_toggle_clockin_state);
@@ -87,7 +94,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         });
         timeView = (MainView) v.findViewById(R.id.main_time_view);
+
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (Build.VERSION.SDK_INT >= 23){
+            if ( ! isLocationEnabled(getActivity()) ) {
+                textviewLocationProviderOff.setVisibility(View.VISIBLE);
+            } else {
+                textviewLocationProviderOff.setVisibility(View.GONE);
+            }
+        }
     }
 
     void setSelection(long trackerID) {
@@ -330,6 +351,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         adapter.notifyDataSetChanged();
     }
 
+    public void onEvent(OnLocationModeChanged event) {
+        onResume();
+    }
+
     private void updateStatisticalValues(TrackerEntry tracker){
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(getActivity());
@@ -352,6 +377,26 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             textviewSaldo.setVisibility(View.VISIBLE);
         } else {
             textviewSaldo.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
+
+            } catch (SettingNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            return locationMode != Secure.LOCATION_MODE_OFF;
+
+        }else{
+            String locationProviders = Secure.getString(context.getContentResolver(),
+                                                        Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !locationProviders.isEmpty();
         }
     }
 }

@@ -49,6 +49,7 @@
     <string name="pref_summary_working_hours">Ihre tägliche Arbeitszeit in Stunden.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
+    <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
     <string name="welcome_text_pt1">Diese App zeichnet ihrer täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.
 
 Starten und stoppen Sie die Aufzeichnung mit den folgenden Buttons: </string>
