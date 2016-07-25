@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -207,20 +208,37 @@ public class AddTrackerActivity extends AppCompatActivity {
     private void showAddWifiDialog() {
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
-                accessPoints);
+                                                                  accessPoints);
 
         List<ScanResult> networkList = wifiManager.getScanResults();
-        if (networkList == null) {
-            return;
-        }
-
-        for (ScanResult network : networkList) {
-            if (accessPointAdapter.indexOfBSSID(network.BSSID) == -1) {
-                AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
-                adapter.add(accessPoint);
+        if (networkList != null) {
+            for (ScanResult network : networkList) {
+                if (accessPointAdapter.indexOfBSSID(network.BSSID) == -1) {
+                    AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
+                    adapter.add(accessPoint);
+                }
             }
         }
 
+        // Usually the configuration does not know BSSIDs. The only exception is when
+        // the device may only connect to a single access point known by BSSID. Normally, every
+        // BSSID is allowed.
+        List<WifiConfiguration> configList = wifiManager.getConfiguredNetworks();
+        if (configList != null ) {
+            for (WifiConfiguration network : configList) {
+                if (network.BSSID != null &&
+                        accessPointAdapter.indexOfBSSID(network.BSSID) == -1 &&
+                        network.BSSID.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$") ) {
+                    String ssid = ( network.SSID != null ) ? network.SSID.replace("\"","") : "";
+                    AccessPoint accessPoint = new AccessPoint(ssid, network.BSSID);
+                    adapter.add(accessPoint);
+                }
+            }
+        }
+
+        if (networkList == null && configList == null) {
+            return;
+        }
         new AlertDialog.Builder(this)
         .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
         .setIcon(R.drawable.ic_wifi)
