@@ -1,21 +1,9 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
-import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
-import com.firebirdberlin.tinytimetracker.models.LogEntry;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,6 +30,23 @@ import android.widget.TextView;
 import android.support.v7.widget.CardView;
 import de.greenrobot.event.EventBus;
 
+import com.firebirdberlin.tinytimetracker.R;
+import com.firebirdberlin.tinytimetracker.LogDataSource;
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.Settings;
+import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
+import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
 
 public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
@@ -62,7 +67,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        bus.register(this);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
@@ -113,14 +117,27 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
-        //if (Build.VERSION.SDK_INT >= 23){
-        if (Build.VERSION.SDK_INT >= 19){
+        bus.register(this);
+        OnTrackerAdded event = bus.removeStickyEvent(OnTrackerAdded.class);
+        if(event != null) {
+            handleOnTrackerAdded(event);
+        }
+
+        if (Build.VERSION.SDK_INT >= 23){
             if ( ! isLocationEnabled(getActivity()) ) {
                 cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationProviderOff.setVisibility(View.GONE);
             }
         }
+
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bus.unregister(this);
     }
 
     void setSelection(long trackerID) {
@@ -285,9 +302,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         button_toggle_clockin_state.invalidate();
     }
 
-    @SuppressWarnings("unchecked")
-    public void onEvent(OnTrackerAdded event) {
-        Log.i(TAG, "OnTrackerAdded");
+    //@SuppressWarnings("unchecked")
+    //public void onEvent(OnTrackerAdded event) {
+        //Log.i(TAG, "OnTrackerAdded");
+        //handleOnTrackerAdded(event);
+    //}
+
+    private void handleOnTrackerAdded(OnTrackerAdded event) {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);

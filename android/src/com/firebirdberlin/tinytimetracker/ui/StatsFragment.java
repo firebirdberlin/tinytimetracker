@@ -1,16 +1,7 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.ui;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
-import com.firebirdberlin.tinytimetracker.models.LogEntry;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,6 +18,22 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.RadioGroup;
 import de.greenrobot.event.EventBus;
+
+import com.firebirdberlin.tinytimetracker.R;
+import com.firebirdberlin.tinytimetracker.LogDataSource;
+import com.firebirdberlin.tinytimetracker.LogEntryListAdapter;
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.TwoColumnListAdapter;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
 
 public class StatsFragment extends ListFragment {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";

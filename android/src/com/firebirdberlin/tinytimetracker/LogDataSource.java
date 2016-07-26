@@ -14,6 +14,7 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -66,7 +67,7 @@ public class LogDataSource {
         if (tracker.id == TrackerEntry.NOT_SAVED) {
             long id = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
             tracker.id = id;
-            bus.post(new OnTrackerAdded(tracker));
+            bus.postSticky(new OnTrackerAdded(tracker));
         }
         else {
             values.put(SQLiteHandler.COLUMN_ID, tracker.id);

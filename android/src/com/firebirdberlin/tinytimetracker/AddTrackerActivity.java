@@ -47,8 +47,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     private WifiManager wifiManager = null;
     private ProgressDialog progress = null;
 
-    private final int RED = Color.parseColor("#AAC0392B");
-    private final int BLUE = Color.parseColor("#3498db");
+    private final int RED = Color.parseColor("#f44336");
     private final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
 
     @Override
@@ -351,7 +350,8 @@ public class AddTrackerActivity extends AppCompatActivity {
         }
 
         String working_hours = edit_tracker_working_hours.getText().toString();
-        if (working_hours.isEmpty()) {
+        if (working_hours.isEmpty() ||
+             Float.parseFloat(working_hours) < 0.f || Float.parseFloat(working_hours) > 24.f) {
             edit_tracker_working_hours.setBackgroundColor(RED);
             edit_tracker_working_hours.requestFocus();
             edit_tracker_working_hours.invalidate();

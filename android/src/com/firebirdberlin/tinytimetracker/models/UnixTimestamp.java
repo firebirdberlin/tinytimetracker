@@ -1,4 +1,4 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.models;
 
 import android.util.Log;
 import java.util.Calendar;
@@ -7,7 +7,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class UnixTimestamp {
-    private static String TAG = TinyTimeTracker.TAG + ".UnixTimestamp";
     private long timestamp;
 
     public UnixTimestamp(long timestamp) {
@@ -35,9 +34,21 @@ public class UnixTimestamp {
         return df.format(date);
     }
 
+    public String toLongerDateString() {
+        Date date = new Date(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE");
+        return sdf.format(date) +", " + toDateString();
+    }
+
     public String toWeekString() {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy 'w'ww");
+        return sdf.format(date);
+    }
+
+    public String toWeekStringVerbose() {
+        Date date = new Date(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("ww '(' yyyy ')'");
         return sdf.format(date);
     }
 
@@ -103,6 +114,11 @@ public class UnixTimestamp {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timestamp);
         return calendar;
+    }
+
+    public int getWeekOfYear() {
+        Calendar cal = this.toCalendar();
+        return cal.get(Calendar.WEEK_OF_YEAR);
     }
 
     public int getHourOfDay() {

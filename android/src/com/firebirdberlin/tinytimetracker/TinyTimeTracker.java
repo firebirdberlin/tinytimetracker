@@ -6,6 +6,9 @@ import java.util.List;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.ui.CardFragment;
+import com.firebirdberlin.tinytimetracker.ui.MainFragment;
+import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -85,13 +88,15 @@ public class TinyTimeTracker extends AppCompatActivity {
             default:
                 return new MainFragment();
             case 1:
+                return new CardFragment();
+            case 2:
                 return new StatsFragment();
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     }
 
@@ -290,7 +295,7 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     @SuppressLint("NewApi")
-	public static boolean isAirplaneModeOn(Context context) {
+    public static boolean isAirplaneModeOn(Context context) {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
         }
