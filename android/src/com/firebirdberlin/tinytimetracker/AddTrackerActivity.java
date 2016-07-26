@@ -85,10 +85,16 @@ public class AddTrackerActivity extends AppCompatActivity {
         edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
         listView = (ListView) findViewById(R.id.wifi_list_view);
         if (tracker != null) {
-            edit_tracker_verbose_name.setText(tracker.verbose_name);
-            edit_tracker_working_hours.setText(String.valueOf(tracker.working_hours));
+            edit_tracker_verbose_name.setText("");
+            edit_tracker_verbose_name.append(tracker.verbose_name);
+            edit_tracker_working_hours.setText("");
+            edit_tracker_working_hours.append(String.valueOf(tracker.working_hours));
             accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
+        } else {
+            edit_tracker_working_hours.setText("");
+            edit_tracker_working_hours.append("8");
         }
+        edit_tracker_verbose_name.requestFocus();
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         listView.setAdapter(accessPointAdapter);
@@ -264,15 +270,16 @@ public class AddTrackerActivity extends AppCompatActivity {
                 AccessPoint accessPoint = adapter.getItem(item);
 
                 if (edit_tracker_verbose_name.length() == 0) {
-                    edit_tracker_verbose_name.setText(accessPoint.ssid);
+                    edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
                 accessPointAdapter.add(accessPoint);
                 adapter.remove(accessPoint);
                 adapter.notifyDataSetChanged();
 
+                edit_tracker_working_hours.requestFocus();
                 if (edit_tracker_working_hours.length() == 0) {
-                    edit_tracker_working_hours.requestFocus();
+                    showSoftKeyboard(edit_tracker_working_hours);
                 } else { // hide the soft keyboard
                     hideSoftKeyboard();
                 }
@@ -293,6 +300,13 @@ public class AddTrackerActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public void showSoftKeyboard(View view) {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        view.requestFocus();
+        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
     }
 
     public void onClickOk(View v) {
