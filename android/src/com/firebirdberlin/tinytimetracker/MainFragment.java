@@ -20,6 +20,7 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
@@ -37,6 +38,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import android.support.v7.widget.CardView;
 import de.greenrobot.event.EventBus;
 
 
@@ -48,7 +51,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private MainView timeView = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
-    private TextView textviewLocationProviderOff = null;
+    private CardView cardviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
@@ -64,7 +67,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
         textviewSaldo = (TextView) v.findViewById(R.id.textview_saldo);
-        textviewLocationProviderOff = (TextView) v.findViewById(R.id.textview_warn_gps_off);
+        cardviewLocationProviderOff = (CardView) v.findViewById(R.id.cardview_warn_gps_off);
         trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = (Button) v.findViewById(R.id.button_toggle_wifi);
         button_toggle_clockin_state = (Button) v.findViewById(R.id.button_toggle_clockin_state);
@@ -95,6 +98,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         });
         timeView = (MainView) v.findViewById(R.id.main_time_view);
 
+        final Button buttonLocationProviders = (Button) v.findViewById(R.id.button_location_providers);
+        buttonLocationProviders.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent viewIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(viewIntent);
+            }
+        });
+
         return v;
     }
 
@@ -102,11 +113,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
-        if (Build.VERSION.SDK_INT >= 23){
+        //if (Build.VERSION.SDK_INT >= 23){
+        if (Build.VERSION.SDK_INT >= 19){
             if ( ! isLocationEnabled(getActivity()) ) {
-                textviewLocationProviderOff.setVisibility(View.VISIBLE);
+                cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
-                textviewLocationProviderOff.setVisibility(View.GONE);
+                cardviewLocationProviderOff.setVisibility(View.GONE);
             }
         }
     }
