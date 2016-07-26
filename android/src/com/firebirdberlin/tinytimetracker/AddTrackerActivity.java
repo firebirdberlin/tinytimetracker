@@ -92,6 +92,7 @@ public class AddTrackerActivity extends AppCompatActivity {
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         listView.setAdapter(accessPointAdapter);
+        determineActiveNetworks();
     }
 
     @Override
@@ -205,6 +206,19 @@ public class AddTrackerActivity extends AppCompatActivity {
         progress = ProgressDialog.show(this,title, msg, true);
     }
 
+    private void determineActiveNetworks() {
+        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
+
+        accessPointAdapter.clearActiveNetworks();
+        List<ScanResult> networkList = wifiManager.getScanResults();
+        if (networkList != null) {
+            for (ScanResult network : networkList) {
+                accessPointAdapter.setActive(network.BSSID);
+            }
+            accessPointAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void showAddWifiDialog() {
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
@@ -236,6 +250,8 @@ public class AddTrackerActivity extends AppCompatActivity {
             }
         }
 
+        determineActiveNetworks();
+
         if (networkList == null && configList == null) {
             return;
         }
@@ -258,11 +274,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                 if (edit_tracker_working_hours.length() == 0) {
                     edit_tracker_working_hours.requestFocus();
                 } else { // hide the soft keyboard
-                    View view = getCurrentFocus();
-                    if (view != null) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    }
+                    hideSoftKeyboard();
                 }
 
                 if ( adapter.getCount() == 0 ) {
@@ -273,6 +285,14 @@ public class AddTrackerActivity extends AppCompatActivity {
         .setNegativeButton(android.R.string.no, null)
         .setPositiveButton(android.R.string.ok, null)
         .show();
+    }
+
+    private void hideSoftKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     public void onClickOk(View v) {
