@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -84,13 +85,20 @@ public class AddTrackerActivity extends AppCompatActivity {
         edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
         listView = (ListView) findViewById(R.id.wifi_list_view);
         if (tracker != null) {
-            edit_tracker_verbose_name.setText(tracker.verbose_name);
-            edit_tracker_working_hours.setText(String.valueOf(tracker.working_hours));
+            edit_tracker_verbose_name.setText("");
+            edit_tracker_verbose_name.append(tracker.verbose_name);
+            edit_tracker_working_hours.setText("");
+            edit_tracker_working_hours.append(String.valueOf(tracker.working_hours));
             accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
+        } else {
+            edit_tracker_working_hours.setText("");
+            edit_tracker_working_hours.append("8");
         }
+        edit_tracker_verbose_name.requestFocus();
 
         accessPointAdapter = new AccessPointAdapter(this, R.layout.list_2_lines, accessPoints);
         listView.setAdapter(accessPointAdapter);
+        determineActiveNetworks();
     }
 
     @Override
@@ -204,23 +212,55 @@ public class AddTrackerActivity extends AppCompatActivity {
         progress = ProgressDialog.show(this,title, msg, true);
     }
 
+    private void determineActiveNetworks() {
+        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
+
+        accessPointAdapter.clearActiveNetworks();
+        List<ScanResult> networkList = wifiManager.getScanResults();
+        if (networkList != null) {
+            for (ScanResult network : networkList) {
+                accessPointAdapter.setActive(network.BSSID);
+            }
+            accessPointAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void showAddWifiDialog() {
         final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
-                accessPoints);
+                                                                  accessPoints);
 
         List<ScanResult> networkList = wifiManager.getScanResults();
-        if (networkList == null) {
-            return;
-        }
-
-        for (ScanResult network : networkList) {
-            if (accessPointAdapter.indexOfBSSID(network.BSSID) == -1) {
-                AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
-                adapter.add(accessPoint);
+        if (networkList != null) {
+            for (ScanResult network : networkList) {
+                if (accessPointAdapter.indexOfBSSID(network.BSSID) == -1) {
+                    AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
+                    adapter.add(accessPoint);
+                }
             }
         }
 
+        // Usually the configuration does not know BSSIDs. The only exception is when
+        // the device may only connect to a single access point known by BSSID. Normally, every
+        // BSSID is allowed.
+        List<WifiConfiguration> configList = wifiManager.getConfiguredNetworks();
+        if (configList != null ) {
+            for (WifiConfiguration network : configList) {
+                if (network.BSSID != null &&
+                        accessPointAdapter.indexOfBSSID(network.BSSID) == -1 &&
+                        network.BSSID.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$") ) {
+                    String ssid = ( network.SSID != null ) ? network.SSID.replace("\"","") : "";
+                    AccessPoint accessPoint = new AccessPoint(ssid, network.BSSID);
+                    adapter.add(accessPoint);
+                }
+            }
+        }
+
+        determineActiveNetworks();
+
+        if (networkList == null && configList == null) {
+            return;
+        }
         new AlertDialog.Builder(this)
         .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
         .setIcon(R.drawable.ic_wifi)
@@ -230,21 +270,18 @@ public class AddTrackerActivity extends AppCompatActivity {
                 AccessPoint accessPoint = adapter.getItem(item);
 
                 if (edit_tracker_verbose_name.length() == 0) {
-                    edit_tracker_verbose_name.setText(accessPoint.ssid);
+                    edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
                 accessPointAdapter.add(accessPoint);
                 adapter.remove(accessPoint);
                 adapter.notifyDataSetChanged();
 
+                edit_tracker_working_hours.requestFocus();
                 if (edit_tracker_working_hours.length() == 0) {
-                    edit_tracker_working_hours.requestFocus();
+                    showSoftKeyboard(edit_tracker_working_hours);
                 } else { // hide the soft keyboard
-                    View view = getCurrentFocus();
-                    if (view != null) {
-                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                    }
+                    hideSoftKeyboard();
                 }
 
                 if ( adapter.getCount() == 0 ) {
@@ -255,6 +292,21 @@ public class AddTrackerActivity extends AppCompatActivity {
         .setNegativeButton(android.R.string.no, null)
         .setPositiveButton(android.R.string.ok, null)
         .show();
+    }
+
+    private void hideSoftKeyboard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    public void showSoftKeyboard(View view) {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        view.requestFocus();
+        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
     }
 
     public void onClickOk(View v) {

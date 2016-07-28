@@ -14,6 +14,7 @@
     <string name="action_open_github">Contribute</string>
     <string name="action_recommend">Recommend</string>
     <string name="action_pebble_app_store">Open Pebble App Store</string>
+    <string name="change">Change</string>
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
     <string name="dialog_title_wifi_networks_progress">Scanning</string>

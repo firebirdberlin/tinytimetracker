@@ -1,11 +1,13 @@
 package com.firebirdberlin.tinytimetracker;
 
 import java.util.List;
+import java.util.HashSet;
 
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
     private Context mContext = null;
     private int viewid = -1;
+    private HashSet<String> activeBSSIDs = new HashSet<String>();
 
     public AccessPointAdapter(Context context, int viewid, List<AccessPoint> values) {
         super(context, viewid, R.id.text1, values);
@@ -34,6 +37,9 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
             AccessPoint accessPoint = (AccessPoint) getItem(position);
             text1.setText(accessPoint.ssid);
             text2.setText(accessPoint.bssid);
+            if ( activeBSSIDs.contains(accessPoint.bssid) ) {
+                text2.setTextColor(Color.parseColor("#8bc34a"));
+            }
         }
 
         return v;
@@ -59,5 +65,13 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         }
 
         return -1;
+    }
+
+    public void clearActiveNetworks() {
+        activeBSSIDs.clear();
+    }
+
+    public void setActive(String bssid) {
+        activeBSSIDs.add(bssid);
     }
 }

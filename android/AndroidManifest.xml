@@ -30,7 +30,8 @@
                   android:parentActivityName="TinyTimeTracker" >
         </activity>
         <activity android:name="AddTrackerActivity"
-                  android:parentActivityName="TinyTimeTracker" >
+            android:parentActivityName="TinyTimeTracker"
+            android:windowSoftInputMode="stateHidden">
 
         <!-- Parent activity meta-data to support 4.0 and lower -->
         <meta-data
