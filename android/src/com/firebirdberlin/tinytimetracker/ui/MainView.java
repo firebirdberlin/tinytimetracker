@@ -116,49 +116,35 @@ public class MainView extends View {
         paint.setAntiAlias(true);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
-        {// draw the page indicator
-            int radius = 6;
-            paint.setColor(textColor);
-            paint.setAlpha(255);
+        int radius = x < y ? 8 * x / 20 : 8 * y / 20;
+        rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
+        paint.setColor(highlightColor);
+        paint.setAlpha(100);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(4);
+        canvas.drawArc(rect, -90, angle, true, paint);
 
-            rect.set(x / 2 - 3 * radius, y - 5 * radius, x / 2 - radius, y - 3 * radius);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setStrokeWidth(3);
-            canvas.drawArc(rect, -90, 360, true, paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(highlightColor);
+        paint.setAlpha(255);
+        canvas.drawArc(rect, -90, 360, true, paint);
 
-            rect.set(x / 2 + radius, y - 5 * radius, x / 2 + 3 *  radius, y - 3 * radius);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(1);
-            canvas.drawArc(rect, -90, 360, true, paint);
-        }
+        paint.setColor(textColor);
+        paint.setAlpha(255);
+        paint.setTextSize(dpToPx(60));
+        paint.setStrokeWidth(1);
 
+        String text = duration.durationAsHours();
+        Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+        int height = bounds.height();
+        int width = bounds.width();
+        canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
+    }
 
-        {// draw the main circle
-            int radius = x < y ? 8 * x / 20 : 8 * y / 20;
-            rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
-            paint.setColor(highlightColor);
-            paint.setAlpha(100);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setStrokeWidth(4);
-            canvas.drawArc(rect, -90, angle, true, paint);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(highlightColor);
-            paint.setAlpha(255);
-            canvas.drawArc(rect, -90, 360, true, paint);
-
-            paint.setColor(textColor);
-            paint.setAlpha(255);
-            paint.setTextSize(150);
-            paint.setStrokeWidth(1);
-
-            String text = duration.durationAsHours();
-            Rect bounds = new Rect();
-            paint.getTextBounds(text, 0, text.length(), bounds);
-            int height = bounds.height();
-            int width = bounds.width();
-            canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
-        }
+    private int dpToPx(int value) {
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+        return (int) (value * scale + 0.5f);
     }
 
     private int getSystemColor(int colorID) {

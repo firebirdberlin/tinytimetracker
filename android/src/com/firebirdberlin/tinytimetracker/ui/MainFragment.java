@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
 import de.greenrobot.event.EventBus;
 
@@ -56,6 +57,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private MainView timeView = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
+    private ViewPager pager = null;
     private CardView cardviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
@@ -67,6 +69,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        pager = (ViewPager) container;
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
@@ -118,10 +121,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onResume();
 
         bus.register(this);
-        OnTrackerAdded event = bus.removeStickyEvent(OnTrackerAdded.class);
-        if(event != null) {
-            handleOnTrackerAdded(event);
-        }
 
         if (Build.VERSION.SDK_INT >= 23){
             if ( ! isLocationEnabled(getActivity()) ) {
@@ -131,6 +130,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }
 
+        OnTrackerAdded event = bus.removeStickyEvent(OnTrackerAdded.class);
+        if(event != null) {
+            handleOnTrackerAdded(event);
+        }
     }
 
 
@@ -302,13 +305,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         button_toggle_clockin_state.invalidate();
     }
 
-    //@SuppressWarnings("unchecked")
-    //public void onEvent(OnTrackerAdded event) {
-        //Log.i(TAG, "OnTrackerAdded");
-        //handleOnTrackerAdded(event);
-    //}
-
-    private void handleOnTrackerAdded(OnTrackerAdded event) {
+    public void handleOnTrackerAdded(OnTrackerAdded event) {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);

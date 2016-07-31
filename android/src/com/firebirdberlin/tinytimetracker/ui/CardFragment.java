@@ -23,7 +23,6 @@ import com.firebirdberlin.tinytimetracker.LogSummaryAdapter;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
@@ -82,7 +81,6 @@ public class CardFragment extends Fragment {
         }
         LogSummaryAdapter adapter = new LogSummaryAdapter(getData());
         recyclerView.swapAdapter(adapter, true);
-
     }
 
     @Override
@@ -143,12 +141,6 @@ public class CardFragment extends Fragment {
         if (event.success && currentTracker.equals(event.tracker)) {
             refresh();
         }
-    }
-
-    public void onEvent(OnTrackerAdded event) {
-        Log.i(TAG, "OnTrackerAdded");
-        this.currentTracker = event.tracker;
-        refresh();
     }
 
     public void onEvent(OnTrackerDeleted event) {
