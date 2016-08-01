@@ -54,13 +54,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Button button_toggle_wifi = null;
     private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
-    private MainView timeView = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
     private ViewPager pager = null;
     private CardView cardviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
+    private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
     EventBus bus = EventBus.getDefault();
@@ -103,7 +103,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             public void onNothingSelected(AdapterView<?> parentView) {
             }
         });
+
         timeView = (MainView) v.findViewById(R.id.main_time_view);
+        timeView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                handleClockinStateChange();
+            }
+        });
 
         final Button buttonLocationProviders = (Button) v.findViewById(R.id.button_location_providers);
         buttonLocationProviders.setOnClickListener(new View.OnClickListener() {
@@ -195,48 +201,54 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         if ( v.equals(button_toggle_clockin_state) ) {
-            Log.i(TAG, "button_toggle_clockin_state clicked");
-            LogDataSource datasource = new LogDataSource(getActivity());
-            long now = System.currentTimeMillis();
-            switch (tracker.operation_state) {
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC:
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                    // set start timestamp
-                    datasource.addTimeStamp(tracker, now, 0);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
-                    break;
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                    // set start timestamp
-                    datasource.addTimeStamp(tracker, now, 0);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
-                    break;
-                case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
-                    // set end timestamp and return to previous mode
-                    LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
-                    logEntry.setTimestampEnd(now);
-                    datasource.save(logEntry);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
-                    break;
-                case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
-                    // set end timestamp and return to previous mode
-                    LogEntry logEntry2 = datasource.getLatestLogEntry(tracker.id);
-                    logEntry2.setTimestampEnd(now);
-                    datasource.save(logEntry2);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
-                    break;
-                default:
-                    break;
-            }
-            datasource.save(tracker);
-            datasource.close();
-
-            setClockinStateIndicator(tracker);
-            setWifiIndicator(tracker);
-            Log.i(TAG, "button_toggle_clockin_state click done ...");
+            handleClockinStateChange();
             return;
         }
     }
 
+    private void handleClockinStateChange() {
+        TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
+        if (tracker == null) return;
+        Log.i(TAG, "button_toggle_clockin_state clicked");
+        LogDataSource datasource = new LogDataSource(getActivity());
+        long now = System.currentTimeMillis();
+        switch (tracker.operation_state) {
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC:
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+                // set start timestamp
+                datasource.addTimeStamp(tracker, now, 0);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
+                break;
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
+                // set start timestamp
+                datasource.addTimeStamp(tracker, now, 0);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
+                break;
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+                // set end timestamp and return to previous mode
+                LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
+                logEntry.setTimestampEnd(now);
+                datasource.save(logEntry);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
+                break;
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
+                // set end timestamp and return to previous mode
+                LogEntry logEntry2 = datasource.getLatestLogEntry(tracker.id);
+                logEntry2.setTimestampEnd(now);
+                datasource.save(logEntry2);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
+                break;
+            default:
+                break;
+        }
+        datasource.save(tracker);
+        datasource.close();
+
+        setClockinStateIndicator(tracker);
+        setWifiIndicator(tracker);
+        Log.i(TAG, "button_toggle_clockin_state click done ...");
+        return;
+    }
     private void setWifiIndicator(TrackerEntry tracker) {
         boolean visible = true;
         switch (tracker.operation_state) {
@@ -295,11 +307,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
                 button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
+                timeView.setActivated();
                 break;
             default:
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
                 button_toggle_clockin_state.animate().setStartDelay(0).setDuration(300).x(0);
+                timeView.setDeactivated();
                 break;
         }
         button_toggle_clockin_state.invalidate();

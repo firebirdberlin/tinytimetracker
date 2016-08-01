@@ -29,6 +29,9 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 public class MainView extends View {
     private Context mContext;
+    private int highlightColor;
+    private int textColor;
+    private boolean activated = false;
     private int workingHoursInSeconds = 8 * 3600;
     EventBus bus = EventBus.getDefault();
     TrackerEntry currentTracker = null;
@@ -37,12 +40,15 @@ public class MainView extends View {
         super(context);
         bus.register(this);
         mContext = context;
+        init();
     }
 
     public MainView(Context context, AttributeSet attrs) {
         super(context, attrs);
         bus.register(this);
         mContext = (TinyTimeTracker) context;
+
+        init();
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
@@ -50,6 +56,11 @@ public class MainView extends View {
         if (event.success && currentTracker.equals(event.tracker)) {
             invalidate();
         }
+    }
+
+    private void init(){
+        highlightColor = getSystemColor(android.R.attr.colorActivatedHighlight);
+        textColor = getSystemColor(android.R.attr.textColor);
     }
 
     public void onEvent(OnTrackerSelected event) {
@@ -83,6 +94,35 @@ public class MainView extends View {
         }
     }
 
+    public void toggleHighlight() {
+        if ( activated ){
+            setHighlightColor("#4caf50");
+        } else {
+            setHighlightColor(getSystemColor(android.R.attr.colorActivatedHighlight));
+        }
+        activated = !activated;
+    }
+
+    public void setActivated() {
+        activated = true;
+        setHighlightColor("#4caf50");
+    }
+
+    public void setDeactivated() {
+        activated = false;
+        setHighlightColor(getSystemColor(android.R.attr.colorActivatedHighlight));
+    }
+
+    private void setHighlightColor(String color) {
+        highlightColor = Color.parseColor(color);
+        invalidate();
+    }
+
+    private void setHighlightColor(int color) {
+        highlightColor = color;
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -94,8 +134,6 @@ public class MainView extends View {
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(mContext);
-        int highlightColor = getSystemColor(android.R.attr.colorActivatedHighlight);
-        int textColor = getSystemColor(android.R.attr.textColor);
 
         UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.id);
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
