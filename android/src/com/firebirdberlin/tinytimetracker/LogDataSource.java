@@ -389,7 +389,7 @@ public class LogDataSource {
         return (rows_affected > 0);
     }
 
-    public LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
+    private LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, tracker_id);
@@ -399,7 +399,7 @@ public class LogDataSource {
         return new LogEntry(insertId, tracker_id, timestamp_start, timestamp_end);
     }
 
-    public LogEntry replaceLogEntry(LogEntry log_entry) {
+    private LogEntry replace(LogEntry log_entry) {
         init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
@@ -408,11 +408,6 @@ public class LogDataSource {
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
         long log_id = database.replace(SQLiteHandler.TABLE_LOGS, null, values);
         return log_entry;
-    }
-
-    public List<LogEntry> getAllEntries(String name) {
-        long tracker_id = getTrackerID(name, "WLAN");
-        return getAllEntries(tracker_id, -1L, -1L);
     }
 
     public List<LogEntry> getAllEntries(long tracker_id, long from_time, long to_time) {
@@ -621,7 +616,7 @@ public class LogDataSource {
 
             if (log.getTimestampEnd() >= cmp_time) {
                 log.setTimestampEnd(timestamp);
-                replaceLogEntry(log);
+                replace(log);
                 return log;
             }
         }
