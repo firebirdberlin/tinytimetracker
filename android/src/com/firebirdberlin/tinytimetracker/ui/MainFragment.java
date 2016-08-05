@@ -28,11 +28,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
 import de.greenrobot.event.EventBus;
 
 import com.firebirdberlin.tinytimetracker.R;
+import com.firebirdberlin.tinytimetracker.CustomViewPager;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.Settings;
@@ -57,7 +57,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Spinner spinner = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
-    private ViewPager pager = null;
+    private CustomViewPager pager = null;
     private CardView cardviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
@@ -70,7 +70,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        pager = (ViewPager) container;
+        pager = (CustomViewPager) container;
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);

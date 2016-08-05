@@ -37,7 +37,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -56,7 +55,7 @@ public class TinyTimeTracker extends AppCompatActivity {
     private TrackerEntry currentTracker = null;
     private FloatingActionButton action_button_add = null;
     private LinearLayout pagerLayout = null;
-    private ViewPager pager = null;
+    private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
 
     @Override
@@ -72,7 +71,7 @@ public class TinyTimeTracker extends AppCompatActivity {
 
         action_button_add = (FloatingActionButton) findViewById(R.id.action_button_add);
         pagerLayout = (LinearLayout) findViewById(R.id.pager_layout);
-        pager = (ViewPager) findViewById(R.id.pager);
+        pager = (CustomViewPager) findViewById(R.id.pager);
         pageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
         pageIndicator.setPageCount(3);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
@@ -164,9 +163,11 @@ public class TinyTimeTracker extends AppCompatActivity {
         if (currentTracker == null) {
             action_button_add.show();
             pagerLayout.setVisibility(View.GONE);
+            pager.setPagingEnabled(false);
         } else {
             action_button_add.hide();
             pagerLayout.setVisibility(View.VISIBLE);
+            pager.setPagingEnabled(true);
         }
         return super.onCreateOptionsMenu(menu);
     }
