@@ -22,6 +22,7 @@
 -dontskipnonpubliclibraryclasses
 -forceprocessing
 -optimizationpasses 5
+-optimizations !field/removal/writeonly,!field/marking/private,!class/merging/*,!code/allocation/variable
 
 -keep class * extends android.app.Activity
 
