@@ -26,6 +26,8 @@
     <string name="label_auto_detection_off">WiFi OFF</string>
     <string name="label_toggle_clockin_state_start">Start</string>
     <string name="label_toggle_clockin_state_end">Stop</string>
+    <string name="detail_this_month">this month</string>
+    <string name="detail_last_month">last month</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_day">Day</string>
     <string name="aggregation_week">Week</string>

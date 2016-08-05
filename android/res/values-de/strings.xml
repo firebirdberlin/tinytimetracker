@@ -13,6 +13,8 @@
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_recommend">Weiterempfehlen</string>
     <string name="action_settings">Einstellungen</string>
+    <string name="detail_this_month">dieser Monat</string>
+    <string name="detail_last_month">letzter Monat</string>
     <string name="aggregation_day">Tag</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_week">Woche</string>

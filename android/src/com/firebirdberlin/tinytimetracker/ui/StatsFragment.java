@@ -60,11 +60,11 @@ public class StatsFragment extends ListFragment {
         radio_group_aggregation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                refresh(checkedId);
+                refresh();
             }
         });
 
-        radio_group_aggregation.check(R.id.radio_aggregation_detail);
+        radio_group_aggregation.check(R.id.radio_detail_this_month);
         log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
         setListAdapter(log_entry_adapter);
         refresh_detail();
@@ -146,9 +146,23 @@ public class StatsFragment extends ListFragment {
         log_entry_adapter.clear();
 
         if (currentTracker != null) {
+            int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
+            long start = 0L;
+            long end = 0L;
+            switch(checkedId) {
+            case R.id.radio_detail_this_month:
+            default:
+                start = UnixTimestamp.startOfMonth().getTimestamp();
+                end = System.currentTimeMillis();
+                break;
+            case R.id.radio_detail_last_month:
+                start = UnixTimestamp.startOfLastMonth().getTimestamp();
+                end = UnixTimestamp.startOfMonth().getTimestamp();
+                break;
+            }
+
             LogDataSource datasource = new LogDataSource(mContext);
-            long startOfMonth = UnixTimestamp.startOfLastMonth().getTimestamp();
-            List<LogEntry> values = datasource.getAllEntries(currentTracker.id, startOfMonth);
+            List<LogEntry> values = datasource.getAllEntries(currentTracker.id, start, end);
             datasource.close();
             log_entry_adapter.addAll(values);
         }
@@ -156,7 +170,10 @@ public class StatsFragment extends ListFragment {
         log_entry_adapter.notifyDataSetChanged();
     }
 
-    public void refresh(int checkedId) {
+    public void refresh() {
+        if (radio_group_aggregation == null) {
+            return;
+        }
 
         try {
             unregisterForContextMenu(getListView());
@@ -164,27 +181,14 @@ public class StatsFragment extends ListFragment {
             // pass
         }
 
-        switch(checkedId) {
-        case R.id.radio_aggregation_detail:
-        default:
-            registerForContextMenu(getListView());
-            refresh_detail();
-            break;
-        }
-    }
-
-    public void refresh() {
-        if (radio_group_aggregation == null) {
-            return;
-        }
-
-        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
-        refresh(checkedId);
+        registerForContextMenu(getListView());
+        refresh_detail();
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( currentTracker == null ) return;
-        if (event.success && currentTracker.equals(event.tracker)) {
+        if (event.success && currentTracker.equals(event.tracker) &&
+                radio_group_aggregation.getCheckedRadioButtonId() == R.id.radio_detail_this_month ) {
             refresh();
         }
     }

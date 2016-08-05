@@ -412,10 +412,10 @@ public class LogDataSource {
 
     public List<LogEntry> getAllEntries(String name) {
         long tracker_id = getTrackerID(name, "WLAN");
-        return getAllEntries(tracker_id, -1L);
+        return getAllEntries(tracker_id, -1L, -1L);
     }
 
-    public List<LogEntry> getAllEntries(long tracker_id, long from_time) {
+    public List<LogEntry> getAllEntries(long tracker_id, long from_time, long to_time) {
         init();
         List<LogEntry> entries = new ArrayList<LogEntry>();
         Cursor cursor = null;
@@ -427,10 +427,12 @@ public class LogDataSource {
                                            new String[] {String.valueOf(tracker_id)});
             } else {
                 cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                           + "WHERE tracker_id=? and timestamp_end>=? ORDER BY "
-                                           + "timestamp_start DESC LIMIT 500",
+                                           + "WHERE tracker_id=? and timestamp_end>=? and "
+                                           + "timestamp_end<? "
+                                           + "ORDER BY timestamp_start DESC LIMIT 500",
                                            new String[] {String.valueOf(tracker_id),
-                                                         String.valueOf(from_time)});
+                                                         String.valueOf(from_time),
+                                                         String.valueOf(to_time)});
             }
             cursor.moveToFirst();
 

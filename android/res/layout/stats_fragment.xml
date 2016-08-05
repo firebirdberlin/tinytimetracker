@@ -12,20 +12,19 @@
         android:orientation="horizontal"
         android:paddingBottom="5dip"
         android:paddingTop="5dip">
-        <RadioButton android:id="@+id/radio_aggregation_detail"
+        <RadioButton android:id="@+id/radio_detail_this_month"
             android:checked="true"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_detail"/>
-        <RadioButton android:id="@+id/radio_aggregation_day"
+            android:text="@string/detail_this_month"/>
+        <RadioButton android:id="@+id/radio_detail_last_month"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_day"
-            android:visibility="gone"/>
+            android:text="@string/detail_last_month"/>
     </RadioGroup>
 
     <include layout="@layout/divider"/>
