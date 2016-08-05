@@ -93,6 +93,19 @@ public class UnixTimestamp {
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 
+    public static UnixTimestamp startOfMonth() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp startOfLastMonth() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.add(Calendar.MONTH, -1);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
     public static UnixTimestamp todayThreeYearsAgo() {
         Calendar cal = startOfTodayAsCalendar();
         cal.add(Calendar.YEAR, -3);

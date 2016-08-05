@@ -196,7 +196,8 @@ public class StatsFragment extends ListFragment {
 
         if (currentTracker != null) {
             LogDataSource datasource = new LogDataSource(mContext);
-            List<LogEntry> values = datasource.getAllEntries(currentTracker.id);
+            long startOfMonth = UnixTimestamp.startOfLastMonth().getTimestamp();
+            List<LogEntry> values = datasource.getAllEntries(currentTracker.id, startOfMonth);
             datasource.close();
             log_entry_adapter.addAll(values);
         }

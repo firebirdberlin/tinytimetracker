@@ -6,6 +6,15 @@ import java.util.List;
 import java.util.List;
 import java.util.Set;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+import android.util.Pair;
+import de.greenrobot.event.EventBus;
+
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
@@ -16,14 +25,6 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
-import android.util.Pair;
-import de.greenrobot.event.EventBus;
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
@@ -411,17 +412,26 @@ public class LogDataSource {
 
     public List<LogEntry> getAllEntries(String name) {
         long tracker_id = getTrackerID(name, "WLAN");
-        return getAllEntries(tracker_id);
+        return getAllEntries(tracker_id, -1L);
     }
 
-    public List<LogEntry> getAllEntries(long tracker_id) {
+    public List<LogEntry> getAllEntries(long tracker_id, long from_time) {
         init();
         List<LogEntry> entries = new ArrayList<LogEntry>();
         Cursor cursor = null;
         try {
-            cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                       + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
-                                       new String[] {String.valueOf(tracker_id)});
+
+            if (from_time < 0) {
+                cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                           + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
+                                           new String[] {String.valueOf(tracker_id)});
+            } else {
+                cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                           + "WHERE tracker_id=? and timestamp_end>=? ORDER BY "
+                                           + "timestamp_start DESC LIMIT 500",
+                                           new String[] {String.valueOf(tracker_id),
+                                                         String.valueOf(from_time)});
+            }
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
