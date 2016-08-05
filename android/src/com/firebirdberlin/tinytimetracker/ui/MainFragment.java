@@ -18,6 +18,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.AdapterView;
@@ -105,9 +106,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         });
 
         timeView = (MainView) v.findViewById(R.id.main_time_view);
-        timeView.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        timeView.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
                 handleClockinStateChange();
+                return true;
             }
         });
 
