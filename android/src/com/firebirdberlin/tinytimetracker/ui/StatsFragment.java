@@ -7,7 +7,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
-import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -23,7 +22,6 @@ import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.LogEntryListAdapter;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
-import com.firebirdberlin.tinytimetracker.TwoColumnListAdapter;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
@@ -37,9 +35,6 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 public class StatsFragment extends ListFragment {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
     final List<LogEntry> log_entries = new ArrayList<LogEntry>();
-    final List<String> svalues1 = new ArrayList<String>();
-    final List<String> svalues2 = new ArrayList<String>();
-    TwoColumnListAdapter two_column_adapter = null;
     LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Context mContext = null;
@@ -69,11 +64,9 @@ public class StatsFragment extends ListFragment {
             }
         });
 
-        two_column_adapter = new TwoColumnListAdapter(mContext, R.layout.list_2_columns, svalues1,
-                                                      svalues2);
-        log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
-
         radio_group_aggregation.check(R.id.radio_aggregation_detail);
+        log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
+        setListAdapter(log_entry_adapter);
         refresh_detail();
     }
 
@@ -145,54 +138,12 @@ public class StatsFragment extends ListFragment {
         }
     }
 
-    public void refresh_aggregated(int aggregation_type) {
-        if (mContext == null) {
-            return;
-        }
-
-        if (two_column_adapter == null) {
-            return;
-        }
-
-        two_column_adapter.clear();
-        setListAdapter(two_column_adapter);
-
-        if (currentTracker != null) {
-            LogDataSource datasource = new LogDataSource(mContext);
-            List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(currentTracker.id, aggregation_type);
-            datasource.close();
-
-            for (Pair<Long, Long> e : values) {
-                UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
-                UnixTimestamp duration = new UnixTimestamp(e.second.longValue());
-                String hours = duration.durationAsHours();
-                two_column_adapter.addRight(hours);
-
-                switch (aggregation_type) {
-                case LogDataSource.AGGRETATION_DAY:
-                default:
-                    two_column_adapter.add(timestamp.toDateString());
-                    break;
-                case LogDataSource.AGGRETATION_WEEK:
-                    two_column_adapter.add(timestamp.toWeekString());
-                    break;
-                case LogDataSource.AGGRETATION_YEAR:
-                    two_column_adapter.add(timestamp.toYearString());
-                    break;
-                }
-            }
-        }
-
-        two_column_adapter.notifyDataSetChanged();
-    }
-
     public void refresh_detail() {
         if (mContext == null || log_entry_adapter == null) {
             return;
         }
 
         log_entry_adapter.clear();
-        setListAdapter(log_entry_adapter);
 
         if (currentTracker != null) {
             LogDataSource datasource = new LogDataSource(mContext);
@@ -218,15 +169,6 @@ public class StatsFragment extends ListFragment {
         default:
             registerForContextMenu(getListView());
             refresh_detail();
-            break;
-        case R.id.radio_aggregation_day:
-            refresh_aggregated(LogDataSource.AGGRETATION_DAY);
-            break;
-        case R.id.radio_aggregation_week:
-            refresh_aggregated(LogDataSource.AGGRETATION_WEEK);
-            break;
-        case R.id.radio_aggregation_year:
-            refresh_aggregated(LogDataSource.AGGRETATION_YEAR);
             break;
         }
     }

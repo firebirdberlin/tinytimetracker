@@ -24,19 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_day"/>
-        <RadioButton android:id="@+id/radio_aggregation_week"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_week"/>
-        <RadioButton android:id="@+id/radio_aggregation_year"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_year"/>
+            android:text="@string/aggregation_day"
+            android:visibility="gone"/>
     </RadioGroup>
 
     <include layout="@layout/divider"/>
