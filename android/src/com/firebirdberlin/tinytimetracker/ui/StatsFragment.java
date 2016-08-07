@@ -138,6 +138,33 @@ public class StatsFragment extends ListFragment {
         }
     }
 
+    public void refresh(LogEntry logEntry) {
+        for (int i = 0; i < log_entry_adapter.getCount() ; i++ ) {
+            LogEntry entry = log_entry_adapter.getItem(i);
+            if ( entry.id == logEntry.id ) {
+                entry.timestamp_start = logEntry.timestamp_start;
+                entry.timestamp_end = logEntry.timestamp_end;
+                log_entry_adapter.notifyDataSetChanged();
+                return;
+            }
+        }
+    }
+
+    public void refresh() {
+        if (radio_group_aggregation == null) {
+            return;
+        }
+
+        try {
+            unregisterForContextMenu(getListView());
+        } catch (IllegalStateException e) {
+            // pass
+        }
+
+        registerForContextMenu(getListView());
+        refresh_detail();
+    }
+
     public void refresh_detail() {
         if (mContext == null || log_entry_adapter == null) {
             return;
@@ -170,26 +197,11 @@ public class StatsFragment extends ListFragment {
         log_entry_adapter.notifyDataSetChanged();
     }
 
-    public void refresh() {
-        if (radio_group_aggregation == null) {
-            return;
-        }
-
-        try {
-            unregisterForContextMenu(getListView());
-        } catch (IllegalStateException e) {
-            // pass
-        }
-
-        registerForContextMenu(getListView());
-        refresh_detail();
-    }
 
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( currentTracker == null ) return;
-        if (event.success && currentTracker.equals(event.tracker) &&
-                radio_group_aggregation.getCheckedRadioButtonId() == R.id.radio_detail_this_month ) {
-            refresh();
+        if (event.success && currentTracker.equals(event.tracker) && event.logentry != null ) {
+            refresh(event.logentry);
         }
     }
 
@@ -206,7 +218,7 @@ public class StatsFragment extends ListFragment {
 
     public void onEvent(OnLogEntryChanged event) {
         if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
-            refresh();
+            refresh(event.entry);
         }
     }
 
