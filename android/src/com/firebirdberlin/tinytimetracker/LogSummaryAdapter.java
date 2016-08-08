@@ -17,11 +17,35 @@ import com.firebirdberlin.tinytimetracker.ui.LogDailySummaryView;
 
 
 public class LogSummaryAdapter extends RecyclerView.Adapter<LogSummaryAdapter.LogSummaryViewHolder> {
-
     private List<LogSummary> weeklyLogsList;
 
     public LogSummaryAdapter(List<LogSummary> weeklyLogsList) {
         this.weeklyLogsList = weeklyLogsList;
+    }
+
+    public void add(int index, LogSummary summary) {
+        this.weeklyLogsList.add(index, summary);
+    }
+
+    public int replace(LogSummary summary) {
+
+        LogDailySummary first = summary.dailySummaries.get(0);
+        UnixTimestamp firstTimestamp = new UnixTimestamp(first.timestamp);
+        String newWeekString = firstTimestamp.toWeekStringVerbose();
+
+        int index = 0;
+        for (LogSummary s: weeklyLogsList) {
+            first = s.dailySummaries.get(0);
+            firstTimestamp = new UnixTimestamp(first.timestamp);
+            String weekString = firstTimestamp.toWeekStringVerbose();
+            if ( weekString.equals(newWeekString) ) {
+                weeklyLogsList.set(index, summary);
+                return index;
+            }
+            index++;
+        }
+
+        return -1;
     }
 
     @Override

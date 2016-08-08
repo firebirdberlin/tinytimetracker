@@ -54,8 +54,8 @@ public class CardFragment extends Fragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        LogSummaryAdapter ca = new LogSummaryAdapter(getData());
-        recyclerView.setAdapter(ca);
+        logSummaryAdapter = new LogSummaryAdapter(getData());
+        recyclerView.setAdapter(logSummaryAdapter);
 
         return v;
     }
@@ -80,8 +80,8 @@ public class CardFragment extends Fragment {
         if ( this.currentTracker == null ) {
             return;
         }
-        LogSummaryAdapter adapter = new LogSummaryAdapter(getData());
-        recyclerView.swapAdapter(adapter, true);
+        logSummaryAdapter = new LogSummaryAdapter(getData());
+        recyclerView.swapAdapter(logSummaryAdapter, true);
     }
 
     @Override
@@ -92,16 +92,14 @@ public class CardFragment extends Fragment {
 
     private List<LogSummary> getData() {
         List<LogSummary> result = new ArrayList<LogSummary>();
-        UnixTimestamp start = UnixTimestamp.startOfToday();
-        start.set(Calendar.DAY_OF_YEAR, 1);
-        start.add(Calendar.YEAR, -1);
 
         if (currentTracker != null) {
+            UnixTimestamp start = UnixTimestamp.startOfToday();
+            start.set(Calendar.DAY_OF_YEAR, 1);
+            start.add(Calendar.YEAR, -1);
+            List< Pair<Long, Long> > values = fetchData(start);
+
             long workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
-            LogDataSource datasource = new LogDataSource(mContext);
-            List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(
-                    currentTracker.id, LogDataSource.AGGRETATION_DAY, start.getTimestamp());
-            datasource.close();
             int weekOfYear = -1;
             LogSummary summary = null;
             for (Pair<Long, Long> e : values) {
@@ -127,9 +125,44 @@ public class CardFragment extends Fragment {
             if (summary != null) {
                 Collections.reverse(summary.dailySummaries);
                 result.add(summary);
+                summary = null;
             }
         }
         return result;
+    }
+
+    private List< Pair<Long, Long> > fetchData(UnixTimestamp start_timestamp) {
+        LogDataSource datasource = new LogDataSource(mContext);
+        List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(
+                currentTracker.id, LogDataSource.AGGRETATION_DAY, start_timestamp.getTimestamp());
+        datasource.close();
+        return values;
+    }
+
+    private void updateCurrentWeek() {
+        if ( currentTracker == null ) return;
+        UnixTimestamp start = UnixTimestamp.startOfWeek();
+        List< Pair<Long, Long> > values = fetchData(start);
+        long workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
+        LogSummary summary = new LogSummary(currentTracker);
+        for (Pair<Long, Long> e : values) {
+            UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
+            UnixTimestamp duration = new UnixTimestamp(e.second.longValue());
+            LogDailySummary logEntry = new LogDailySummary(e.first.longValue(), e.second.longValue());
+            logEntry.calculateSaldo(workingHoursInSeconds);
+            summary.dailySummaries.add(logEntry);
+        }
+
+        Collections.reverse(summary.dailySummaries);
+        LogSummaryAdapter adapter = (LogSummaryAdapter) recyclerView.getAdapter();
+
+        int position = adapter.replace(summary);
+        if ( position >= 0 ) {
+            adapter.notifyItemChanged(position);
+        } else {
+            adapter.add(0, summary);
+            adapter.notifyItemInserted(0);
+        }
     }
 
     public void onEvent(OnTrackerSelected event) {
@@ -141,7 +174,7 @@ public class CardFragment extends Fragment {
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( currentTracker == null ) return;
         if (event.success && currentTracker.equals(event.tracker)) {
-            refresh();
+            updateCurrentWeek();
         }
     }
 
