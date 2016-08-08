@@ -57,7 +57,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Spinner spinner = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
-    private CustomViewPager pager = null;
     private CardView cardviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
@@ -70,7 +69,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        pager = (CustomViewPager) container;
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
@@ -83,6 +81,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         button_toggle_clockin_state.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
         loadTrackers();
+
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
                                                                             R.layout.main_spinner,
                                                                             trackers);
@@ -152,8 +151,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     void setSelection(long trackerID) {
+        int item = 0;
         if (trackerIDToSelectionIDMap.containsKey(trackerID)) {
-            int item = trackerIDToSelectionIDMap.get(trackerID);
+            item = trackerIDToSelectionIDMap.get(trackerID);
+        }
+        int count = spinner.getAdapter().getCount();
+        if ( count > 0 && item < count ) {
             spinner.setSelection(item);
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(item);
             Log.i(TAG, "Tracker selected " + tracker.verbose_name);
