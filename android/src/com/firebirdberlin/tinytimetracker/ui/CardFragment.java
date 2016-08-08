@@ -1,6 +1,7 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -91,14 +92,15 @@ public class CardFragment extends Fragment {
 
     private List<LogSummary> getData() {
         List<LogSummary> result = new ArrayList<LogSummary>();
+        UnixTimestamp start = UnixTimestamp.startOfToday();
+        start.set(Calendar.DAY_OF_YEAR, 1);
+        start.add(Calendar.YEAR, -1);
 
         if (currentTracker != null) {
             long workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
             LogDataSource datasource = new LogDataSource(mContext);
             List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(
-                    currentTracker.id,
-                    LogDataSource.AGGRETATION_DAY,
-                    1000);
+                    currentTracker.id, LogDataSource.AGGRETATION_DAY, start.getTimestamp());
             datasource.close();
             int weekOfYear = -1;
             LogSummary summary = null;

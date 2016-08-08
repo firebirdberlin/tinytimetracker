@@ -501,7 +501,7 @@ public class LogDataSource {
         return getTotalDurationAggregated(tracker_id, aggregation_type, -1L);
     }
 
-    public List< Pair<Long, Long> > getTotalDurationAggregated(long tracker_id, int aggregation_type, long limit) {
+    public List< Pair<Long, Long> > getTotalDurationAggregated(long tracker_id, int aggregation_type, long start_timestamp) {
         init();
         String group_by = "";
 
@@ -518,22 +518,19 @@ public class LogDataSource {
             break;
         }
 
-        String limit_str = "";
-
-        if ( limit > 0 ) {
-            limit_str = " LIMIT " + String.valueOf(limit);
-        }
-
         Cursor cursor = null;
         List< Pair<Long, Long> > results = new ArrayList< Pair<Long, Long> >();
+
+        if ( start_timestamp < 0L ) start_timestamp = 0L;
 
         try {
             cursor = database.rawQuery("SELECT timestamp_end, "
                                        + "SUM(timestamp_end - timestamp_start) FROM logs "
-                                       + "WHERE tracker_id=? GROUP BY " + group_by
-                                       + " ORDER BY timestamp_start DESC"
-                                       + limit_str,
-                                       new String[] {String.valueOf(tracker_id)});
+                                       + "WHERE timestamp_end>=? and tracker_id=? GROUP BY "
+                                       + group_by
+                                       + " ORDER BY timestamp_start DESC",
+                                       new String[] {String.valueOf(start_timestamp),
+                                                     String.valueOf(tracker_id)});
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {

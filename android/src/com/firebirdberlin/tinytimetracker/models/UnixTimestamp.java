@@ -99,6 +99,12 @@ public class UnixTimestamp {
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 
+    public static UnixTimestamp startOfWeek() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
     public static UnixTimestamp startOfLastMonth() {
         Calendar cal = startOfTodayAsCalendar();
         cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -127,6 +133,18 @@ public class UnixTimestamp {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timestamp);
         return calendar;
+    }
+
+    public void set(int specifier, int value) {
+        Calendar cal = this.toCalendar();
+        cal.set(specifier, value);
+        this.timestamp = cal.getTimeInMillis();
+    }
+
+    public void add(int specifier, int value) {
+        Calendar cal = this.toCalendar();
+        cal.add(specifier, value);
+        this.timestamp = cal.getTimeInMillis();
     }
 
     public int getWeekOfYear() {
