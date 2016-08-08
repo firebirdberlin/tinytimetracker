@@ -148,6 +148,9 @@ public class StatsFragment extends ListFragment {
                 return;
             }
         }
+        // no match yet, insert entry at the top
+        log_entry_adapter.insert(logEntry, 0);
+        log_entry_adapter.notifyDataSetChanged();
     }
 
     public void refresh() {
