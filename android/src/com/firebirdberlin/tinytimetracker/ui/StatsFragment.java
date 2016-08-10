@@ -149,8 +149,11 @@ public class StatsFragment extends ListFragment {
             }
         }
         // no match yet, insert entry at the top
-        log_entry_adapter.insert(logEntry, 0);
-        log_entry_adapter.notifyDataSetChanged();
+        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
+        if (checkedId == R.id.radio_detail_this_month) {
+            log_entry_adapter.insert(logEntry, 0);
+            log_entry_adapter.notifyDataSetChanged();
+        }
     }
 
     public void refresh() {
