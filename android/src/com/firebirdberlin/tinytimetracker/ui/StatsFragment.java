@@ -15,10 +15,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
 import android.widget.RadioGroup;
 import de.greenrobot.event.EventBus;
 
 import com.firebirdberlin.tinytimetracker.R;
+import com.firebirdberlin.tinytimetracker.CSVExport;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.LogEntryListAdapter;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
@@ -32,11 +34,12 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 
-public class StatsFragment extends ListFragment {
+public class StatsFragment extends ListFragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
     final List<LogEntry> log_entries = new ArrayList<LogEntry>();
     LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
+    Button btnCSVExport = null;
     Context mContext = null;
     TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
@@ -48,6 +51,7 @@ public class StatsFragment extends ListFragment {
         mContext = (Context) getActivity();
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
         radio_group_aggregation = (RadioGroup) v.findViewById(R.id.radio_group_aggregation);
+        btnCSVExport = (Button) v.findViewById(R.id.button_csv_export);
         return v;
     }
 
@@ -63,6 +67,8 @@ public class StatsFragment extends ListFragment {
                 refresh();
             }
         });
+
+        btnCSVExport.setOnClickListener(this);
 
         radio_group_aggregation.check(R.id.radio_detail_this_month);
         log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
@@ -135,6 +141,15 @@ public class StatsFragment extends ListFragment {
         default:
             datasource.close();
             return super.onContextItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if ( v.equals(btnCSVExport) ) {
+            CSVExport csv = new CSVExport(mContext, "export.csv");
+            csv.save();
+            csv.share();
         }
     }
 
