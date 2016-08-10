@@ -2,12 +2,7 @@ package com.firebirdberlin.tinytimetracker.models;
 
 import java.text.SimpleDateFormat;
 
-import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
-import com.firebirdberlin.tinytimetracker.UnixTimestamp;
-
-
 public class LogEntry {
-    private static String TAG = TinyTimeTracker.TAG + ".LogEntry";
     public final static long NOT_SAVED = -1L;
     public long id;
     public long tracker_id;

@@ -18,23 +18,3 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
--dontskipnonpubliclibraryclasses
--forceprocessing
--optimizationpasses 5
--optimizations !field/removal/writeonly,!field/marking/private,!class/merging/*,!code/allocation/variable
-
--keep class * extends android.app.Activity
-
--assumenosideeffects class android.util.Log {
-    public static boolean isLoggable(java.lang.String, int);
-    public static int v(...);
-    public static int i(...);
-    public static int w(...);
-    public static int d(...);
-    public static int e(...);
-}
-
--keepclassmembers class ** {
-    public void onEvent*(**);
-}

@@ -3,9 +3,14 @@ package com.firebirdberlin.tinytimetracker;
 import java.util.Calendar;
 import java.util.List;
 
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.ui.CardFragment;
+import com.firebirdberlin.tinytimetracker.ui.MainFragment;
+import com.firebirdberlin.pageindicator.PageIndicator;
+import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -32,10 +37,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,7 +54,9 @@ public class TinyTimeTracker extends AppCompatActivity {
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
     private FloatingActionButton action_button_add = null;
-    ViewPager pager = null;
+    private LinearLayout pagerLayout = null;
+    private CustomViewPager pager = null;
+    private PageIndicator pageIndicator = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,9 +70,19 @@ public class TinyTimeTracker extends AppCompatActivity {
         setSupportActionBar(myToolbar);
 
         action_button_add = (FloatingActionButton) findViewById(R.id.action_button_add);
-        pager = (ViewPager) findViewById(R.id.pager);
+        pagerLayout = (LinearLayout) findViewById(R.id.pager_layout);
+        pager = (CustomViewPager) findViewById(R.id.pager);
+        pageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
+        pageIndicator.setPageCount(3);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        pager.setOnPageChangeListener(new OnPageChangeListener() {
+            public void onPageScrollStateChanged(int state) {}
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
+            public void onPageSelected(int position) {
+                pageIndicator.setCurrentPage(position);
+            }
+        });
         bus.register(this);
         enableBootReceiver(this);
         scheduleWiFiService(this);
@@ -85,19 +103,26 @@ public class TinyTimeTracker extends AppCompatActivity {
             default:
                 return new MainFragment();
             case 1:
+                return new CardFragment();
+            case 2:
                 return new StatsFragment();
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        OnTrackerAdded event = bus.getStickyEvent(OnTrackerAdded.class);
+        if(event != null) {
+            pager.setCurrentItem(0);
+        }
 
         LogDataSource datasource = new LogDataSource(this);
         List<TrackerEntry> trackers = datasource.getTrackers();
@@ -137,10 +162,12 @@ public class TinyTimeTracker extends AppCompatActivity {
 
         if (currentTracker == null) {
             action_button_add.show();
-            pager.setVisibility(View.GONE);
+            pagerLayout.setVisibility(View.GONE);
+            pager.setPagingEnabled(false);
         } else {
             action_button_add.hide();
-            pager.setVisibility(View.VISIBLE);
+            pagerLayout.setVisibility(View.VISIBLE);
+            pager.setPagingEnabled(true);
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -290,7 +317,7 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     @SuppressLint("NewApi")
-	public static boolean isAirplaneModeOn(Context context) {
+    public static boolean isAirplaneModeOn(Context context) {
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
         }
@@ -308,6 +335,7 @@ public class TinyTimeTracker extends AppCompatActivity {
     public void onEvent(OnTrackerDeleted event) {
         currentTracker = null;
         invalidateOptionsMenu();
+        pager.setCurrentItem(0);
         Log.d(TAG, "currentTracker: null");
     }
 }

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dip">
     >
 
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,39 +13,22 @@
         android:orientation="horizontal"
         android:paddingBottom="5dip"
         android:paddingTop="5dip">
-        <RadioButton android:id="@+id/radio_aggregation_detail"
+        <RadioButton android:id="@+id/radio_detail_this_month"
             android:checked="true"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_detail"/>
-        <RadioButton android:id="@+id/radio_aggregation_day"
+            android:text="@string/detail_this_month"/>
+        <RadioButton android:id="@+id/radio_detail_last_month"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_day"/>
-        <RadioButton android:id="@+id/radio_aggregation_week"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_week"/>
-        <RadioButton android:id="@+id/radio_aggregation_year"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/aggregation_year"/>
+            android:text="@string/detail_last_month"/>
     </RadioGroup>
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="2dip"
-        android:paddingBottom="5dip"
-        android:paddingTop="5dip"
-        android:background="?android:attr/colorActivatedHighlight"/>
+    <include layout="@layout/divider"/>
 
     <ListView android:id="@id/android:list"
         android:layout_width="match_parent"

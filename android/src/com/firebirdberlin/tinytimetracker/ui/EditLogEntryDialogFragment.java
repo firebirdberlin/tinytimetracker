@@ -1,8 +1,6 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.ui;
 
 import java.util.Calendar;
-
-import com.firebirdberlin.tinytimetracker.models.LogEntry;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,6 +15,12 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.NumberPicker.OnValueChangeListener;
 import android.widget.TextView;
+
+import com.firebirdberlin.tinytimetracker.R;
+import com.firebirdberlin.tinytimetracker.LogDataSource;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
 
 public class EditLogEntryDialogFragment extends DialogFragment {
 

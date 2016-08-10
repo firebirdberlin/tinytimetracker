@@ -15,3 +15,9 @@ uninstall:
 
 clean:
 	ant clean
+
+start:
+	adb $(OPT) shell am start -n com.firebirdberlin.tinytimetracker/com.firebirdberlin.tinytimetracker.TinyTimeTracker
+
+on:
+	adb shell input keyevent KEYCODE_POWER

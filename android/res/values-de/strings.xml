@@ -13,6 +13,8 @@
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_recommend">Weiterempfehlen</string>
     <string name="action_settings">Einstellungen</string>
+    <string name="detail_this_month">dieser Monat</string>
+    <string name="detail_last_month">letzter Monat</string>
     <string name="aggregation_day">Tag</string>
     <string name="aggregation_detail">Detail</string>
     <string name="aggregation_week">Woche</string>
@@ -51,10 +53,10 @@
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
     <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
-    <string name="welcome_text_pt1">Diese App zeichnet ihrer täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.
+    <string name="welcome_text_pt1">Diese App zeichnet Ihre täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.
 
 Starten und stoppen Sie die Aufzeichnung mit den folgenden Buttons: </string>
-    <string name="welcome_text_pt2">Die automatische Überwachung von WLAN Netzwerken starten und pausieren sie mit diesen Symbolen: </string>
+    <string name="welcome_text_pt2">Die automatische Überwachung von WLAN Netzwerken starten und pausieren Sie mit diesen Symbolen: </string>
     <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen.</string>
     <string-array name="empty_array"/>
 </resources>

@@ -1,4 +1,4 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.models;
 
 import android.util.Log;
 import java.util.Calendar;
@@ -7,7 +7,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class UnixTimestamp {
-    private static String TAG = TinyTimeTracker.TAG + ".UnixTimestamp";
     private long timestamp;
 
     public UnixTimestamp(long timestamp) {
@@ -35,9 +34,21 @@ public class UnixTimestamp {
         return df.format(date);
     }
 
+    public String toLongerDateString() {
+        Date date = new Date(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE");
+        return sdf.format(date) +", " + toDateString();
+    }
+
     public String toWeekString() {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy 'w'ww");
+        return sdf.format(date);
+    }
+
+    public String toWeekStringVerbose() {
+        Date date = new Date(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("ww '(' yyyy ')'");
         return sdf.format(date);
     }
 
@@ -82,6 +93,25 @@ public class UnixTimestamp {
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 
+    public static UnixTimestamp startOfMonth() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp startOfWeek() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp startOfLastMonth() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.add(Calendar.MONTH, -1);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
     public static UnixTimestamp todayThreeYearsAgo() {
         Calendar cal = startOfTodayAsCalendar();
         cal.add(Calendar.YEAR, -3);
@@ -103,6 +133,23 @@ public class UnixTimestamp {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timestamp);
         return calendar;
+    }
+
+    public void set(int specifier, int value) {
+        Calendar cal = this.toCalendar();
+        cal.set(specifier, value);
+        this.timestamp = cal.getTimeInMillis();
+    }
+
+    public void add(int specifier, int value) {
+        Calendar cal = this.toCalendar();
+        cal.add(specifier, value);
+        this.timestamp = cal.getTimeInMillis();
+    }
+
+    public int getWeekOfYear() {
+        Calendar cal = this.toCalendar();
+        return cal.get(Calendar.WEEK_OF_YEAR);
     }
 
     public int getHourOfDay() {

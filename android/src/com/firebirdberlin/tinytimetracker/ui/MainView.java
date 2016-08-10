@@ -1,12 +1,4 @@
-package com.firebirdberlin.tinytimetracker;
-
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+package com.firebirdberlin.tinytimetracker.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -23,8 +15,23 @@ import android.util.TypedValue;
 import android.view.View;
 import de.greenrobot.event.EventBus;
 
+import com.firebirdberlin.tinytimetracker.LogDataSource;
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
+
 public class MainView extends View {
     private Context mContext;
+    private int highlightColor;
+    private int textColor;
+    private boolean activated = false;
     private int workingHoursInSeconds = 8 * 3600;
     EventBus bus = EventBus.getDefault();
     TrackerEntry currentTracker = null;
@@ -33,12 +40,15 @@ public class MainView extends View {
         super(context);
         bus.register(this);
         mContext = context;
+        init();
     }
 
     public MainView(Context context, AttributeSet attrs) {
         super(context, attrs);
         bus.register(this);
         mContext = (TinyTimeTracker) context;
+
+        init();
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
@@ -46,6 +56,11 @@ public class MainView extends View {
         if (event.success && currentTracker.equals(event.tracker)) {
             invalidate();
         }
+    }
+
+    private void init(){
+        highlightColor = getSystemColor(android.R.attr.colorActivatedHighlight);
+        textColor = getSystemColor(android.R.attr.textColor);
     }
 
     public void onEvent(OnTrackerSelected event) {
@@ -79,6 +94,35 @@ public class MainView extends View {
         }
     }
 
+    public void toggleHighlight() {
+        if ( activated ){
+            setHighlightColor("#4caf50");
+        } else {
+            setHighlightColor(getSystemColor(android.R.attr.colorActivatedHighlight));
+        }
+        activated = !activated;
+    }
+
+    public void setActivated() {
+        activated = true;
+        setHighlightColor("#4caf50");
+    }
+
+    public void setDeactivated() {
+        activated = false;
+        setHighlightColor(getSystemColor(android.R.attr.colorActivatedHighlight));
+    }
+
+    private void setHighlightColor(String color) {
+        highlightColor = Color.parseColor(color);
+        invalidate();
+    }
+
+    private void setHighlightColor(int color) {
+        highlightColor = color;
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -90,8 +134,6 @@ public class MainView extends View {
         UnixTimestamp today = UnixTimestamp.startOfToday();
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(mContext);
-        int highlightColor = getSystemColor(android.R.attr.colorActivatedHighlight);
-        int textColor = getSystemColor(android.R.attr.textColor);
 
         UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.id);
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
@@ -112,49 +154,35 @@ public class MainView extends View {
         paint.setAntiAlias(true);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
-        {// draw the page indicator
-            int radius = 6;
-            paint.setColor(textColor);
-            paint.setAlpha(255);
+        int radius = x < y ? 8 * x / 20 : 8 * y / 20;
+        rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
+        paint.setColor(highlightColor);
+        paint.setAlpha(100);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(4);
+        canvas.drawArc(rect, -90, angle, true, paint);
 
-            rect.set(x / 2 - 3 * radius, y - 5 * radius, x / 2 - radius, y - 3 * radius);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setStrokeWidth(3);
-            canvas.drawArc(rect, -90, 360, true, paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(highlightColor);
+        paint.setAlpha(255);
+        canvas.drawArc(rect, -90, 360, true, paint);
 
-            rect.set(x / 2 + radius, y - 5 * radius, x / 2 + 3 *  radius, y - 3 * radius);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(1);
-            canvas.drawArc(rect, -90, 360, true, paint);
-        }
+        paint.setColor(textColor);
+        paint.setAlpha(255);
+        paint.setTextSize(dpToPx(60));
+        paint.setStrokeWidth(1);
 
+        String text = duration.durationAsHours();
+        Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+        int height = bounds.height();
+        int width = bounds.width();
+        canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
+    }
 
-        {// draw the main circle
-            int radius = x < y ? 8 * x / 20 : 8 * y / 20;
-            rect.set(x / 2 - radius, y / 2 - radius, x / 2 + radius, y / 2 + radius);
-            paint.setColor(highlightColor);
-            paint.setAlpha(100);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setStrokeWidth(4);
-            canvas.drawArc(rect, -90, angle, true, paint);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(highlightColor);
-            paint.setAlpha(255);
-            canvas.drawArc(rect, -90, 360, true, paint);
-
-            paint.setColor(textColor);
-            paint.setAlpha(255);
-            paint.setTextSize(150);
-            paint.setStrokeWidth(1);
-
-            String text = duration.durationAsHours();
-            Rect bounds = new Rect();
-            paint.getTextBounds(text, 0, text.length(), bounds);
-            int height = bounds.height();
-            int width = bounds.width();
-            canvas.drawText(text, (x - width) / 2, (y + height) / 2, paint);
-        }
+    private int dpToPx(int value) {
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+        return (int) (value * scale + 0.5f);
     }
 
     private int getSystemColor(int colorID) {

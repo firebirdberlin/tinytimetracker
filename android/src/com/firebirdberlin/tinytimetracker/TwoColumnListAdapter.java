@@ -24,7 +24,7 @@ public class TwoColumnListAdapter extends ArrayAdapter<String> {
     }
 
     @Override
-    public View getView( int position, View convertView, ViewGroup parent ) {
+    public View getView(int position, View convertView, ViewGroup parent ) {
         super.getView(position, convertView, parent);
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
         View v = inflater.inflate(R.layout.list_2_columns, parent, false);

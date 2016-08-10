@@ -6,15 +6,6 @@ import java.util.List;
 import java.util.List;
 import java.util.Set;
 
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.models.AccessPoint;
-import com.firebirdberlin.tinytimetracker.models.LogEntry;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -23,6 +14,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.Pair;
 import de.greenrobot.event.EventBus;
+
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.models.AccessPoint;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
 
 public class LogDataSource {
     private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
@@ -66,7 +68,7 @@ public class LogDataSource {
         if (tracker.id == TrackerEntry.NOT_SAVED) {
             long id = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
             tracker.id = id;
-            bus.post(new OnTrackerAdded(tracker));
+            bus.postSticky(new OnTrackerAdded(tracker));
         }
         else {
             values.put(SQLiteHandler.COLUMN_ID, tracker.id);
@@ -387,7 +389,7 @@ public class LogDataSource {
         return (rows_affected > 0);
     }
 
-    public LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
+    private LogEntry createLogEntry(long tracker_id, long timestamp_start, long timestamp_end) {
         init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, tracker_id);
@@ -397,7 +399,7 @@ public class LogDataSource {
         return new LogEntry(insertId, tracker_id, timestamp_start, timestamp_end);
     }
 
-    public LogEntry replaceLogEntry(LogEntry log_entry) {
+    private LogEntry replace(LogEntry log_entry) {
         init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
@@ -408,19 +410,25 @@ public class LogDataSource {
         return log_entry;
     }
 
-    public List<LogEntry> getAllEntries(String name) {
-        long tracker_id = getTrackerID(name, "WLAN");
-        return getAllEntries(tracker_id);
-    }
-
-    public List<LogEntry> getAllEntries(long tracker_id) {
+    public List<LogEntry> getAllEntries(long tracker_id, long from_time, long to_time) {
         init();
         List<LogEntry> entries = new ArrayList<LogEntry>();
         Cursor cursor = null;
         try {
-            cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
-                                       + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
-                                       new String[] {String.valueOf(tracker_id)});
+
+            if (from_time < 0) {
+                cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                           + "WHERE tracker_id=? ORDER BY timestamp_start DESC LIMIT 500",
+                                           new String[] {String.valueOf(tracker_id)});
+            } else {
+                cursor = database.rawQuery("SELECT _id, timestamp_start, timestamp_end FROM logs "
+                                           + "WHERE tracker_id=? and timestamp_end>=? and "
+                                           + "timestamp_end<? "
+                                           + "ORDER BY timestamp_start DESC LIMIT 500",
+                                           new String[] {String.valueOf(tracker_id),
+                                                         String.valueOf(from_time),
+                                                         String.valueOf(to_time)});
+            }
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
@@ -493,7 +501,7 @@ public class LogDataSource {
         return getTotalDurationAggregated(tracker_id, aggregation_type, -1L);
     }
 
-    public List< Pair<Long, Long> > getTotalDurationAggregated(long tracker_id, int aggregation_type, long limit) {
+    public List< Pair<Long, Long> > getTotalDurationAggregated(long tracker_id, int aggregation_type, long start_timestamp) {
         init();
         String group_by = "";
 
@@ -510,22 +518,19 @@ public class LogDataSource {
             break;
         }
 
-        String limit_str = "";
-
-        if ( limit > 0 ) {
-            limit_str = " LIMIT " + String.valueOf(limit);
-        }
-
         Cursor cursor = null;
         List< Pair<Long, Long> > results = new ArrayList< Pair<Long, Long> >();
+
+        if ( start_timestamp < 0L ) start_timestamp = 0L;
 
         try {
             cursor = database.rawQuery("SELECT timestamp_end, "
                                        + "SUM(timestamp_end - timestamp_start) FROM logs "
-                                       + "WHERE tracker_id=? GROUP BY " + group_by
-                                       + " ORDER BY timestamp_start DESC"
-                                       + limit_str,
-                                       new String[] {String.valueOf(tracker_id)});
+                                       + "WHERE timestamp_end>=? and tracker_id=? GROUP BY "
+                                       + group_by
+                                       + " ORDER BY timestamp_start DESC",
+                                       new String[] {String.valueOf(start_timestamp),
+                                                     String.valueOf(tracker_id)});
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
@@ -608,7 +613,7 @@ public class LogDataSource {
 
             if (log.getTimestampEnd() >= cmp_time) {
                 log.setTimestampEnd(timestamp);
-                replaceLogEntry(log);
+                replace(log);
                 return log;
             }
         }

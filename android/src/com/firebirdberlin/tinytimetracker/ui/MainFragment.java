@@ -1,21 +1,9 @@
-package com.firebirdberlin.tinytimetracker;
+package com.firebirdberlin.tinytimetracker.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
-import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
-import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
-import com.firebirdberlin.tinytimetracker.models.LogEntry;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -30,6 +18,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.AdapterView;
@@ -42,18 +31,36 @@ import android.widget.TextView;
 import android.support.v7.widget.CardView;
 import de.greenrobot.event.EventBus;
 
+import com.firebirdberlin.tinytimetracker.R;
+import com.firebirdberlin.tinytimetracker.CustomViewPager;
+import com.firebirdberlin.tinytimetracker.LogDataSource;
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.Settings;
+import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
+import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.LogEntry;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
 
 public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
     private Button button_toggle_wifi = null;
     private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
-    private MainView timeView = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
     private CardView cardviewLocationProviderOff = null;
     private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
+    private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
     EventBus bus = EventBus.getDefault();
@@ -62,7 +69,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        bus.register(this);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
@@ -75,6 +81,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         button_toggle_clockin_state.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
         loadTrackers();
+
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
                                                                             R.layout.main_spinner,
                                                                             trackers);
@@ -96,7 +103,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             public void onNothingSelected(AdapterView<?> parentView) {
             }
         });
+
         timeView = (MainView) v.findViewById(R.id.main_time_view);
+        timeView.setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                handleClockinStateChange();
+                return true;
+            }
+        });
 
         final Button buttonLocationProviders = (Button) v.findViewById(R.id.button_location_providers);
         buttonLocationProviders.setOnClickListener(new View.OnClickListener() {
@@ -113,19 +127,36 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
-        //if (Build.VERSION.SDK_INT >= 23){
-        if (Build.VERSION.SDK_INT >= 19){
+        bus.register(this);
+
+        if (Build.VERSION.SDK_INT >= 23){
             if ( ! isLocationEnabled(getActivity()) ) {
                 cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationProviderOff.setVisibility(View.GONE);
             }
         }
+
+        OnTrackerAdded event = bus.removeStickyEvent(OnTrackerAdded.class);
+        if(event != null) {
+            handleOnTrackerAdded(event);
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bus.unregister(this);
     }
 
     void setSelection(long trackerID) {
+        int item = 0;
         if (trackerIDToSelectionIDMap.containsKey(trackerID)) {
-            int item = trackerIDToSelectionIDMap.get(trackerID);
+            item = trackerIDToSelectionIDMap.get(trackerID);
+        }
+        int count = spinner.getAdapter().getCount();
+        if ( count > 0 && item < count ) {
             spinner.setSelection(item);
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(item);
             Log.i(TAG, "Tracker selected " + tracker.verbose_name);
@@ -175,48 +206,54 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         if ( v.equals(button_toggle_clockin_state) ) {
-            Log.i(TAG, "button_toggle_clockin_state clicked");
-            LogDataSource datasource = new LogDataSource(getActivity());
-            long now = System.currentTimeMillis();
-            switch (tracker.operation_state) {
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC:
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                    // set start timestamp
-                    datasource.addTimeStamp(tracker, now, 0);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
-                    break;
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                    // set start timestamp
-                    datasource.addTimeStamp(tracker, now, 0);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
-                    break;
-                case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
-                    // set end timestamp and return to previous mode
-                    LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
-                    logEntry.setTimestampEnd(now);
-                    datasource.save(logEntry);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
-                    break;
-                case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
-                    // set end timestamp and return to previous mode
-                    LogEntry logEntry2 = datasource.getLatestLogEntry(tracker.id);
-                    logEntry2.setTimestampEnd(now);
-                    datasource.save(logEntry2);
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
-                    break;
-                default:
-                    break;
-            }
-            datasource.save(tracker);
-            datasource.close();
-
-            setClockinStateIndicator(tracker);
-            setWifiIndicator(tracker);
-            Log.i(TAG, "button_toggle_clockin_state click done ...");
+            handleClockinStateChange();
             return;
         }
     }
 
+    private void handleClockinStateChange() {
+        TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
+        if (tracker == null) return;
+        Log.i(TAG, "button_toggle_clockin_state clicked");
+        LogDataSource datasource = new LogDataSource(getActivity());
+        long now = System.currentTimeMillis();
+        switch (tracker.operation_state) {
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC:
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+                // set start timestamp
+                datasource.addTimeStamp(tracker, now, 0);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
+                break;
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
+                // set start timestamp
+                datasource.addTimeStamp(tracker, now, 0);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
+                break;
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
+                // set end timestamp and return to previous mode
+                LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
+                logEntry.setTimestampEnd(now);
+                datasource.save(logEntry);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
+                break;
+            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
+                // set end timestamp and return to previous mode
+                LogEntry logEntry2 = datasource.getLatestLogEntry(tracker.id);
+                logEntry2.setTimestampEnd(now);
+                datasource.save(logEntry2);
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
+                break;
+            default:
+                break;
+        }
+        datasource.save(tracker);
+        datasource.close();
+
+        setClockinStateIndicator(tracker);
+        setWifiIndicator(tracker);
+        Log.i(TAG, "button_toggle_clockin_state click done ...");
+        return;
+    }
     private void setWifiIndicator(TrackerEntry tracker) {
         boolean visible = true;
         switch (tracker.operation_state) {
@@ -275,19 +312,19 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
                 button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
+                timeView.setActivated();
                 break;
             default:
                 button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
                 button_toggle_clockin_state.animate().setStartDelay(0).setDuration(300).x(0);
+                timeView.setDeactivated();
                 break;
         }
         button_toggle_clockin_state.invalidate();
     }
 
-    @SuppressWarnings("unchecked")
-    public void onEvent(OnTrackerAdded event) {
-        Log.i(TAG, "OnTrackerAdded");
+    public void handleOnTrackerAdded(OnTrackerAdded event) {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);
