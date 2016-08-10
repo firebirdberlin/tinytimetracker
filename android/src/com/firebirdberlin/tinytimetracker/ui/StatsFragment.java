@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,10 +148,29 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         if ( v.equals(btnCSVExport) ) {
-            CSVExport csv = new CSVExport(mContext, "export.csv");
-            csv.save();
-            csv.share();
+            exportCSV();
         }
+    }
+
+    private void exportCSV() {
+        if (currentTracker == null) return;
+        if (log_entry_adapter.getCount() == 0) return;
+
+        LogEntry firstEntry = log_entry_adapter.getItem(0);
+        SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
+        String monthString = firstEntry.timestamp_start.toTimeString(df);
+
+        String filename = currentTracker.verbose_name + " " + monthString + ".csv";
+
+        String data = "";
+        for (int i = log_entry_adapter.getCount() - 1 ; i  >= 0 ; i-- ) {
+            LogEntry entry = log_entry_adapter.getItem(i);
+            data += entry.toCSVString();
+        }
+
+        CSVExport csv = new CSVExport(mContext, filename);
+        csv.save(data);
+        csv.share();
     }
 
     public void refresh(LogEntry logEntry) {

@@ -58,6 +58,12 @@ public class LogEntry {
                timestamp_end.toTimeString(dateFormat);
     }
 
+    public String toCSVString() {
+        return timestamp_start.toDateString() + ", "
+            + timestamp_start.toTimeString() + ", "
+            + timestamp_end.toTimeString() + "\n";
+    }
+
     public String startAsDateString() {
         return timestamp_start.toDateString();
     }

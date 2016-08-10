@@ -21,8 +21,7 @@ public class CSVExport {
         this.filename = filename;
     }
 
-    public void save() {
-        String string = "Hello world!";
+    public void save(String string) {
         FileOutputStream outputStream;
         try {
             outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -34,16 +33,14 @@ public class CSVExport {
     }
 
     public void share() {
-        // concatenate the internal cache folder with the document its path and filename
         final File file = new File(context.getFilesDir(), filename);
+
         Log.i(TAG, file.getAbsolutePath());
         if (! file.exists()) {
             Log.i(TAG, "does not exist");
             return;
         }
-        // let the FileProvider generate an URI for this private file
         final Uri uri = FileProvider.getUriForFile(context, "com.firebirdberlin.tinytimetracker.fileprovider", file);
-        // create an intent, so the user can choose which application he/she wants to use to share this file
         final Intent intent = ShareCompat.IntentBuilder.from((Activity) context)
             .setType("text/csv")
             .setSubject("Share")
