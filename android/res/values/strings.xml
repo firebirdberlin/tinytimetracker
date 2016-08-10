@@ -17,6 +17,7 @@
     <string name="change">Change</string>
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
+    <string name="csv_export">CSV export</string>
     <string name="dialog_title_wifi_networks_progress">Scanning</string>
     <string name="dialog_msg_wifi_networks_progress">Scanning for WiFi networks</string>
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
