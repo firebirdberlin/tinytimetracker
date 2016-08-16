@@ -13,7 +13,7 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.ui.CardFragment;
 import com.firebirdberlin.tinytimetracker.ui.MainFragment;
-import com.firebirdberlin.pageindicator.PageIndicator;
+import de.firebirdberlin.pageindicator.PageIndicator;
 import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
 import com.android.vending.billing.IInAppBillingService;
