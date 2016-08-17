@@ -38,7 +38,7 @@ public class SettingsFragment extends PreferenceFragment {
         Preference pref_data_export = (Preference) findPreference("pref_key_data_export");
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @SuppressLint("NewApi")
-			public boolean onPreferenceClick(Preference preference) {
+            public boolean onPreferenceClick(Preference preference) {
 
                 if ( ! hasPermissionWriteExternalStorage() ) {
                     requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},

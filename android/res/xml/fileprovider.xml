@@ -1,3 +1,3 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <files-path path="/" name="allfiles" />
+    <cache-path path="/" name="allfiles" />
 </paths>

@@ -160,7 +160,8 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
         String monthString = firstEntry.timestamp_start.toTimeString(df);
 
-        String filename = currentTracker.verbose_name + " " + monthString + ".csv";
+        String title = currentTracker.verbose_name + " " + monthString;
+        String filename = title + ".csv";
 
         String data = "";
         for (int i = log_entry_adapter.getCount() - 1 ; i  >= 0 ; i-- ) {
@@ -170,7 +171,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
 
         CSVExport csv = new CSVExport(mContext, filename);
         csv.save(data);
-        csv.share();
+        csv.share(title);
     }
 
     public void refresh(LogEntry logEntry) {

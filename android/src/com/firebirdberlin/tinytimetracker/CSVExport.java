@@ -14,7 +14,8 @@ import android.support.v4.app.ShareCompat;
 public class CSVExport {
     private static String TAG = TinyTimeTracker.TAG + ".CSVExport";
     private Context context = null;
-    private String filename = "myfile.txt";
+    private String filename = "";
+    private File file;
 
     public CSVExport(Context context, String filename) {
         this.context = context;
@@ -22,9 +23,9 @@ public class CSVExport {
     }
 
     public void save(String string) {
-        FileOutputStream outputStream;
+        file = new File(context.getCacheDir(), filename);
         try {
-            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream outputStream = new FileOutputStream(file);
             outputStream.write(string.getBytes());
             outputStream.close();
         } catch (Exception e) {
@@ -32,20 +33,18 @@ public class CSVExport {
         }
     }
 
-    public void share() {
-        final File file = new File(context.getFilesDir(), filename);
-
-        Log.i(TAG, file.getAbsolutePath());
-        if (! file.exists()) {
+    public void share(String subject) {
+        if (file == null || ! file.exists()) {
             Log.i(TAG, "does not exist");
             return;
         }
+        String chooserTitle = context.getResources().getString(R.string.dialog_title_share_database);
         final Uri uri = FileProvider.getUriForFile(context, "com.firebirdberlin.tinytimetracker.fileprovider", file);
         final Intent intent = ShareCompat.IntentBuilder.from((Activity) context)
             .setType("text/csv")
-            .setSubject("Share")
+            .setSubject(subject)
             .setStream(uri)
-            .setChooserTitle("Share title")
+            .setChooserTitle(chooserTitle)
             .createChooserIntent()
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
