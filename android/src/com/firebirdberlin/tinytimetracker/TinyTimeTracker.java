@@ -60,14 +60,18 @@ import de.greenrobot.event.EventBus;
 
 public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
-    private static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
+    public static final String ITEM_DONATION = "donation";
+    public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
+    public static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
+    public static final int REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT = 1002;
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
     private FloatingActionButton action_button_add = null;
     private LinearLayout pagerLayout = null;
     private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
-    private boolean purchased_donation = false;
+    public boolean purchased_donation = false;
+    public boolean purchased_csv_data_export = false;
 
     IInAppBillingService mService;
 
@@ -121,9 +125,12 @@ public class TinyTimeTracker extends AppCompatActivity {
                 String sku = ownedSkus.get(i);
                 Log.i(TAG, "Item "  + sku + " was already purchased.");
 
-                if (sku.equals("donation")) {
+                if (sku.equals(ITEM_DONATION)) {
                     purchased_donation = true;
                     invalidateOptionsMenu();
+                }
+                if (sku.equals(ITEM_CSV_DATA_EXPORT)) {
+                    purchased_csv_data_export = true;
                 }
 
                 // do something with this purchase information
@@ -136,7 +143,7 @@ public class TinyTimeTracker extends AppCompatActivity {
 
     }
 
-    private void purchaseIntent(String sku, int REQUEST_CODE) {
+    public void purchaseIntent(String sku, int REQUEST_CODE) {
         if (mService == null) return;
         try {
             String developerPayload = "abcdefghijklmnopqrstuvwxyz";
@@ -155,7 +162,8 @@ public class TinyTimeTracker extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_PURCHASE_DONATION) {
+        if (requestCode == REQUEST_CODE_PURCHASE_DONATION ||
+                requestCode == REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT) {
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
             String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
@@ -164,8 +172,13 @@ public class TinyTimeTracker extends AppCompatActivity {
                 try {
                     JSONObject jo = new JSONObject(purchaseData);
                     String sku = jo.getString("productId");
-                    purchased_donation = true;
-                    invalidateOptionsMenu();
+                    if (sku.equals(ITEM_DONATION) ) {
+                        purchased_donation = true;
+                        invalidateOptionsMenu();
+                    } else
+                    if (sku.equals(ITEM_CSV_DATA_EXPORT) ) {
+                        purchased_csv_data_export = true;
+                    }
                 }
                 catch (JSONException e) {
                     e.printStackTrace();
@@ -196,7 +209,7 @@ public class TinyTimeTracker extends AppCompatActivity {
         pager = (CustomViewPager) findViewById(R.id.pager);
         pageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
         pageIndicator.setPageCount(3);
-        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        pager.setAdapter(new MyPagerAdapter(this, getSupportFragmentManager()));
         pager.setOnPageChangeListener(new OnPageChangeListener() {
             public void onPageScrollStateChanged(int state) {}
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
@@ -222,9 +235,11 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
+        private TinyTimeTracker mainActivity = null;
 
-        public MyPagerAdapter(FragmentManager fm) {
+        public MyPagerAdapter(TinyTimeTracker mainActivity, FragmentManager fm) {
             super(fm);
+            this.mainActivity = mainActivity;
         }
 
         @Override
@@ -236,7 +251,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             case 1:
                 return new CardFragment();
             case 2:
-                return new StatsFragment();
+                return new StatsFragment(mainActivity);
             }
         }
 
@@ -332,7 +347,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             recommendApp();
             return true;
         case R.id.action_donate:
-            purchaseIntent("donation", REQUEST_CODE_PURCHASE_DONATION);
+            purchaseIntent(ITEM_DONATION, REQUEST_CODE_PURCHASE_DONATION);
             return true;
         default:
             return super.onOptionsItemSelected(item);
