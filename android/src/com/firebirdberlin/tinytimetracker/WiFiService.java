@@ -44,7 +44,6 @@ public class WiFiService extends Service {
     private int NOTIFICATION_ID_WIFI = 1338;
     private int NOTIFICATION_ID_ERROR = 1339;
 
-    private Long SECONDS_CONNECTION_LOST = 20 * 60L;
     private boolean showNotifications = false;
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
@@ -79,6 +78,10 @@ public class WiFiService extends Service {
 
         if ( TinyTimeTracker.isAirplaneModeOn(mContext) ) {
             Log.i(TAG, "Airplane mode enabled");
+
+            long now = System.currentTimeMillis();
+            saveTimestampLastRun(now);
+
             stopUnsuccessfulStartAttempt();
             return Service.START_NOT_STICKY;
         }
@@ -102,9 +105,6 @@ public class WiFiService extends Service {
             stopUnsuccessfulStartAttempt();
             return Service.START_NOT_STICKY;
         }
-
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SECONDS_CONNECTION_LOST = 60L * settings.getInt("pref_key_absence_time", 20);
 
         handler.postDelayed(stopOnTimeout, 30000);
         return Service.START_NOT_STICKY;
@@ -194,7 +194,7 @@ public class WiFiService extends Service {
     };
 
     @SuppressLint("NewApi")
-	private Notification buildNotification(String title, String text) {
+    private Notification buildNotification(String title, String text) {
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
@@ -273,10 +273,11 @@ public class WiFiService extends Service {
             switch (tracker.operation_state) {
 
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC:
-                    log_entry = datasource.addTimeStamp(tracker, now, SECONDS_CONNECTION_LOST);
+                    long graceTime = getGraceTime(datasource, tracker, now);
+                    log_entry = datasource.addTimeStamp(tracker, now, graceTime);
                     break;
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                    log_entry = datasource.addTimeStamp(tracker, now, 0);
+                    log_entry = datasource.addTimeStamp(tracker, now, now);
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
                     datasource.save(tracker);
                     break;
@@ -288,6 +289,26 @@ public class WiFiService extends Service {
                 bus.post(new OnWifiUpdateCompleted(tracker, log_entry));
             }
         }
+        saveTimestampLastRun(now);
+    }
+
+    private long getGraceTime(LogDataSource datasource, TrackerEntry tracker, long now) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        long millisConnectionLost = 1000L * 60L * settings.getInt("pref_key_absence_time", 20);
+        long lastRunTime = settings.getLong("last_wifi_detection_timestamp", -1L);
+
+        LogEntry latestLogEntry = datasource.getLatestLogEntry(tracker.id);
+        if ( latestLogEntry != null ) {
+            if ( lastRunTime > 0L && latestLogEntry.getTimestampEnd() == lastRunTime ) {
+                return lastRunTime;
+            } else {
+                return now - millisConnectionLost;
+            }
+        }
+
+        // In all other cases a new entry is created anyway.
+        // Return an arbitrary value.
+        return 0L;
     }
 
     private void updateNotifications() {
@@ -351,6 +372,13 @@ public class WiFiService extends Service {
         if ( tracker != null ) {
             editor.putLong("last_tracker_id", tracker.id);
         }
+        editor.commit();
+    }
+
+    private void saveTimestampLastRun(long now) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong("last_wifi_detection_timestamp", now);
         editor.commit();
     }
 

@@ -221,12 +221,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case TrackerEntry.OPERATION_STATE_AUTOMATIC:
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
                 // set start timestamp
-                datasource.addTimeStamp(tracker, now, 0);
+                datasource.addTimeStamp(tracker, now, now);
                 tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                 // set start timestamp
-                datasource.addTimeStamp(tracker, now, 0);
+                datasource.addTimeStamp(tracker, now, now);
                 tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
                 break;
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
