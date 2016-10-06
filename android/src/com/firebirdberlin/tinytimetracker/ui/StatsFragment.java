@@ -38,17 +38,12 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 public class StatsFragment extends ListFragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
     final List<LogEntry> log_entries = new ArrayList<LogEntry>();
-    TinyTimeTracker mainActivity = null;
     LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Button btnCSVExport = null;
     Context mContext = null;
     TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
-
-    public StatsFragment(TinyTimeTracker mainActivity) {
-        this.mainActivity = mainActivity;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -153,6 +148,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         if ( v.equals(btnCSVExport) ) {
+            TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
             if ( mainActivity.purchased_csv_data_export ) {
                 exportCSV();
             } else {

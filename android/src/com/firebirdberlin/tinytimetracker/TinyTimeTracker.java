@@ -211,7 +211,7 @@ public class TinyTimeTracker extends AppCompatActivity {
         pager = (CustomViewPager) findViewById(R.id.pager);
         pageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
         pageIndicator.setPageCount(3);
-        pager.setAdapter(new MyPagerAdapter(this, getSupportFragmentManager()));
+        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
         pager.setOnPageChangeListener(new OnPageChangeListener() {
             public void onPageScrollStateChanged(int state) {}
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
@@ -237,11 +237,9 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
-        private TinyTimeTracker mainActivity = null;
 
-        public MyPagerAdapter(TinyTimeTracker mainActivity, FragmentManager fm) {
+        public MyPagerAdapter(FragmentManager fm) {
             super(fm);
-            this.mainActivity = mainActivity;
         }
 
         @Override
@@ -253,7 +251,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             case 1:
                 return new CardFragment();
             case 2:
-                return new StatsFragment(mainActivity);
+                return new StatsFragment();
             }
         }
 
