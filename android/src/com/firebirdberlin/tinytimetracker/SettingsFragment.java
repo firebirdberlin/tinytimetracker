@@ -65,6 +65,7 @@ public class SettingsFragment extends PreferenceFragment {
                 return true;
             }
         });
+
         Preference pref_data_share = (Preference) findPreference("pref_key_data_share");
         pref_data_share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
@@ -73,16 +74,6 @@ public class SettingsFragment extends PreferenceFragment {
                         DbImportExport.shareFile(getActivity(), absoluteFilePath);
                     }
                 } );
-                return true;
-            }
-        });
-
-        Preference pref_donate = (Preference) findPreference("pref_key_donation");
-        pref_donate.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5PX9XVHHE6XP8"));
-                getActivity().startActivity(browserIntent);
                 return true;
             }
         });
@@ -103,8 +94,8 @@ public class SettingsFragment extends PreferenceFragment {
         });
     }
 
-    @SuppressLint("NewApi")
-	private boolean hasPermissionWriteExternalStorage() {
+    @SuppressWarnings("deprecation")
+    private boolean hasPermissionWriteExternalStorage() {
         if (Build.VERSION.SDK_INT >= 23 ) {
             return ( getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED );
