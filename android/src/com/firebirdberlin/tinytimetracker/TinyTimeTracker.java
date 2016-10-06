@@ -40,6 +40,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
+import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -489,5 +491,25 @@ public class TinyTimeTracker extends AppCompatActivity {
         invalidateOptionsMenu();
         pager.setCurrentItem(0);
         Log.d(TAG, "currentTracker: null");
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
+
+            } catch (SettingNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            return locationMode != Secure.LOCATION_MODE_OFF;
+
+        }else{
+            String locationProviders = Secure.getString(context.getContentResolver(),
+                                                        Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !locationProviders.isEmpty();
+        }
     }
 }

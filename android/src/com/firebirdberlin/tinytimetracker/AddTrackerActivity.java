@@ -21,6 +21,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
+import android.os.Build;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -195,6 +196,14 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     public void onChooseWifi(View v) {
+
+        if (Build.VERSION.SDK_INT >= 23){
+            if ( ! TinyTimeTracker.isLocationEnabled(this) ) {
+                showLocationProviderDisabledWarning();
+                return;
+            }
+        }
+
         TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION,
                                                   PERMISSIONS_REQUEST_COARSE_LOCATION);
         if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
@@ -291,6 +300,15 @@ public class AddTrackerActivity extends AppCompatActivity {
         .setNegativeButton(android.R.string.no, null)
         .setPositiveButton(android.R.string.ok, null)
         .show();
+    }
+
+    private void showLocationProviderDisabledWarning() {
+        new AlertDialog.Builder(this)
+            .setMessage(R.string.warning_location_services_off)
+            .setTitle(getResources().getString(R.string.title_warning_location_services_off))
+            .setIcon(R.drawable.ic_wifi)
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
     }
 
     private void hideSoftKeyboard() {
