@@ -25,6 +25,7 @@ import com.firebirdberlin.tinytimetracker.CSVExport;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.LogEntryListAdapter;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.Utility;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
@@ -153,7 +154,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
                 exportCSV();
             } else {
                 mainActivity.purchaseIntent(TinyTimeTracker.ITEM_CSV_DATA_EXPORT,
-                                            TinyTimeTracker.REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT);
+                        TinyTimeTracker.REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT);
             }
         }
     }
@@ -170,9 +171,10 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         String filename = title + ".csv";
 
         String data = "";
+        SimpleDateFormat timeFormat = Utility.getTimeFormat(mContext);
         for (int i = log_entry_adapter.getCount() - 1 ; i  >= 0 ; i-- ) {
             LogEntry entry = log_entry_adapter.getItem(i);
-            data += entry.toCSVString();
+            data += entry.toCSVString(timeFormat);
         }
 
         CSVExport csv = new CSVExport(mContext, filename);
