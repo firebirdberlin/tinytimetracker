@@ -129,6 +129,7 @@ public class TinyTimeTracker extends AppCompatActivity {
 
                 if (sku.equals(ITEM_DONATION)) {
                     purchased_donation = true;
+                    purchased_csv_data_export = true;
                     invalidateOptionsMenu();
                 }
                 if (sku.equals(ITEM_CSV_DATA_EXPORT)) {
@@ -176,7 +177,9 @@ public class TinyTimeTracker extends AppCompatActivity {
                     String sku = jo.getString("productId");
                     if (sku.equals(ITEM_DONATION) ) {
                         purchased_donation = true;
+                        purchased_csv_data_export = true;
                         invalidateOptionsMenu();
+                        showThankYouDialog();
                     } else
                     if (sku.equals(ITEM_CSV_DATA_EXPORT) ) {
                         purchased_csv_data_export = true;
@@ -187,6 +190,14 @@ public class TinyTimeTracker extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void showThankYouDialog() {
+        new AlertDialog.Builder(this)
+            .setTitle(getResources().getString(R.string.dialog_title_thank_you))
+            .setMessage(R.string.dialog_message_thank_you)
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
     }
 
     @Override
