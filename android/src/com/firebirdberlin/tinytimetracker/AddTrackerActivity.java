@@ -281,8 +281,12 @@ public class AddTrackerActivity extends AppCompatActivity {
                     edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
-                accessPointAdapter.add(accessPoint);
-                adapter.remove(accessPoint);
+                boolean isActive = adapter.toggleActive(accessPoint.bssid);
+                if (isActive) {
+                    accessPointAdapter.addUnique(accessPoint);
+                } else {
+                    accessPointAdapter.remove(accessPoint);
+                }
                 adapter.notifyDataSetChanged();
 
                 edit_tracker_working_hours.requestFocus();
