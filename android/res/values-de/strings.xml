@@ -26,6 +26,8 @@
     <string name="dialog_msg_wifi_networks_progress">Suche aktive WLAN Netzwerken.</string>
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
+    <string name="dialog_title_thank_you">Danke</string>
+    <string name="dialog_message_thank_you">Vielen Dank für Ihre Spende.</string>
     <string name="dialog_title_wifi_networks">Aktive WLAN Netzwerke</string>
     <string name="dialog_title_wifi_networks_progress">Suche</string>
     <string name="edit_tracker_access_point_list">Zugeordnete Access Points</string>
@@ -37,13 +39,13 @@
     <string name="pref_about">Über</string>
     <string name="pref_credits">Quellen</string>
     <string name="pref_data_export">Sichern und Wiederherstellen</string>
-    <string name="pref_summary_seconds_connection_lost">Zeit bis Abwesenheit erkannt wird.</string>
+    <string name="pref_summary_seconds_connection_lost">Kurze Pausen, in denen das WLAN-Netzwerk verlassen wird, überbrücken.</string>
     <string name="pref_summary_show_notifications">Zeige Benachrichtigungen an.</string>
     <string name="pref_summary_working_hours">Ihre tägliche Arbeitszeit in Stunden.</string>
     <string name="pref_title_auto_disable_wifi">WLAN automatisch ausschalten</string>
     <string name="pref_title_export">Datenbankexport</string>
     <string name="pref_title_import">Datenbankimport</string>
-    <string name="pref_title_seconds_connection_lost">Abwesenheitszeit</string>
+    <string name="pref_title_seconds_connection_lost">minimale Pausenzeit</string>
     <string name="pref_title_share">Teilen</string>
     <string name="pref_title_show_notifications">Benachrichtigungen</string>
     <string name="pref_title_working_hours">Arbeitsstunden</string>
@@ -52,11 +54,10 @@
     <string name="pref_worktime_settings">Arbeitszeit</string>
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
+    <string name="title_warning_location_services_off">Fehler</string>
     <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
-    <string name="welcome_text_pt1">Diese App zeichnet Ihre täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.
-
-Starten und stoppen Sie die Aufzeichnung mit den folgenden Buttons: </string>
-    <string name="welcome_text_pt2">Die automatische Überwachung von WLAN Netzwerken starten und pausieren Sie mit diesen Symbolen: </string>
+    <string name="welcome_text_pt1">Diese App zeichnet Ihre täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.</string>
+    <string name="welcome_text_pt2">Die App ist Open Source. Beiträge sind herzlich willkommen.</string>
     <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen.</string>
     <string-array name="empty_array"/>
 </resources>

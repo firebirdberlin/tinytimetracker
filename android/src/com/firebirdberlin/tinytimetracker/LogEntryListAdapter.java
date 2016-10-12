@@ -3,11 +3,11 @@ package com.firebirdberlin.tinytimetracker;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import com.firebirdberlin.tinytimetracker.Utility;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 
 import android.app.Activity;
 import android.content.Context;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +22,7 @@ public class LogEntryListAdapter extends ArrayAdapter<LogEntry> {
     public LogEntryListAdapter(Context context, int viewid, List<LogEntry> values1) {
         super(context, viewid, R.id.text1, values1);
         mContext = context;
-
-        if ( DateFormat.is24HourFormat(context) ) {
-            timeFormat = new SimpleDateFormat("HH:mm");
-        }
+        timeFormat = Utility.getTimeFormat(context);
     }
 
     @Override

@@ -13,7 +13,7 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.ui.CardFragment;
 import com.firebirdberlin.tinytimetracker.ui.MainFragment;
-import com.firebirdberlin.pageindicator.PageIndicator;
+import de.firebirdberlin.pageindicator.PageIndicator;
 import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -40,6 +40,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
+import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -60,14 +62,18 @@ import de.greenrobot.event.EventBus;
 
 public class TinyTimeTracker extends AppCompatActivity {
     public static final String TAG = "TinyTimeTracker";
-    private static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
+    public static final String ITEM_DONATION = "donation";
+    public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
+    public static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
+    public static final int REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT = 1002;
     EventBus bus = EventBus.getDefault();
     private TrackerEntry currentTracker = null;
     private FloatingActionButton action_button_add = null;
     private LinearLayout pagerLayout = null;
     private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
-    private boolean purchased_donation = false;
+    public boolean purchased_donation = false;
+    public boolean purchased_csv_data_export = false;
 
     IInAppBillingService mService;
 
@@ -121,9 +127,13 @@ public class TinyTimeTracker extends AppCompatActivity {
                 String sku = ownedSkus.get(i);
                 Log.i(TAG, "Item "  + sku + " was already purchased.");
 
-                if (sku.equals("donation")) {
+                if (sku.equals(ITEM_DONATION)) {
                     purchased_donation = true;
+                    purchased_csv_data_export = true;
                     invalidateOptionsMenu();
+                }
+                if (sku.equals(ITEM_CSV_DATA_EXPORT)) {
+                    purchased_csv_data_export = true;
                 }
 
                 // do something with this purchase information
@@ -136,7 +146,7 @@ public class TinyTimeTracker extends AppCompatActivity {
 
     }
 
-    private void purchaseIntent(String sku, int REQUEST_CODE) {
+    public void purchaseIntent(String sku, int REQUEST_CODE) {
         if (mService == null) return;
         try {
             String developerPayload = "abcdefghijklmnopqrstuvwxyz";
@@ -155,7 +165,8 @@ public class TinyTimeTracker extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_PURCHASE_DONATION) {
+        if (requestCode == REQUEST_CODE_PURCHASE_DONATION ||
+                requestCode == REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT) {
             int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
             String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
@@ -164,14 +175,29 @@ public class TinyTimeTracker extends AppCompatActivity {
                 try {
                     JSONObject jo = new JSONObject(purchaseData);
                     String sku = jo.getString("productId");
-                    purchased_donation = true;
-                    invalidateOptionsMenu();
+                    if (sku.equals(ITEM_DONATION) ) {
+                        purchased_donation = true;
+                        purchased_csv_data_export = true;
+                        invalidateOptionsMenu();
+                        showThankYouDialog();
+                    } else
+                    if (sku.equals(ITEM_CSV_DATA_EXPORT) ) {
+                        purchased_csv_data_export = true;
+                    }
                 }
                 catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    private void showThankYouDialog() {
+        new AlertDialog.Builder(this)
+            .setTitle(getResources().getString(R.string.dialog_title_thank_you))
+            .setMessage(R.string.dialog_message_thank_you)
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
     }
 
     @Override
@@ -332,7 +358,7 @@ public class TinyTimeTracker extends AppCompatActivity {
             recommendApp();
             return true;
         case R.id.action_donate:
-            purchaseIntent("donation", REQUEST_CODE_PURCHASE_DONATION);
+            purchaseIntent(ITEM_DONATION, REQUEST_CODE_PURCHASE_DONATION);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -474,5 +500,25 @@ public class TinyTimeTracker extends AppCompatActivity {
         invalidateOptionsMenu();
         pager.setCurrentItem(0);
         Log.d(TAG, "currentTracker: null");
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
+
+            } catch (SettingNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            return locationMode != Secure.LOCATION_MODE_OFF;
+
+        }else{
+            String locationProviders = Secure.getString(context.getContentResolver(),
+                                                        Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !locationProviders.isEmpty();
+        }
     }
 }

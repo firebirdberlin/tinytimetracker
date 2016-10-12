@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
+import android.os.Build;
+import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -108,19 +111,29 @@ public class AddTrackerActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        unregister(wifiReceiver);
+        unregisterWifiReceiver();
     }
 
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
             Log.i(TAG, "WiFi Scan successfully completed");
-            unregister(wifiReceiver);
+            unregisterWifiReceiver();
             showAddWifiDialog();
-            if (progress != null) {
-                progress.dismiss();
-            }
         }
     };
+
+    private void registerWifiReceiver(IntentFilter filter) {
+        registerReceiver(wifiReceiver, filter);
+        Log.i(TAG, "Receiver registered.");
+    }
+
+    private void unregisterWifiReceiver() {
+        removeWifiReceiverTimeout();
+        unregister(wifiReceiver);
+        if (progress != null) {
+            progress.dismiss();
+        }
+    }
 
     private void unregister(BroadcastReceiver receiver) {
         try {
@@ -195,13 +208,20 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     public void onChooseWifi(View v) {
+
+        if (Build.VERSION.SDK_INT >= 23){
+            if ( ! TinyTimeTracker.isLocationEnabled(this) ) {
+                showLocationProviderDisabledWarning();
+                return;
+            }
+        }
+
         TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION,
                                                   PERMISSIONS_REQUEST_COARSE_LOCATION);
         if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
 
         final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(wifiReceiver, filter);
-        Log.i(TAG, "Receiver registered.");
+        registerWifiReceiver(filter);
 
         boolean res = wifiManager.setWifiEnabled(true);
         Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
@@ -209,7 +229,22 @@ public class AddTrackerActivity extends AppCompatActivity {
         String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
         String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
         progress = ProgressDialog.show(this,title, msg, true);
+        setWifiReceiverTimeout(60000);
     }
+
+    public void setWifiReceiverTimeout(long time) {
+        new Handler().postDelayed(wifiReceiverTimeout, time);
+    }
+
+    public void removeWifiReceiverTimeout() {
+        new Handler().removeCallbacks(wifiReceiverTimeout);
+    }
+
+    Runnable wifiReceiverTimeout = new Runnable() {
+        public void run() {
+            unregisterWifiReceiver();
+        }
+    };
 
     private void determineActiveNetworks() {
         if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
@@ -272,8 +307,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                     edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
-                accessPointAdapter.add(accessPoint);
-                adapter.remove(accessPoint);
+                adapter.toggleActive(accessPoint.bssid);
                 adapter.notifyDataSetChanged();
 
                 edit_tracker_working_hours.requestFocus();
@@ -288,9 +322,28 @@ public class AddTrackerActivity extends AppCompatActivity {
                 }
             }
         })
-        .setNegativeButton(android.R.string.no, null)
-        .setPositiveButton(android.R.string.ok, null)
+        .setNegativeButton(android.R.string.no,null)
+        .setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        for (int i = 0; i < adapter.getCount() ; i++ ) {
+                            AccessPoint accessPoint = adapter.getItem(i);
+                            if ( adapter.isActive(accessPoint.bssid) ) {
+                                accessPointAdapter.addUnique(accessPoint);
+                            }
+                        }
+                }
+        })
         .show();
+    }
+
+    private void showLocationProviderDisabledWarning() {
+        new AlertDialog.Builder(this)
+            .setMessage(R.string.warning_location_services_off)
+            .setTitle(getResources().getString(R.string.title_warning_location_services_off))
+            .setIcon(R.drawable.ic_wifi)
+            .setPositiveButton(android.R.string.ok, null)
+            .show();
     }
 
     private void hideSoftKeyboard() {

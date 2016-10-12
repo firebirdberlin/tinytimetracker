@@ -11,8 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
-import android.provider.Settings.SettingNotFoundException;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
@@ -130,7 +128,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         bus.register(this);
 
         if (Build.VERSION.SDK_INT >= 23){
-            if ( ! isLocationEnabled(getActivity()) ) {
+            if ( ! TinyTimeTracker.isLocationEnabled(getActivity()) ) {
                 cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationProviderOff.setVisibility(View.GONE);
@@ -221,12 +219,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case TrackerEntry.OPERATION_STATE_AUTOMATIC:
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
                 // set start timestamp
-                datasource.addTimeStamp(tracker, now, 0);
+                datasource.addTimeStamp(tracker, now, now);
                 tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                 // set start timestamp
-                datasource.addTimeStamp(tracker, now, 0);
+                datasource.addTimeStamp(tracker, now, now);
                 tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
                 break;
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
@@ -426,26 +424,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             textviewSaldo.setVisibility(View.VISIBLE);
         } else {
             textviewSaldo.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            try {
-                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
-
-            } catch (SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return locationMode != Secure.LOCATION_MODE_OFF;
-
-        }else{
-            String locationProviders = Secure.getString(context.getContentResolver(),
-                                                        Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !locationProviders.isEmpty();
         }
     }
 }

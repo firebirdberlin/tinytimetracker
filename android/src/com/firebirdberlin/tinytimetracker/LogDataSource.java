@@ -597,25 +597,22 @@ public class LogDataSource {
         return new Pair<Long, Long>(duration_millis, distinct_date_count);
     }
 
-    public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long seconds_connection_lost) {
+    public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long graceTime) {
         init();
 
         if (tracker == null) {
             return null;
         }
 
-        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker.id) + ", " + String.valueOf(timestamp) +
-                   ", " + String.valueOf(seconds_connection_lost) + ")");
+        Log.i(TAG, "addTimestamp(" + String.valueOf(tracker.id) +
+                   ", " + String.valueOf(timestamp) +
+                   ", " + String.valueOf(graceTime) + ")");
         LogEntry log = getLatestLogEntry(tracker.id);
 
-        if (log != null) {
-            long cmp_time = timestamp - 1000 * seconds_connection_lost;
-
-            if (log.getTimestampEnd() >= cmp_time) {
-                log.setTimestampEnd(timestamp);
-                replace(log);
-                return log;
-            }
+        if (log != null && log.getTimestampEnd() >= graceTime) {
+            log.setTimestampEnd(timestamp);
+            replace(log);
+            return log;
         }
 
         // make a new entry

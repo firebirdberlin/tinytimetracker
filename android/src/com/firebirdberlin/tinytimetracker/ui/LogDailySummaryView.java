@@ -1,6 +1,7 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.Gravity;
 import android.view.View;
@@ -35,9 +36,9 @@ public class LogDailySummaryView extends View {
         tvDate = new TextView(context);
         tvDuration = new TextView(context);
         tvSaldo = new TextView(context);
-        tvDate.setTextAppearance(mContext, android.R.style.TextAppearance_Small);
-        tvDuration.setTextAppearance(mContext, android.R.style.TextAppearance_Small);
-        tvSaldo.setTextAppearance(mContext, android.R.style.TextAppearance_Small);
+        setTextAppearance(tvDate, android.R.style.TextAppearance_Small);
+        setTextAppearance(tvDuration, android.R.style.TextAppearance_Small);
+        setTextAppearance(tvSaldo, android.R.style.TextAppearance_Small);
 
         TableRow tr = makeRow();
         tvDate.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
@@ -84,13 +85,28 @@ public class LogDailySummaryView extends View {
 
     public void emphasize() {
         tvDate.setText("Total");
-        tvDate.setTextAppearance(mContext, android.R.style.TextAppearance_Medium);
-        tvDuration.setTextAppearance(mContext, android.R.style.TextAppearance_Medium);
-        tvSaldo.setTextAppearance(mContext, android.R.style.TextAppearance_Medium);
+        setTextAppearance(tvDate, android.R.style.TextAppearance_Medium);
+        setTextAppearance(tvDuration, android.R.style.TextAppearance_Medium);
+        setTextAppearance(tvSaldo, android.R.style.TextAppearance_Medium);
 
         addDividerAbove();
     }
 
+    private void setTextAppearance(TextView tv, int size) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            tv.setTextAppearance(size);
+        } else {
+            setTextAppearanceDeprecated(tv, size);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setTextAppearanceDeprecated(TextView tv, int size) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            tv.setTextAppearance(mContext, size);
+        }
+
+    }
     private void addDividerAbove() {
         TableRow tr = makeRow();
         View divider = LayoutInflater.from(mContext)

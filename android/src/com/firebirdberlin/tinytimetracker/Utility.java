@@ -1,8 +1,11 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.text.SimpleDateFormat;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.text.format.DateFormat;
 
 public class Utility {
 
@@ -17,6 +20,13 @@ public class Utility {
         }
 
         return true;
+    }
+
+    public static SimpleDateFormat getTimeFormat(Context context) {
+        if ( DateFormat.is24HourFormat(context) ) {
+            return new SimpleDateFormat("HH:mm");
+        }
+        return new SimpleDateFormat("hh:mm a");
     }
 }
 

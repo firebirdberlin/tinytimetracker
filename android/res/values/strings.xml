@@ -17,11 +17,14 @@
     <string name="change">Change</string>
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
+    <string name="csv_export">CSV export</string>
     <string name="dialog_title_wifi_networks_progress">Scanning</string>
     <string name="dialog_msg_wifi_networks_progress">Scanning for WiFi networks</string>
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
     <string name="dialog_title_database_backup">Database files</string>
     <string name="dialog_title_share_database">Select an application</string>
+    <string name="dialog_title_thank_you">Thanks</string>
+    <string name="dialog_message_thank_you">Thank you very much for your donation.</string>
     <string name="label_auto_detection_on">WiFi ON</string>
     <string name="label_auto_detection_off">WiFi OFF</string>
     <string name="label_toggle_clockin_state_start">Start</string>
@@ -44,8 +47,8 @@
     <string name="pref_title_share">Share</string>
     <string name="pref_about">About</string>
     <string name="pref_credits">Credits</string>
-    <string name="pref_title_seconds_connection_lost">Absence time</string>
-    <string name="pref_summary_seconds_connection_lost">Time after which absence is detected.</string>
+    <string name="pref_title_seconds_connection_lost">Bridge short breaks</string>
+    <string name="pref_summary_seconds_connection_lost">Short times of absence are not counted as a break.</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
     <string name="pref_title_auto_disable_wifi">Automatically disable WiFi</string>
     <string name="pref_title_show_notifications">Notifications</string>
@@ -54,11 +57,10 @@
     <string name="pref_summary_working_hours">Your daily working hours.</string>
     <string name="recommend_app_subject">I would like to recommend this time tracking app to you.</string>
     <string name="recommend_app_desc">Choose an app to share your recommendation.</string>
+    <string name="title_warning_location_services_off">Error</string>
     <string name="warning_location_services_off">Location services are currently disabled. You should enable location services in order to make TinyTimeTracker work.</string>
-    <string name="welcome_text_pt1">This app helps you to track your daily activites, projects and work times. You can easily start and stop the time tracking.  You can also monitor WiFi access points near you, if your activity is bound to a distinct place.
-
-Start and stop the tracker using these buttons:</string>
-    <string name="welcome_text_pt2">Start and stop automatic tracking using these ones:</string>
-    <string name="welcome_text_pt3">Now, you can add your first account with the button below.</string>
+    <string name="welcome_text_pt1">TinyTimeTracker helps to track your daily activites, projects and work times. You can easily start and stop the time tracking.  You can also monitor WiFi access points near you, if your activity is bound to a distinct place.</string>
+    <string name="welcome_text_pt2">The app is open source. Contributions are appreciated.</string>
+    <string name="welcome_text_pt3">Start by adding your first account using the button below.</string>
     <string-array name="empty_array"/>
 </resources>
