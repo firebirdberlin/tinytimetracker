@@ -75,6 +75,10 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         activeBSSIDs.add(bssid);
     }
 
+    public boolean isActive(String bssid) {
+        return activeBSSIDs.contains(bssid);
+    }
+
     public boolean toggleActive(String bssid) {
         if (activeBSSIDs.contains(bssid)) {
             activeBSSIDs.remove(bssid);

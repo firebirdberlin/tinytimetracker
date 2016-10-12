@@ -307,12 +307,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                     edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
-                boolean isActive = adapter.toggleActive(accessPoint.bssid);
-                if (isActive) {
-                    accessPointAdapter.addUnique(accessPoint);
-                } else {
-                    accessPointAdapter.remove(accessPoint);
-                }
+                adapter.toggleActive(accessPoint.bssid);
                 adapter.notifyDataSetChanged();
 
                 edit_tracker_working_hours.requestFocus();
@@ -327,8 +322,18 @@ public class AddTrackerActivity extends AppCompatActivity {
                 }
             }
         })
-        .setNegativeButton(android.R.string.no, null)
-        .setPositiveButton(android.R.string.ok, null)
+        .setNegativeButton(android.R.string.no,null)
+        .setPositiveButton(android.R.string.ok,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        for (int i = 0; i < adapter.getCount() ; i++ ) {
+                            AccessPoint accessPoint = adapter.getItem(i);
+                            if ( adapter.isActive(accessPoint.bssid) ) {
+                                accessPointAdapter.addUnique(accessPoint);
+                            }
+                        }
+                }
+        })
         .show();
     }
 
