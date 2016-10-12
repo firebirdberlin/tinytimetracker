@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
+import java.lang.Runnable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +23,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -109,19 +111,29 @@ public class AddTrackerActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        unregister(wifiReceiver);
+        unregisterWifiReceiver();
     }
 
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
             Log.i(TAG, "WiFi Scan successfully completed");
-            unregister(wifiReceiver);
+            unregisterWifiReceiver();
             showAddWifiDialog();
-            if (progress != null) {
-                progress.dismiss();
-            }
         }
     };
+
+    private void registerWifiReceiver(IntentFilter filter) {
+        registerReceiver(wifiReceiver, filter);
+        Log.i(TAG, "Receiver registered.");
+    }
+
+    private void unregisterWifiReceiver() {
+        removeWifiReceiverTimeout();
+        unregister(wifiReceiver);
+        if (progress != null) {
+            progress.dismiss();
+        }
+    }
 
     private void unregister(BroadcastReceiver receiver) {
         try {
@@ -209,8 +221,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
 
         final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(wifiReceiver, filter);
-        Log.i(TAG, "Receiver registered.");
+        registerWifiReceiver(filter);
 
         boolean res = wifiManager.setWifiEnabled(true);
         Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
@@ -218,7 +229,22 @@ public class AddTrackerActivity extends AppCompatActivity {
         String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
         String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
         progress = ProgressDialog.show(this,title, msg, true);
+        setWifiReceiverTimeout(60000);
     }
+
+    public void setWifiReceiverTimeout(long time) {
+        new Handler().postDelayed(wifiReceiverTimeout, time);
+    }
+
+    public void removeWifiReceiverTimeout() {
+        new Handler().removeCallbacks(wifiReceiverTimeout);
+    }
+
+    Runnable wifiReceiverTimeout = new Runnable() {
+        public void run() {
+            unregisterWifiReceiver();
+        }
+    };
 
     private void determineActiveNetworks() {
         if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
