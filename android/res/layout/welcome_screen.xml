@@ -14,6 +14,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/welcome_text_pt1"
+            android:breakStrategy="high_quality"
             android:layout_marginTop="10dp"/>
 
         <TextView
@@ -22,6 +23,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/welcome_text_pt2"
             android:layout_marginBottom="10dp"
+            android:breakStrategy="high_quality"
             android:layout_marginTop="10dp"/>
 
         <TextView
@@ -30,6 +32,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/welcome_text_pt3"
             android:layout_marginBottom="10dp"
+            android:breakStrategy="high_quality"
             android:layout_marginTop="10dp"/>
     </LinearLayout>
 </ScrollView>
