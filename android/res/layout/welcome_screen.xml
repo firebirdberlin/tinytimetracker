@@ -13,60 +13,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/welcome_text_pt1"/>
+            android:text="@string/welcome_text_pt1"
+            android:layout_marginTop="10dp"/>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-            <Button
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:drawableLeft="@drawable/ic_play"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:text="@string/label_toggle_clockin_state_start"
-                />
-            <Button
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:drawableLeft="@drawable/ic_stop"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:text="@string/label_toggle_clockin_state_end"
-                />
-        </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/welcome_text_pt2"/>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-            <Button
-                android:layout_alignParentRight="true"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:drawableLeft="@drawable/ic_wifi"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:text="@string/label_auto_detection_on"
-                weight="5"
-                />
-            <Button
-                android:layout_alignParentRight="true"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:drawableLeft="@drawable/ic_no_wifi"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:text="@string/label_auto_detection_off"
-                />
-        </LinearLayout>
+            android:text="@string/welcome_text_pt2"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/welcome_text_pt3"/>
+            android:text="@string/welcome_text_pt3"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"/>
     </LinearLayout>
 </ScrollView>

@@ -56,10 +56,8 @@
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
     <string name="title_warning_location_services_off">Fehler</string>
     <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
-    <string name="welcome_text_pt1">Diese App zeichnet Ihre täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.
-
-Starten und stoppen Sie die Aufzeichnung mit den folgenden Buttons: </string>
-    <string name="welcome_text_pt2">Die automatische Überwachung von WLAN Netzwerken starten und pausieren Sie mit diesen Symbolen: </string>
+    <string name="welcome_text_pt1">Diese App zeichnet Ihre täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.</string>
+    <string name="welcome_text_pt2">Die App ist Open Source. Beiträge sind herzlich willkommen.</string>
     <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen.</string>
     <string-array name="empty_array"/>
 </resources>
