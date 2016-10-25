@@ -40,7 +40,7 @@ int phone_battery_percent = 0;
 /*\
 |*| DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
 \*/
-static void graphics_draw_arc(GContext *ctx, GPoint center, int radius, int thickness, int start_angle, int end_angle, GColor c) {
+static void my_graphics_draw_arc(GContext *ctx, GPoint center, int radius, int thickness, int start_angle, int end_angle, GColor c) {
     int32_t xmin = 65535000, xmax = -65535000, ymin = 65535000, ymax = -65535000;
     int32_t cosStart, sinStart, cosEnd, sinEnd;
     int32_t r, t;
@@ -54,8 +54,8 @@ static void graphics_draw_arc(GContext *ctx, GPoint center, int radius, int thic
     if (end_angle == 0) end_angle = TRIG_MAX_ANGLE;
 
     if (start_angle > end_angle) {
-        graphics_draw_arc(ctx, center, radius, thickness, start_angle, TRIG_MAX_ANGLE, c);
-        graphics_draw_arc(ctx, center, radius, thickness, 0, end_angle, c);
+        my_graphics_draw_arc(ctx, center, radius, thickness, start_angle, TRIG_MAX_ANGLE, c);
+        my_graphics_draw_arc(ctx, center, radius, thickness, 0, end_angle, c);
     } else {
         // Calculate bounding box for the arc to be drawn
         cosStart = cos_lookup(start_angle);
@@ -247,11 +247,11 @@ static void clock_layer_draw(Layer *layer, GContext *ctx) {
     int battery_percent = charge_state.charge_percent;
     if (battery_percent > 0) {
         int angle = angle_180 + angle_180 * battery_percent/100;
-        graphics_draw_arc(ctx, center, half_h - 3, 3, angle_180, angle, GColorWhite);
+        my_graphics_draw_arc(ctx, center, half_h - 3, 3, angle_180, angle, GColorWhite);
     }
     if (phone_battery_percent > 0) {
         int angle = angle_180 * phone_battery_percent/100;
-        graphics_draw_arc(ctx, center, half_h - 3, 3, 0, angle, GColorWhite);
+        my_graphics_draw_arc(ctx, center, half_h - 3, 3, 0, angle, GColorWhite);
     }
 }
 
