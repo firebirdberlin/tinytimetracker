@@ -29,130 +29,11 @@ static GBitmap *s_icon_bitmap = NULL;
 
 static PropertyAnimation *s_property_animation;
 
-static int angle_45 = TRIG_MAX_ANGLE / 8;
 static int angle_90 = TRIG_MAX_ANGLE / 4;
 static int angle_180 = TRIG_MAX_ANGLE / 2;
 static int angle_270 = 3 * TRIG_MAX_ANGLE / 4;
 
 int phone_battery_percent = 0;
-
-
-/*\
-|*| DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
-\*/
-static void my_graphics_draw_arc(GContext *ctx, GPoint center, int radius, int thickness, int start_angle, int end_angle, GColor c) {
-    int32_t xmin = 65535000, xmax = -65535000, ymin = 65535000, ymax = -65535000;
-    int32_t cosStart, sinStart, cosEnd, sinEnd;
-    int32_t r, t;
-
-    while (start_angle < 0) start_angle += TRIG_MAX_ANGLE;
-    while (end_angle < 0) end_angle += TRIG_MAX_ANGLE;
-
-    start_angle %= TRIG_MAX_ANGLE;
-    end_angle %= TRIG_MAX_ANGLE;
-
-    if (end_angle == 0) end_angle = TRIG_MAX_ANGLE;
-
-    if (start_angle > end_angle) {
-        my_graphics_draw_arc(ctx, center, radius, thickness, start_angle, TRIG_MAX_ANGLE, c);
-        my_graphics_draw_arc(ctx, center, radius, thickness, 0, end_angle, c);
-    } else {
-        // Calculate bounding box for the arc to be drawn
-        cosStart = cos_lookup(start_angle);
-        sinStart = sin_lookup(start_angle);
-        cosEnd = cos_lookup(end_angle);
-        sinEnd = sin_lookup(end_angle);
-
-        r = radius;
-        // Point 1: radius & start_angle
-        t = r * cosStart;
-        if (t < xmin) xmin = t;
-        if (t > xmax) xmax = t;
-        t = r * sinStart;
-        if (t < ymin) ymin = t;
-        if (t > ymax) ymax = t;
-
-        // Point 2: radius & end_angle
-        t = r * cosEnd;
-        if (t < xmin) xmin = t;
-        if (t > xmax) xmax = t;
-        t = r * sinEnd;
-        if (t < ymin) ymin = t;
-        if (t > ymax) ymax = t;
-
-        r = radius - thickness;
-        // Point 3: radius-thickness & start_angle
-        t = r * cosStart;
-        if (t < xmin) xmin = t;
-        if (t > xmax) xmax = t;
-        t = r * sinStart;
-        if (t < ymin) ymin = t;
-        if (t > ymax) ymax = t;
-
-        // Point 4: radius-thickness & end_angle
-        t = r * cosEnd;
-        if (t < xmin) xmin = t;
-        if (t > xmax) xmax = t;
-        t = r * sinEnd;
-        if (t < ymin) ymin = t;
-        if (t > ymax) ymax = t;
-
-        // Normalization
-        xmin /= TRIG_MAX_RATIO;
-        xmax /= TRIG_MAX_RATIO;
-        ymin /= TRIG_MAX_RATIO;
-        ymax /= TRIG_MAX_RATIO;
-
-        // Corrections if arc crosses X or Y axis
-        if ((start_angle < angle_90) && (end_angle > angle_90)) {
-            ymax = radius;
-        }
-
-        if ((start_angle < angle_180) && (end_angle > angle_180)) {
-            xmin = -radius;
-        }
-
-        if ((start_angle < angle_270) && (end_angle > angle_270)) {
-            ymin = -radius;
-        }
-
-        // Slopes for the two sides of the arc
-        float sslope = (float)cosStart/ (float)sinStart;
-        float eslope = (float)cosEnd / (float)sinEnd;
-
-        if (end_angle == TRIG_MAX_ANGLE) eslope = -1000000;
-
-        int ir2 = (radius - thickness) * (radius - thickness);
-        int or2 = radius * radius;
-
-        graphics_context_set_stroke_color(ctx, c);
-
-        for (int x = xmin; x <= xmax; x++) {
-            for (int y = ymin; y <= ymax; y++)
-            {
-                int x2 = x * x;
-                int y2 = y * y;
-
-                if (
-                    (x2 + y2 < or2 && x2 + y2 >= ir2) && (
-                        (y > 0 && start_angle < angle_180 && x <= y * sslope) ||
-                        (y < 0 && start_angle > angle_180 && x >= y * sslope) ||
-                        (y < 0 && start_angle <= angle_180) ||
-                        (y == 0 && start_angle <= angle_180 && x < 0) ||
-                        (y == 0 && start_angle == 0 && x > 0)
-                    ) && (
-                        (y > 0 && end_angle < angle_180 && x >= y * eslope) ||
-                        (y < 0 && end_angle > angle_180 && x <= y * eslope) ||
-                        (y > 0 && end_angle >= angle_180) ||
-                        (y == 0 && end_angle >= angle_180 && x < 0) ||
-                        (y == 0 && start_angle == 0 && x > 0)
-                    )
-                )
-                graphics_draw_pixel(ctx, GPoint(center.x+x, center.y+y));
-            }
-        }
-    }
-}
 
 
 static void update_time() {
@@ -232,26 +113,29 @@ static void worktime_layer_draw(Layer *layer, GContext *ctx) {
 static void clock_layer_draw(Layer *layer, GContext *ctx) {
     GRect bounds = layer_get_frame(layer);
 
-    // Draw a black filled rectangle with sharp corners
-    graphics_context_set_fill_color(ctx, GColorBlack);
-    graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-
-    // Draw a white filled circle a radius of half the layer height
+    graphics_context_set_antialiased(ctx, true);
     graphics_context_set_fill_color(ctx, GColorWhite);
     const int16_t half_h = (bounds.size.h) / 2;
     const int16_t half_w = (bounds.size.w) / 2;
     GPoint center = {half_w, half_h};
     graphics_fill_circle(ctx, center, half_h - 10);
 
+    const GRect rect = GRect(center.x - half_w + 4,
+                             center.y - half_h + 4,
+                             bounds.size.h - 8,
+                             bounds.size.w - 8 );
+
+    graphics_context_set_stroke_color(ctx, GColorWhite);
+    graphics_context_set_stroke_width(ctx, 3);
     BatteryChargeState charge_state = battery_state_service_peek();
     int battery_percent = charge_state.charge_percent;
     if (battery_percent > 0) {
-        int angle = angle_180 + angle_180 * battery_percent/100;
-        my_graphics_draw_arc(ctx, center, half_h - 3, 3, angle_180, angle, GColorWhite);
+        int angle = angle_270 + angle_180 * battery_percent/100;
+        graphics_draw_arc( ctx, rect, GOvalScaleModeFitCircle, angle_270, angle);
     }
     if (phone_battery_percent > 0) {
-        int angle = angle_180 * phone_battery_percent/100;
-        my_graphics_draw_arc(ctx, center, half_h - 3, 3, 0, angle, GColorWhite);
+        int angle = angle_90 + angle_180 * phone_battery_percent/100;
+        graphics_draw_arc( ctx, rect, GOvalScaleModeFitCircle, angle_90, angle);
     }
 }
 
@@ -384,7 +268,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Store incoming information
     static char temperature_buffer[8];
     static char conditions_buffer[32];
-    static char weather_layer_buffer[32];
     static char worktime_buffer[6];
 
     // For all items
@@ -479,7 +362,7 @@ static void init(void) {
     app_message_register_outbox_failed(outbox_failed_callback);
     app_message_register_outbox_sent(outbox_sent_callback);
 
-    app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+    app_message_open(124, 124);
     update_time();
     send_battery_state_to_phone(VALUE_WAITING_FOR_INPUT);
 }
