@@ -7,10 +7,13 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Pair;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.ViewGroup;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
@@ -47,12 +50,26 @@ public class CardFragment extends Fragment {
         Log.i(TAG, "onCreateView()");
         mContext = (Context) getActivity();
 
+
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         recyclerView = (RecyclerView) v.findViewById(R.id.cardList);
+        ViewTreeObserver vto = recyclerView.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int dpWidth = pxToDp(recyclerView.getWidth());
+                recyclerView.getLayoutParams().width =
+                    ( dpWidth < 400 ) ? ViewGroup.LayoutParams.MATCH_PARENT : dpToPx(400);
+                ViewTreeObserver obs = recyclerView.getViewTreeObserver();
+                obs.removeGlobalOnLayoutListener(this);
+            }
+        });
+
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(mContext);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
+
 
         logSummaryAdapter = new LogSummaryAdapter(getData());
         recyclerView.setAdapter(logSummaryAdapter);
@@ -60,6 +77,20 @@ public class CardFragment extends Fragment {
         return v;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    private int pxToDp(float px) {
+        DisplayMetrics displaymetrics = mContext.getResources().getDisplayMetrics();
+        return (int) TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, px, displaymetrics );
+    }
+
+    private int dpToPx(float dp) {
+        DisplayMetrics displaymetrics = mContext.getResources().getDisplayMetrics();
+        return (int)((dp * displaymetrics.density) + 0.5);
+    }
 
     @Override
     public void onResume() {
