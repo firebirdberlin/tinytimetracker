@@ -104,6 +104,13 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.context_menu_log_entries, menu);
+
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        int position = info.position;
+        if ( position == log_entry_adapter.getCount() - 1 ) {
+            MenuItem itemActionJoin = menu.findItem(R.id.action_join);
+            itemActionJoin.setVisible(false);
+        }
     }
 
     @Override
