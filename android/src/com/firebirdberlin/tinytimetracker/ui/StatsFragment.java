@@ -43,7 +43,6 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     RadioGroup radio_group_aggregation = null;
     Button btnCSVExport = null;
     Context mContext = null;
-    TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
 
     @Override
@@ -92,10 +91,6 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         Log.i(TAG, "onResume()");
         bus.register(this);
 
-        OnTrackerSelected event = bus.getStickyEvent(OnTrackerSelected.class);
-        if ( event != null ) {
-            this.currentTracker = event.newTracker;
-        }
         refresh();
     }
 
@@ -167,14 +162,14 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     }
 
     private void exportCSV() {
-        if (currentTracker == null) return;
+        if (TinyTimeTracker.currentTracker == null) return;
         if (log_entry_adapter.getCount() == 0) return;
 
         LogEntry firstEntry = log_entry_adapter.getItem(0);
         SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
         String monthString = firstEntry.timestamp_start.toTimeString(df);
 
-        String title = currentTracker.verbose_name + " " + monthString;
+        String title = TinyTimeTracker.currentTracker.verbose_name + " " + monthString;
         String filename = title + ".csv";
 
         String data = "";
@@ -229,7 +224,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
 
         log_entry_adapter.clear();
 
-        if (currentTracker != null) {
+        if (TinyTimeTracker.currentTracker != null) {
             int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
             long start = 0L;
             long end = 0L;
@@ -246,7 +241,8 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
             }
 
             LogDataSource datasource = new LogDataSource(mContext);
-            List<LogEntry> values = datasource.getAllEntries(currentTracker.id, start, end);
+            List<LogEntry> values = datasource.getAllEntries(TinyTimeTracker.currentTracker.id,
+                                                             start, end);
             datasource.close();
             log_entry_adapter.addAll(values);
         }
@@ -256,31 +252,32 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
 
 
     public void onEvent(OnWifiUpdateCompleted event) {
-        if ( currentTracker == null ) return;
-        if (event.success && currentTracker.equals(event.tracker) && event.logentry != null ) {
+        if ( TinyTimeTracker.currentTracker == null ) return;
+        if (event.success &&
+                TinyTimeTracker.currentTracker.equals(event.tracker)
+                && event.logentry != null ) {
             refresh(event.logentry);
         }
     }
 
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
-        this.currentTracker = event.newTracker;
         refresh();
     }
 
     public void onEvent(OnTrackerDeleted event) {
-        this.currentTracker = null;
         refresh();
     }
 
     public void onEvent(OnLogEntryChanged event) {
-        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
+        if ( TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
             refresh(event.entry);
         }
     }
 
     public void onEvent(OnLogEntryDeleted event) {
-        if ( currentTracker != null ) {
+        if ( TinyTimeTracker.currentTracker != null ) {
             refresh();
         }
     }

@@ -37,7 +37,6 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 public class CardFragment extends Fragment {
     private static String TAG = TinyTimeTracker.TAG + ".CardFragment";
-    private TrackerEntry currentTracker = null;
     private Context mContext = null;
     private EventBus bus = EventBus.getDefault();
     private RecyclerView recyclerView = null;
@@ -99,16 +98,11 @@ public class CardFragment extends Fragment {
         Log.i(TAG, "onResume()");
         bus.register(this);
 
-        OnTrackerSelected event = bus.getStickyEvent(OnTrackerSelected.class);
-        if ( event != null ) {
-            Log.i(TAG, event.newTracker.verbose_name);
-            this.currentTracker = event.newTracker;
-            refresh();
-        }
+        refresh();
     }
 
     private void refresh() {
-        if ( this.currentTracker == null ) {
+        if ( TinyTimeTracker.currentTracker == null ) {
             return;
         }
         logSummaryAdapter = new LogSummaryAdapter(getData());
@@ -124,13 +118,13 @@ public class CardFragment extends Fragment {
     private List<LogSummary> getData() {
         List<LogSummary> result = new ArrayList<LogSummary>();
 
-        if (currentTracker != null) {
+        if (TinyTimeTracker.currentTracker != null) {
             UnixTimestamp start = UnixTimestamp.startOfToday();
             start.set(Calendar.DAY_OF_YEAR, 1);
             start.add(Calendar.YEAR, -1);
             List< Pair<Long, Long> > values = fetchData(start);
 
-            long workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
+            long workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
             int weekOfYear = -1;
             LogSummary summary = null;
             for (Pair<Long, Long> e : values) {
@@ -148,7 +142,7 @@ public class CardFragment extends Fragment {
                         result.add(summary);
                         summary = null;
                     }
-                    summary = new LogSummary(currentTracker);
+                    summary = new LogSummary(TinyTimeTracker.currentTracker);
                 }
                 summary.dailySummaries.add(logEntry);
             }
@@ -165,17 +159,18 @@ public class CardFragment extends Fragment {
     private List< Pair<Long, Long> > fetchData(UnixTimestamp start_timestamp) {
         LogDataSource datasource = new LogDataSource(mContext);
         List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(
-                currentTracker.id, LogDataSource.AGGRETATION_DAY, start_timestamp.getTimestamp());
+                TinyTimeTracker.currentTracker.id, LogDataSource.AGGRETATION_DAY,
+                start_timestamp.getTimestamp());
         datasource.close();
         return values;
     }
 
     private void updateCurrentWeek() {
-        if ( currentTracker == null ) return;
+        if ( TinyTimeTracker.currentTracker == null ) return;
         UnixTimestamp start = UnixTimestamp.startOfWeek();
         List< Pair<Long, Long> > values = fetchData(start);
-        long workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
-        LogSummary summary = new LogSummary(currentTracker);
+        long workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
+        LogSummary summary = new LogSummary(TinyTimeTracker.currentTracker);
         for (Pair<Long, Long> e : values) {
             UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
             UnixTimestamp duration = new UnixTimestamp(e.second.longValue());
@@ -198,30 +193,29 @@ public class CardFragment extends Fragment {
 
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
-        this.currentTracker = event.newTracker;
         refresh();
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
-        if ( currentTracker == null ) return;
-        if (event.success && currentTracker.equals(event.tracker)) {
+        if ( TinyTimeTracker.currentTracker == null ) return;
+        if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
             updateCurrentWeek();
         }
     }
 
     public void onEvent(OnTrackerDeleted event) {
-        this.currentTracker = null;
         refresh();
     }
 
     public void onEvent(OnLogEntryChanged event) {
-        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
+        if ( TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
             refresh();
         }
     }
 
     public void onEvent(OnLogEntryDeleted event) {
-        if ( currentTracker != null ) {
+        if ( TinyTimeTracker.currentTracker != null ) {
             refresh();
         }
     }

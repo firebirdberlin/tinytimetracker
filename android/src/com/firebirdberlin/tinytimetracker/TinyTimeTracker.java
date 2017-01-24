@@ -66,8 +66,8 @@ public class TinyTimeTracker extends AppCompatActivity {
     public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
     public static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
     public static final int REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT = 1002;
+    public static TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
-    private TrackerEntry currentTracker = null;
     private FloatingActionButton action_button_add = null;
     private LinearLayout pagerLayout = null;
     private CustomViewPager pager = null;
@@ -490,13 +490,11 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     public void onEvent(OnTrackerSelected event) {
-        currentTracker = event.newTracker;
         invalidateOptionsMenu();
         Log.d(TAG, "currentTracker: " + currentTracker.toString());
     }
 
     public void onEvent(OnTrackerDeleted event) {
-        currentTracker = null;
         invalidateOptionsMenu();
         pager.setCurrentItem(0);
         Log.d(TAG, "currentTracker: null");

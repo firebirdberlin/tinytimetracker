@@ -24,6 +24,7 @@ import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 
 
 public class LogDataSource {
@@ -350,6 +351,7 @@ public class LogDataSource {
         boolean success = (rows_affected > 0);
 
         if (success) {
+            TinyTimeTracker.currentTracker = null;
             bus.post(new OnTrackerDeleted(tracker));
         }
 

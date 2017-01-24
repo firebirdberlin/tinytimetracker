@@ -56,7 +56,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
     private CardView cardviewLocationProviderOff = null;
-    private TrackerEntry currentTracker = null;
     private View trackerToolbar = null;
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
@@ -93,9 +92,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 TrackerEntry tracker = (TrackerEntry) parentView.getItemAtPosition(position);
-                Log.i(TAG, "Tracker selected " + tracker.verbose_name);
-                EventBus bus = EventBus.getDefault();
-                bus.postSticky(new OnTrackerSelected(tracker));
+                postTrackerSelected(tracker);
             }
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
@@ -157,9 +154,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if ( count > 0 && item < count ) {
             spinner.setSelection(item);
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(item);
-            Log.i(TAG, "Tracker selected " + tracker.verbose_name);
-            EventBus bus = EventBus.getDefault();
-            bus.postSticky(new OnTrackerSelected(tracker));
+            postTrackerSelected(tracker);
         }
     }
 
@@ -336,15 +331,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
 
         adapter.notifyDataSetChanged();
-        if (currentTracker != null && currentTracker.id == event.tracker.id) {
-            updateStatisticalValues(currentTracker);
+        if (TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.tracker.id) {
+            updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         if ( event == null || event.newTracker == null) return;
-        currentTracker = event.newTracker;
         trackerToolbar.setVisibility(View.VISIBLE);
 
         setWifiIndicator(event.newTracker);
@@ -353,8 +348,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
-        if ( currentTracker == null ) return;
-        if (event.success && currentTracker.equals(event.tracker)) {
+        if ( TinyTimeTracker.currentTracker == null ) return;
+        if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
             updateStatisticalValues(event.tracker);
         }
     }
@@ -371,23 +366,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if (adapter.getCount() > 0) {
             spinner.setSelection(0, true);
             TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
-            Log.i(TAG, "Tracker selected " + tracker.verbose_name);
-            EventBus bus = EventBus.getDefault();
-            bus.postSticky(new OnTrackerSelected(tracker));
+            postTrackerSelected(tracker);
         }
 
         adapter.notifyDataSetChanged();
     }
 
     public void onEvent(OnLogEntryDeleted event) {
-        if ( currentTracker != null && currentTracker.id == event.tracker_id ) {
-            updateStatisticalValues(currentTracker);
+        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.tracker_id ) {
+            updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
     public void onEvent(OnLogEntryChanged event) {
-        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
-            updateStatisticalValues(currentTracker);
+        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
+            updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
@@ -425,5 +418,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         } else {
             textviewSaldo.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private void postTrackerSelected(TrackerEntry tracker) {
+        Log.i(TAG, "Tracker selected " + tracker.verbose_name);
+        EventBus bus = EventBus.getDefault();
+        TinyTimeTracker.currentTracker = tracker;
+        bus.postSticky(new OnTrackerSelected(tracker));
     }
 }

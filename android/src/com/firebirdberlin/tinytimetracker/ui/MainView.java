@@ -34,7 +34,6 @@ public class MainView extends View {
     private boolean activated = false;
     private int workingHoursInSeconds = 8 * 3600;
     EventBus bus = EventBus.getDefault();
-    TrackerEntry currentTracker = null;
 
     public MainView(Context context) {
         super(context);
@@ -52,8 +51,8 @@ public class MainView extends View {
     }
 
     public void onEvent(OnWifiUpdateCompleted event) {
-        if ( currentTracker == null ) return;
-        if (event.success && currentTracker.equals(event.tracker)) {
+        if ( TinyTimeTracker.currentTracker == null ) return;
+        if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
             invalidate();
         }
     }
@@ -64,23 +63,20 @@ public class MainView extends View {
     }
 
     public void onEvent(OnTrackerSelected event) {
-        currentTracker = event.newTracker;
         invalidate();
     }
 
     public void onEvent(OnTrackerChanged event) {
-        if (currentTracker == null || event == null || event.tracker == null) {
+        if (TinyTimeTracker.currentTracker == null || event == null || event.tracker == null) {
             return;
         }
 
-        if (currentTracker.id == event.tracker.id) {
-            currentTracker = event.tracker;
+        if (TinyTimeTracker.currentTracker.id == event.tracker.id) {
             invalidate();
         }
     }
 
     public void onEvent(OnTrackerDeleted event) {
-        currentTracker = null;
         invalidate();
     }
 
@@ -89,7 +85,7 @@ public class MainView extends View {
     }
 
     public void onEvent(OnLogEntryChanged event) {
-        if ( currentTracker != null && currentTracker.id == event.entry.tracker_id ) {
+        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
             invalidate();
         }
     }
@@ -126,7 +122,7 @@ public class MainView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (currentTracker == null) {
+        if (TinyTimeTracker.currentTracker == null) {
             return;
         }
 
@@ -135,11 +131,11 @@ public class MainView extends View {
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(mContext);
 
-        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), currentTracker.id);
+        UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), TinyTimeTracker.currentTracker.id);
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
-        workingHoursInSeconds = (int) (currentTracker.working_hours * 3600.f);
+        workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
 
-        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), currentTracker.id);
+        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), TinyTimeTracker.currentTracker.id);
 
         int angle = 360;
         if (workingHoursInSeconds > 0) {
