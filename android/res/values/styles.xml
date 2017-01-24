@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MainTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorAccent">#3498db</item>
+        <item name="android:colorActivatedHighlight">#FFC107</item>
+        <item name="colorPrimary">#212121</item>
+        <!--<item name="colorControlNormal">#3F51B5</item>-->
+        <item name="colorControlActivated">#3498db</item>
+    </style>
+</resources>

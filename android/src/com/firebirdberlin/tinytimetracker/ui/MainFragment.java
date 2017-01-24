@@ -247,6 +247,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         Log.i(TAG, "button_toggle_clockin_state click done ...");
         return;
     }
+
     private void setWifiIndicator(TrackerEntry tracker) {
         boolean visible = true;
         switch (tracker.operation_state) {

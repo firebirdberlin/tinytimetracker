@@ -49,7 +49,6 @@ public class CardFragment extends Fragment {
         Log.i(TAG, "onCreateView()");
         mContext = (Context) getActivity();
 
-
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         recyclerView = (RecyclerView) v.findViewById(R.id.cardList);
         ViewTreeObserver vto = recyclerView.getViewTreeObserver();
@@ -68,7 +67,6 @@ public class CardFragment extends Fragment {
         LinearLayoutManager llm = new LinearLayoutManager(mContext);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
-
 
         logSummaryAdapter = new LogSummaryAdapter(getData());
         recyclerView.setAdapter(logSummaryAdapter);

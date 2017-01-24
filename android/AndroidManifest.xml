@@ -18,10 +18,9 @@
 
     <application android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
-        android:theme="@style/Theme.AppCompat.NoActionBar" >
+        android:theme="@style/MainTheme" >
 
         <activity android:name="TinyTimeTracker"
-            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

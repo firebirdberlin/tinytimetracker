@@ -65,6 +65,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/action_button_add_wifi"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
@@ -74,7 +75,8 @@
         android:layout_margin="16dp"
         android:clickable="true"
         android:onClick="onChooseWifi"
-        android:src="@drawable/ic_wifi_add"/>
+        android:src="@drawable/ic_wifi_add"
+        app:backgroundTint="#FFC107"/>
 
 </RelativeLayout>
 

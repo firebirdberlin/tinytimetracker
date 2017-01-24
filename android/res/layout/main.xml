@@ -37,6 +37,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/action_button_add"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
@@ -47,5 +48,6 @@
         android:visibility="gone"
         android:clickable="true"
         android:onClick="onAddTracker"
-        android:src="@drawable/ic_add"/>
+        android:src="@drawable/ic_add"
+        app:backgroundTint="#FFC107"/>
 </RelativeLayout>
