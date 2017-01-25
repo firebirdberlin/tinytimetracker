@@ -49,5 +49,5 @@
         android:clickable="true"
         android:onClick="onAddTracker"
         android:src="@drawable/ic_add"
-        app:backgroundTint="#FFC107"/>
+        app:backgroundTint="#FFA000"/>
 </RelativeLayout>

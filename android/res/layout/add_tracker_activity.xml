@@ -76,7 +76,7 @@
         android:clickable="true"
         android:onClick="onChooseWifi"
         android:src="@drawable/ic_wifi_add"
-        app:backgroundTint="#FFC107"/>
+        app:backgroundTint="#FFA000"/>
 
 </RelativeLayout>
 
