@@ -20,12 +20,14 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
@@ -43,6 +45,7 @@ public class WiFiService extends Service {
     private int NOTIFICATION_ID = 1337;
     private int NOTIFICATION_ID_WIFI = 1338;
     private int NOTIFICATION_ID_ERROR = 1339;
+    private int NOTIFICATION_ID_AP = 1340;
 
     private boolean showNotifications = false;
     private boolean wifiWasEnabled = false;
@@ -209,11 +212,26 @@ public class WiFiService extends Service {
         return note;
     }
 
+    @SuppressLint("NewApi")
+    private Notification buildNotificationNewAccessPoint(String title, String text) {
+
+        Intent intent = new Intent(mContext, TinyTimeTracker.class);
+        PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+
+        Notification note = new Notification.Builder(this).setContentTitle(title)
+                                                          .setContentText(text)
+                                                          .setSmallIcon(R.drawable.ic_hourglass)
+                                                          .setContentIntent(pIntent)
+                                                          .build();
+        return note;
+    }
+
     private void getWiFiNetworks() {
         LogDataSource datasource = new LogDataSource(this);
         datasource.open();
         Set<TrackerEntry> trackersToUpdate = getTrackersToUpdate(datasource);
         updateTrackers(datasource, trackersToUpdate);
+        findNewAccessPointsBySSID(datasource);
         datasource.close();
 
         this.tracked_wifi_network_found = (trackersToUpdate.size() > 0);
@@ -290,6 +308,43 @@ public class WiFiService extends Service {
             }
         }
         saveTimestampLastRun(now);
+    }
+
+    private void findNewAccessPointsBySSID(LogDataSource datasource) {
+        ArrayList<AccessPoint> accessPoints =
+            (ArrayList<AccessPoint>) datasource.getAllAccessPoints();
+
+        List<ScanResult> networkList = wifiManager.getScanResults();
+
+        for (ScanResult network : networkList) {
+            String ssid = network.SSID;
+            String bssid = network.BSSID;
+            ArrayList<AccessPoint> accessPointsWithSSID = new ArrayList<AccessPoint>();
+            Set<Long> tracker_ids = new HashSet<Long>();
+            // collect tracker_ids for this SSID
+            for (AccessPoint ap : accessPoints) {
+                if (ap.ssid.equals(ssid)) {
+                    accessPointsWithSSID.add(ap);
+                    tracker_ids.add(ap.getTrackerID());
+                }
+            }
+
+            // remove tracker_ids if the BSSID already exists
+            for (AccessPoint ap : accessPointsWithSSID) {
+                if (ap.bssid.equals(bssid) ) {
+                    tracker_ids.remove(ap.getTrackerID());
+                }
+            }
+            // tracker_ids now only contains items which do not track this BSSID
+            if (tracker_ids.size() > 0 ) {
+                Notification note = buildNotificationNewAccessPoint("New Access Point found !",
+                        String.format("%s (%s)", ssid, bssid));
+                notificationManager.notify(NOTIFICATION_ID_AP, note);
+                break;
+            }
+
+
+        }
     }
 
     private long getGraceTime(LogDataSource datasource, TrackerEntry tracker, long now) {

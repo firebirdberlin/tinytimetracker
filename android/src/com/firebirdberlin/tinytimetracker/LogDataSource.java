@@ -474,6 +474,33 @@ public class LogDataSource {
         return accessPoints;
     }
 
+    public List<AccessPoint> getAllAccessPoints() {
+        init();
+        List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+        Cursor cursor = null;
+        try {
+            cursor = database.query(SQLiteHandler.TABLE_ACCESS_POINTS,
+                                    new String[] {"_id", "tracker_id", "ssid", "bssid"},
+                                    null, null, null, null, null, null);
+            cursor.moveToFirst();
+
+            while (!cursor.isAfterLast()) {
+                long log_id = cursor.getLong(0);
+                long tracker_id = cursor.getLong(1);
+                String ssid = cursor.getString(2);
+                String bssid = cursor.getString(3);
+                AccessPoint ap = new AccessPoint(log_id, tracker_id, ssid, bssid);
+                accessPoints.add(ap);
+                cursor.moveToNext();
+            }
+        }
+        finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return accessPoints;
+    }
+
     public LogEntry getLatestLogEntry(long tracker_id) {
         init();
         Cursor cursor = null;
