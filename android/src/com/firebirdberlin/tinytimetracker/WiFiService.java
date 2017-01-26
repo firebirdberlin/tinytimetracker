@@ -18,6 +18,8 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
@@ -202,8 +203,10 @@ public class WiFiService extends Service {
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
+        int highlightColor = ResourcesCompat.getColor(getResources(), R.color.highlight, null);
         Notification note = new Notification.Builder(this).setContentTitle(title)
                                                           .setContentText(text)
+                                                          .setColor(highlightColor)
                                                           .setSmallIcon(R.drawable.ic_hourglass)
                                                           .setOngoing(true)
                                                           .setContentIntent(pIntent)
@@ -213,17 +216,29 @@ public class WiFiService extends Service {
     }
 
     @SuppressLint("NewApi")
-    private Notification buildNotificationNewAccessPoint(String title, String text) {
+    private Notification buildNotificationNewAccessPoint(TrackerEntry tracker, String ssid, String bssid) {
+
+        String title = tracker.verbose_name;
+        String text = "A new access point was found !";
+        String[] text_expanded = new String[]{ssid, bssid};
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-
-        Notification note = new Notification.Builder(this).setContentTitle(title)
+        int highlightColor = ResourcesCompat.getColor(getResources(), R.color.highlight, null);
+        NotificationCompat.Builder note = new NotificationCompat.Builder(this)
+                                                          .setContentTitle(title)
                                                           .setContentText(text)
                                                           .setSmallIcon(R.drawable.ic_wifi_add)
-                                                          .setContentIntent(pIntent)
-                                                          .build();
-        return note;
+                                                          .setColor(highlightColor)
+                                                          .setContentIntent(pIntent);
+
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        inboxStyle.setBigContentTitle(title);
+        for (int i=0; i < text_expanded.length; i++) {
+            inboxStyle.addLine(text_expanded[i]);
+        }
+        note.setStyle(inboxStyle);
+        return note.build();
     }
 
     private void getWiFiNetworks() {
@@ -337,8 +352,8 @@ public class WiFiService extends Service {
             }
             // tracker_ids now only contains items which do not track this BSSID
             if (tracker_ids.size() > 0 ) {
-                Notification note = buildNotificationNewAccessPoint("New Access Point found !",
-                        String.format("%s (%s)", ssid, bssid));
+                TrackerEntry tracker = datasource.getTracker(tracker_ids.iterator().next());
+                Notification note = buildNotificationNewAccessPoint(tracker, ssid, bssid);
                 notificationManager.notify(NOTIFICATION_ID_AP, note);
                 break;
             }
