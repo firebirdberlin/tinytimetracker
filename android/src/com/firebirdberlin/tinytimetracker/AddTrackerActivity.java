@@ -282,11 +282,14 @@ public class AddTrackerActivity extends AppCompatActivity {
         List<WifiConfiguration> configList = wifiManager.getConfiguredNetworks();
         if (configList != null ) {
             for (WifiConfiguration network : configList) {
-                if (network.BSSID != null &&
-                        accessPointAdapter.indexOfBSSID(network.BSSID) == -1 &&
-                        network.BSSID.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$") ) {
-                    String ssid = ( network.SSID != null ) ? network.SSID.replace("\"","") : "";
-                    AccessPoint accessPoint = new AccessPoint(ssid, network.BSSID);
+                String ssid = ( network.SSID == null ) ? "" : network.SSID.replace("\"","");
+                String bssid = (network.BSSID == null) ? "" : network.BSSID;
+                bssid = bssid.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$") ? bssid : "";
+                if ( network.SSID != null &&
+                        ! accessPointAdapter.containsSSID(ssid) &&
+                        ! adapter.containsSSID(ssid) &&
+                        accessPointAdapter.indexOfBSSID(ssid, bssid) == -1 ) {
+                    AccessPoint accessPoint = new AccessPoint(ssid, bssid);
                     adapter.add(accessPoint);
                 }
             }

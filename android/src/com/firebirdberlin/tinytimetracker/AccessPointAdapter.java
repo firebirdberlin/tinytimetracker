@@ -55,16 +55,15 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         return (index == -1);
     }
 
-    public int indexOfBSSID(String bssid) {
+    public boolean containsSSID(String ssid) {
         for (int i = 0; i < getCount() ; i++ ) {
             AccessPoint ap = getItem(i);
 
-            if (ap.bssid.equals(bssid) ) {
-                return i;
+            if (ap.ssid.equals(ssid) ) {
+                return true;
             }
         }
-
-        return -1;
+        return false;
     }
 
     public int indexOfBSSID(String ssid, String bssid) {
