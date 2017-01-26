@@ -220,7 +220,7 @@ public class WiFiService extends Service {
 
         Notification note = new Notification.Builder(this).setContentTitle(title)
                                                           .setContentText(text)
-                                                          .setSmallIcon(R.drawable.ic_hourglass)
+                                                          .setSmallIcon(R.drawable.ic_wifi_add)
                                                           .setContentIntent(pIntent)
                                                           .build();
         return note;
