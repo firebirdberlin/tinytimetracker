@@ -253,7 +253,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
-                accessPointAdapter.setActive(network.BSSID);
+                accessPointAdapter.setActive(network.SSID, network.BSSID);
             }
             accessPointAdapter.notifyDataSetChanged();
         }
@@ -267,7 +267,9 @@ public class AddTrackerActivity extends AppCompatActivity {
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
-                if (accessPointAdapter.indexOfBSSID(network.BSSID) == -1) {
+
+                Log.i(TAG, String.format("%s (%s)", network.BSSID, network.SSID));
+                if (accessPointAdapter.indexOfBSSID(network.SSID, network.BSSID) == -1) {
                     AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
                     adapter.add(accessPoint);
                 }
@@ -307,7 +309,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                     edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
-                adapter.toggleActive(accessPoint.bssid);
+                adapter.toggleActive(accessPoint.ssid, accessPoint.bssid);
                 adapter.notifyDataSetChanged();
 
                 edit_tracker_working_hours.requestFocus();
@@ -328,7 +330,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         for (int i = 0; i < adapter.getCount() ; i++ ) {
                             AccessPoint accessPoint = adapter.getItem(i);
-                            if ( adapter.isActive(accessPoint.bssid) ) {
+                            if ( adapter.isActive(accessPoint.ssid, accessPoint.bssid) ) {
                                 accessPointAdapter.addUnique(accessPoint);
                             }
                         }

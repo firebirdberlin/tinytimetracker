@@ -37,7 +37,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
             AccessPoint accessPoint = (AccessPoint) getItem(position);
             text1.setText(accessPoint.ssid);
             text2.setText(accessPoint.bssid);
-            if ( activeBSSIDs.contains(accessPoint.bssid) ) {
+            if ( isActive(accessPoint.ssid, accessPoint.bssid) ) {
                 text2.setTextColor(Color.parseColor("#8bc34a"));
             }
         }
@@ -46,7 +46,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
     }
 
     public boolean addUnique(AccessPoint accessPoint) {
-        int index = indexOfBSSID(accessPoint.bssid);
+        int index = indexOfBSSID(accessPoint.ssid, accessPoint.bssid);
 
         if (index == -1) {
             add(accessPoint);
@@ -67,24 +67,36 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         return -1;
     }
 
+    public int indexOfBSSID(String ssid, String bssid) {
+        for (int i = 0; i < getCount() ; i++ ) {
+            AccessPoint ap = getItem(i);
+
+            if (ap.bssid.equals(bssid) && ap.ssid.equals(ssid)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     public void clearActiveNetworks() {
         activeBSSIDs.clear();
     }
 
-    public void setActive(String bssid) {
-        activeBSSIDs.add(bssid);
+    public void setActive(String ssid, String bssid) {
+        activeBSSIDs.add(bssid + "|" + ssid);
     }
 
-    public boolean isActive(String bssid) {
-        return activeBSSIDs.contains(bssid);
+    public boolean isActive(String ssid, String bssid) {
+        return activeBSSIDs.contains(bssid + "|" + ssid);
     }
 
-    public boolean toggleActive(String bssid) {
-        if (activeBSSIDs.contains(bssid)) {
-            activeBSSIDs.remove(bssid);
+    public boolean toggleActive(String ssid, String bssid) {
+        if (isActive(ssid, bssid)) {
+            activeBSSIDs.remove(bssid + "|" + ssid);
             return false;
         } else {
-            activeBSSIDs.add(bssid);
+            setActive(ssid, bssid);
             return true;
         }
     }
