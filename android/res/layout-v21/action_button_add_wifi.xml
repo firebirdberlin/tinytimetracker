@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.FloatingActionButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/action_button_add_wifi"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentRight="true"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:layout_margin="16dp"
+    android:clickable="true"
+    android:onClick="onChooseWifi"
+    android:src="@drawable/ic_wifi_add"
+    android:background="@drawable/ripple"
+    app:backgroundTint="@color/highlight"
+    app:rippleColor="#FFFFFF"/>
