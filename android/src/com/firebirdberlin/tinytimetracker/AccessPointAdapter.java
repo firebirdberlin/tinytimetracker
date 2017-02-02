@@ -33,17 +33,16 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         TextView text1 = ( TextView ) v.findViewById ( R.id.text1 );
         TextView text2 = ( TextView ) v.findViewById ( R.id.text2 );
 
+        int colorActivated = Utility.getColor(mContext, R.color.listItemActivated);
         if (position < getCount()) {
             AccessPoint accessPoint = (AccessPoint) getItem(position);
             text1.setText(accessPoint.ssid);
             text2.setText(accessPoint.bssid);
             if ( isActive(accessPoint.ssid, accessPoint.bssid) ) {
-                int color = Utility.getColor(mContext, R.color.listItemActivated);
                 if ( accessPoint.bssid.isEmpty() ) {
-                    text1.setTextColor(color);
-                }
-                else {
-                    text2.setTextColor(color);
+                    text1.setTextColor(colorActivated);
+                } else {
+                    text2.setTextColor(colorActivated);
                 }
             }
         }

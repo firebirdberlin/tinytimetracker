@@ -217,12 +217,13 @@ public class WiFiService extends Service {
         return note;
     }
 
-    @SuppressLint("NewApi")
     private Notification buildNotificationNewAccessPoint(TrackerEntry tracker, String ssid, String bssid) {
 
         String title = tracker.verbose_name;
-        String text = "A new access point was found !";
-        String[] text_expanded = new String[]{ssid, bssid};
+        String text = String.format("%s (%s)", ssid, bssid);
+        String message = mContext.getString(R.string.new_access_point_message);
+        String string_action_add = mContext.getString(R.string.new_access_point_action_add);
+        String string_action_ignore = mContext.getString(R.string.new_access_point_action_ignore);
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
@@ -243,7 +244,7 @@ public class WiFiService extends Service {
             new NotificationCompat.WearableExtender().setHintHideIcon(true);
 
         NotificationCompat.Action addAction =
-            new NotificationCompat.Action.Builder(R.drawable.ic_add, "Add", pAddIntent).build();
+            new NotificationCompat.Action.Builder(R.drawable.ic_add, string_action_add, pAddIntent).build();
         note.addAction(addAction);
         wearableExtender.addAction(addAction);
 
@@ -251,17 +252,14 @@ public class WiFiService extends Service {
         PendingIntent pIgnoreIntent = PendingIntent.getService(this, 0, ignoreIntent,
                                                                PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Action ignoreAction =
-            new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, "Ignore", pIgnoreIntent)
+            new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, string_action_ignore, pIgnoreIntent)
                                          .build();
         note.addAction(ignoreAction);
         wearableExtender.addAction(ignoreAction);
 
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-        inboxStyle.setBigContentTitle(title);
-        for (int i=0; i < text_expanded.length; i++) {
-            inboxStyle.addLine(text_expanded[i]);
-        }
-        note.setStyle(inboxStyle);
+        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+        bigStyle.bigText(String.format(message, tracker.verbose_name, ssid, bssid));
+        note.setStyle(bigStyle);
 
         note.extend(wearableExtender);
 
@@ -380,12 +378,13 @@ public class WiFiService extends Service {
             // tracker_ids now only contains items which do not track this BSSID
             if (tracker_ids.size() > 0 ) {
                 TrackerEntry tracker = datasource.getTracker(tracker_ids.iterator().next());
-                Notification note = buildNotificationNewAccessPoint(tracker, ssid, bssid);
-                notificationManager.notify(NOTIFICATION_ID_AP, note);
-                break;
+                Log.i(TAG, String.format("New AP found %d %s %s", tracker.id, ssid, bssid));
+                if (! datasource.accessPointIsIgnored(tracker.id, ssid, bssid)) {
+                    Notification note = buildNotificationNewAccessPoint(tracker, ssid, bssid);
+                    notificationManager.notify(NOTIFICATION_ID_AP, note);
+                    break;
+                }
             }
-
-
         }
     }
 

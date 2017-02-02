@@ -347,6 +347,7 @@ public class LogDataSource {
         init();
         database.delete(SQLiteHandler.TABLE_LOGS, "tracker_id=?", new String[] {String.valueOf(id)});
         database.delete(SQLiteHandler.TABLE_ACCESS_POINTS, "tracker_id=?", new String[] {String.valueOf(id)});
+        database.delete(SQLiteHandler.TABLE_IGNORED_ACCESS_POINTS, "tracker_id=?", new String[] {String.valueOf(id)});
         int rows_affected = database.delete(SQLiteHandler.TABLE_TRACKERS, "_id=?", new String[] {String.valueOf(id)});
         boolean success = (rows_affected > 0);
 
@@ -678,5 +679,35 @@ public class LogDataSource {
 
         // make a new entry
         return createLogEntry(tracker.id, timestamp, timestamp);
+    }
+
+    public void addToIgnoreList(AccessPoint accessPoint) {
+        init();
+
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHandler.COLUMN_SSID, accessPoint.ssid);
+        values.put(SQLiteHandler.COLUMN_BSSID, accessPoint.bssid);
+        values.put(SQLiteHandler.COLUMN_TRACKER_ID, accessPoint.getTrackerID());
+
+        database.insert(SQLiteHandler.TABLE_IGNORED_ACCESS_POINTS, null, values);
+    }
+
+    public boolean accessPointIsIgnored(long tracker_id, String ssid, String bssid) {
+        init();
+        Cursor cursor = null;
+        boolean result = false;
+        try {
+            cursor = database.query(SQLiteHandler.TABLE_IGNORED_ACCESS_POINTS,
+                                    new String[] {"tracker_id", "ssid", "bssid"},
+                                    "tracker_id = ? AND ssid = ? AND bssid = ?",
+                                    new String[] {String.valueOf(tracker_id), ssid, bssid},
+                                    null, null, null, null);
+            result = cursor.getCount() > 0;
+        }
+        finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return result;
     }
 }

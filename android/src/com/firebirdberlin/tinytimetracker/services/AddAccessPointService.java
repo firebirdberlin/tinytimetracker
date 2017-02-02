@@ -41,13 +41,15 @@ public class AddAccessPointService extends IntentService {
         String ssid = intent.getStringExtra(ExtraSSID);
         String bssid = intent.getStringExtra(ExtraBSSID);
 
+        Log.i(TAG, String.format("%s %d %s %s", action, tracker_id, ssid, bssid));
+
         AccessPoint ap = new AccessPoint(AccessPoint.NOT_SAVED, tracker_id, ssid, bssid);
         if (action.equals(ACTION_ADD)) {
             addAccessPoint(ap);
+        } else
+        if (action.equals(ACTION_IGNORE)) {
+            ignoreAccessPoint(ap);
         }
-
-        Log.i(TAG, String.format("%s %d %s %s", action, tracker_id, ssid, bssid));
-        Log.i(TAG, String.format("%d", notificationId));
 
         // dismiss the notification
         if (notificationId > 0) {
@@ -60,6 +62,7 @@ public class AddAccessPointService extends IntentService {
     private void addAccessPoint(AccessPoint ap) {
         LogDataSource datasource = new LogDataSource(this);
         datasource.open();
+        Log.i(TAG, " > adding access point ");
         AccessPoint storedAccessPoint = datasource.getAccessPoint(ap.tracker_id, ap.ssid, ap.bssid);
         if (storedAccessPoint == null) {
             datasource.save(ap);
@@ -72,6 +75,8 @@ public class AddAccessPointService extends IntentService {
     private void ignoreAccessPoint(AccessPoint ap) {
         LogDataSource datasource = new LogDataSource(this);
         datasource.open();
+        Log.i(TAG, " > adding ap to ignore list");
+        datasource.addToIgnoreList(ap);
         datasource.close();
     }
 

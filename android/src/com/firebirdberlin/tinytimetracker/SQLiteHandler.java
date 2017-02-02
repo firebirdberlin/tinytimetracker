@@ -21,11 +21,12 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String COLUMN_TRACKER_ID = "tracker_id";
 
     public static final String TABLE_ACCESS_POINTS = "access_points";
+    public static final String TABLE_IGNORED_ACCESS_POINTS = "ignored_access_points";
     public static final String COLUMN_SSID = "ssid";
     public static final String COLUMN_BSSID = "bssid";
 
     private static final String DATABASE_NAME = "trackers.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRACKERS =
@@ -51,6 +52,13 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         + COLUMN_SSID + " TEXT not null, "
         + COLUMN_BSSID + " TEXT not null);";
 
+    private static final String DATABASE_CREATE_IGNORED_ACCESS_POINTS =
+        "CREATE TABLE " + TABLE_IGNORED_ACCESS_POINTS + "("
+        + COLUMN_TRACKER_ID + " INTEGER REFERENCES " + TABLE_TRACKERS + "(" + COLUMN_ID + "),"
+        + COLUMN_SSID + " TEXT not null, "
+        + COLUMN_BSSID + " TEXT not null, "
+        + "UNIQUE(" + COLUMN_TRACKER_ID + ", " + COLUMN_SSID + ", " + COLUMN_BSSID +") ON CONFLICT REPLACE);";
+
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -60,6 +68,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         database.execSQL(DATABASE_CREATE_TRACKERS);
         database.execSQL(DATABASE_CREATE_LOGS);
         database.execSQL(DATABASE_CREATE_ACCESS_POINTS);
+        database.execSQL(DATABASE_CREATE_IGNORED_ACCESS_POINTS);
     }
 
     @Override
@@ -83,6 +92,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         if (oldVersion < 5 && newVersion >= 5) {
             db.execSQL("ALTER TABLE " + TABLE_TRACKERS + " ADD COLUMN " + COLUMN_OPERATION_STATE + " INTEGER DEFAULT 0 NOT NULL");
+        }
+
+        if (oldVersion < 6 && newVersion >= 6) {
+            db.execSQL(DATABASE_CREATE_IGNORED_ACCESS_POINTS);
             return;
         }
 
@@ -90,6 +103,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOGS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCESS_POINTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_IGNORED_ACCESS_POINTS);
         onCreate(db);
     }
 
