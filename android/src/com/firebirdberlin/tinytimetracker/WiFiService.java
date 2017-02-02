@@ -27,11 +27,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+import com.firebirdberlin.tinytimetracker.services.AddAccessPointService;
+
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
@@ -43,10 +46,10 @@ public class WiFiService extends Service {
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
     private Context mContext = null;
-    private int NOTIFICATION_ID = 1337;
-    private int NOTIFICATION_ID_WIFI = 1338;
-    private int NOTIFICATION_ID_ERROR = 1339;
-    private int NOTIFICATION_ID_AP = 1340;
+    private static int NOTIFICATION_ID = 1337;
+    private static int NOTIFICATION_ID_WIFI = 1338;
+    private static int NOTIFICATION_ID_ERROR = 1339;
+    public static int NOTIFICATION_ID_AP = 1340;
 
     private boolean showNotifications = false;
     private boolean wifiWasEnabled = false;
@@ -231,6 +234,17 @@ public class WiFiService extends Service {
                                                           .setSmallIcon(R.drawable.ic_wifi_add)
                                                           .setColor(highlightColor)
                                                           .setContentIntent(pIntent);
+
+        Intent addIntent = AddAccessPointService.addIntent(this, tracker.id, ssid, bssid);
+        PendingIntent pAddIntent = PendingIntent.getService(this, 0, addIntent,
+                                                            PendingIntent.FLAG_UPDATE_CURRENT);
+
+        note.addAction(R.drawable.ic_add, "Add", pAddIntent);
+
+        Intent ignoreIntent = AddAccessPointService.ignoreIntent(this, tracker.id, ssid, bssid);
+        PendingIntent pIgnoreIntent = PendingIntent.getService(this, 0, ignoreIntent,
+                                                               PendingIntent.FLAG_UPDATE_CURRENT);
+        note.addAction(R.drawable.ic_dismiss, "Ignore permanently", pIgnoreIntent);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle(title);

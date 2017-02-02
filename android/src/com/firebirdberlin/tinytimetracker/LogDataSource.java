@@ -375,6 +375,14 @@ public class LogDataSource {
         return (rows_affected > 0);
     }
 
+    public boolean deleteAccessPointWithoutBSSID(long tracker_id, String ssid) {
+        init();
+        int rows_affected = database.delete(SQLiteHandler.TABLE_ACCESS_POINTS,
+                                            "tracker_id=? AND ssid=? AND (bssid is null OR bssid = '' OR bssid = 'ANY')",
+                                            new String[] {String.valueOf(tracker_id), ssid});
+        return (rows_affected > 0);
+    }
+
     public boolean delete(LogEntry logEntry) {
         if (logEntry == null) {
             return false;
@@ -453,16 +461,13 @@ public class LogDataSource {
         List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
         Cursor cursor = null;
         try {
-            cursor = database.rawQuery("SELECT _id, ssid, bssid FROM access_points "
+            cursor = database.rawQuery("SELECT _id, tracker_id, ssid, bssid FROM access_points "
                                        + "WHERE tracker_id=?",
                                        new String[] {String.valueOf(tracker_id)});
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
-                long log_id = cursor.getLong(0);
-                String ssid = cursor.getString(1);
-                String bssid = cursor.getString(2);
-                AccessPoint ap = new AccessPoint(log_id, tracker_id, ssid, bssid);
+                AccessPoint ap = getAccessPointFromCursor(cursor);
                 accessPoints.add(ap);
                 cursor.moveToNext();
             }
@@ -485,11 +490,7 @@ public class LogDataSource {
             cursor.moveToFirst();
 
             while (!cursor.isAfterLast()) {
-                long log_id = cursor.getLong(0);
-                long tracker_id = cursor.getLong(1);
-                String ssid = cursor.getString(2);
-                String bssid = cursor.getString(3);
-                AccessPoint ap = new AccessPoint(log_id, tracker_id, ssid, bssid);
+                AccessPoint ap = getAccessPointFromCursor(cursor);
                 accessPoints.add(ap);
                 cursor.moveToNext();
             }
@@ -499,6 +500,37 @@ public class LogDataSource {
         }
 
         return accessPoints;
+    }
+
+    public AccessPoint getAccessPoint(long tracker_id, String ssid, String bssid) {
+        init();
+        Cursor cursor = null;
+        AccessPoint ap = null;
+        try {
+            cursor = database.query(SQLiteHandler.TABLE_ACCESS_POINTS,
+                                    new String[] {"_id", "tracker_id", "ssid", "bssid"},
+                                    "tracker_id = ? AND ssid = ? AND bssid = ?",
+                                    new String[] {String.valueOf(tracker_id), ssid, bssid},
+                                    null, null, null, null);
+            cursor.moveToFirst();
+
+            while (!cursor.isAfterLast()) {
+                ap = getAccessPointFromCursor(cursor);
+            }
+        }
+        finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return ap;
+    }
+
+    private AccessPoint getAccessPointFromCursor(Cursor cursor) {
+        long id = cursor.getLong(0);
+        long tracker_id = cursor.getLong(1);
+        String ssid = cursor.getString(2);
+        String bssid = cursor.getString(3);
+        return new AccessPoint(id, tracker_id, ssid, bssid);
     }
 
     public LogEntry getLatestLogEntry(long tracker_id) {

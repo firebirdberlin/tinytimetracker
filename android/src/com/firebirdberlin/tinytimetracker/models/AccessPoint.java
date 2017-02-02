@@ -6,8 +6,8 @@ public class AccessPoint {
     private static String TAG = TinyTimeTracker.TAG + ".AccessPoint";
     public final static long NOT_SAVED = -1L;
 
-    private long id = -1L;
-    private long tracker_id = -1L;
+    public long id = -1L;
+    public long tracker_id = -1L;
     public String ssid = "";
     public String bssid = "";
 

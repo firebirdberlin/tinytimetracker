@@ -40,7 +40,15 @@
             android:value="TinyTimeTracker" />
         </activity>
 
-        <service android:enabled="true" android:name=".WiFiService" />
+        <service
+            android:enabled="true"
+            android:exported="false"
+            android:name=".WiFiService" />
+
+        <service
+            android:enabled="true"
+            android:exported="false"
+            android:name=".services.AddAccessPointService" />
 
         <receiver android:name=".AlarmReceiver" android:enabled="true">
         </receiver>
