@@ -19,7 +19,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import de.greenrobot.event.EventBus;
 import java.util.ArrayList;
@@ -206,7 +205,7 @@ public class WiFiService extends Service {
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
-        int highlightColor = ResourcesCompat.getColor(getResources(), R.color.highlight, null);
+        int highlightColor = Utility.getColor(this, R.color.highlight);
         Notification note = new Notification.Builder(this).setContentTitle(title)
                                                           .setContentText(text)
                                                           .setColor(highlightColor)
@@ -227,7 +226,7 @@ public class WiFiService extends Service {
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
-        int highlightColor = ResourcesCompat.getColor(getResources(), R.color.highlight, null);
+        int highlightColor = Utility.getColor(this, R.color.highlight);
 
         NotificationCompat.Builder note = new NotificationCompat.Builder(this)
                                                           .setContentTitle(title)

@@ -38,7 +38,13 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
             text1.setText(accessPoint.ssid);
             text2.setText(accessPoint.bssid);
             if ( isActive(accessPoint.ssid, accessPoint.bssid) ) {
-                text2.setTextColor(Color.parseColor("#8bc34a"));
+                int color = Utility.getColor(mContext, R.color.listItemActivated);
+                if ( accessPoint.bssid.isEmpty() ) {
+                    text1.setTextColor(color);
+                }
+                else {
+                    text2.setTextColor(color);
+                }
             }
         }
 

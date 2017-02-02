@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
+import android.support.v4.content.res.ResourcesCompat;
 
 public class Utility {
 
@@ -27,6 +28,10 @@ public class Utility {
             return new SimpleDateFormat("HH:mm");
         }
         return new SimpleDateFormat("hh:mm a");
+    }
+
+    public static int getColor(Context context, int resid) {
+        return ResourcesCompat.getColor(context.getResources(), resid, null);
     }
 }
 
