@@ -228,6 +228,7 @@ public class WiFiService extends Service {
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
         int highlightColor = ResourcesCompat.getColor(getResources(), R.color.highlight, null);
+
         NotificationCompat.Builder note = new NotificationCompat.Builder(this)
                                                           .setContentTitle(title)
                                                           .setContentText(text)
@@ -239,12 +240,22 @@ public class WiFiService extends Service {
         PendingIntent pAddIntent = PendingIntent.getService(this, 0, addIntent,
                                                             PendingIntent.FLAG_UPDATE_CURRENT);
 
-        note.addAction(R.drawable.ic_add, "Add", pAddIntent);
+        NotificationCompat.WearableExtender wearableExtender =
+            new NotificationCompat.WearableExtender().setHintHideIcon(true);
+
+        NotificationCompat.Action addAction =
+            new NotificationCompat.Action.Builder(R.drawable.ic_add, "Add", pAddIntent).build();
+        note.addAction(addAction);
+        wearableExtender.addAction(addAction);
 
         Intent ignoreIntent = AddAccessPointService.ignoreIntent(this, tracker.id, ssid, bssid);
         PendingIntent pIgnoreIntent = PendingIntent.getService(this, 0, ignoreIntent,
                                                                PendingIntent.FLAG_UPDATE_CURRENT);
-        note.addAction(R.drawable.ic_dismiss, "Ignore permanently", pIgnoreIntent);
+        NotificationCompat.Action ignoreAction =
+            new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, "Ignore", pIgnoreIntent)
+                                         .build();
+        note.addAction(ignoreAction);
+        wearableExtender.addAction(ignoreAction);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle(title);
@@ -252,6 +263,9 @@ public class WiFiService extends Service {
             inboxStyle.addLine(text_expanded[i]);
         }
         note.setStyle(inboxStyle);
+
+        note.extend(wearableExtender);
+
         return note.build();
     }
 
