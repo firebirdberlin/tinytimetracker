@@ -2,6 +2,8 @@ package com.firebirdberlin.tinytimetracker;
 
 import java.lang.Runnable;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -92,6 +94,7 @@ public class AddTrackerActivity extends AppCompatActivity {
             edit_tracker_working_hours.setText("");
             edit_tracker_working_hours.append(String.valueOf(tracker.working_hours));
             accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
+            sort();
         } else {
             edit_tracker_working_hours.setText("");
             edit_tracker_working_hours.append("8");
@@ -335,6 +338,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                             AccessPoint accessPoint = adapter.getItem(i);
                             if ( adapter.isActive(accessPoint.ssid, accessPoint.bssid) ) {
                                 accessPointAdapter.addUnique(accessPoint);
+                                sort();
                             }
                         }
                 }
@@ -443,6 +447,15 @@ public class AddTrackerActivity extends AppCompatActivity {
         Intent myIntent = new Intent(context, AddTrackerActivity.class);
         myIntent.putExtra("tracker_id", tracker_id);
         context.startActivity(myIntent);
+    }
+
+    public void sort() {
+        Collections.sort(accessPoints, new Comparator<AccessPoint>() {
+            @Override
+            public int compare(AccessPoint item1, AccessPoint item2) {
+                return item1.bssid.compareTo(item2.bssid);
+            }
+        });
     }
 
 }
