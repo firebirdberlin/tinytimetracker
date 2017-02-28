@@ -206,14 +206,15 @@ public class WiFiService extends Service {
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
         int highlightColor = Utility.getColor(this, R.color.highlight);
-        Notification note = new Notification.Builder(this).setContentTitle(title)
-                                                          .setContentText(text)
-                                                          .setColor(highlightColor)
-                                                          .setSmallIcon(R.drawable.ic_hourglass)
-                                                          .setOngoing(true)
-                                                          .setContentIntent(pIntent)
-                                                          .setPriority(Notification.PRIORITY_MAX)
-                                                          .build();
+        Notification note = new NotificationCompat.Builder(this)
+                                                  .setContentTitle(title)
+                                                  .setContentText(text)
+                                                  .setColor(highlightColor)
+                                                  .setSmallIcon(R.drawable.ic_hourglass)
+                                                  .setOngoing(true)
+                                                  .setContentIntent(pIntent)
+                                                  .setPriority(Notification.PRIORITY_MAX)
+                                                  .build();
         return note;
     }
 

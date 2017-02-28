@@ -1,83 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
-
-    <include layout="@layout/card_gps_off"/>
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:orientation="vertical"
+        android:layout_width="0px"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        >
+
+        <include layout="@layout/card_gps_off"/>
 
         <com.firebirdberlin.tinytimetracker.ui.MainView
             android:id="@+id/main_time_view"
-            android:layout_width="0px"
-            android:layout_weight="1"
             android:layout_height="match_parent"
+            android:layout_width="match_parent"
             />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="300dp"
+        android:layout_height="match_parent">
+
+        <Spinner android:id="@+id/spinner_trackers"
+            android:layout_alignParentTop="true"
+            android:layout_width="match_parent"
+            android:layout_height="80dip"/>
+
+        <RelativeLayout android:id="@+id/tracker_toolbar"
+            android:layout_below="@+id/spinner_trackers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <Button
+                android:drawableLeft="@drawable/ic_play"
+                android:id="@+id/button_toggle_clockin_state"
+                android:layout_alignParentLeft="true"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/label_toggle_clockin_state_start"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                />
+            <Button
+                android:drawableLeft="@drawable/ic_wifi"
+                android:id="@+id/button_toggle_wifi"
+                android:layout_alignParentRight="true"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/label_auto_detection_on"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                />
+        </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="300dp"
-            android:layout_height="match_parent">
-
-            <Spinner android:id="@+id/spinner_trackers"
-                android:layout_alignParentTop="true"
-                android:layout_width="match_parent"
-                android:layout_height="80dip"/>
-
-            <RelativeLayout android:id="@+id/tracker_toolbar"
-                android:layout_below="@+id/spinner_trackers"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <Button
-                    android:drawableLeft="@drawable/ic_play"
-                    android:id="@+id/button_toggle_clockin_state"
-                    android:layout_alignParentLeft="true"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/label_toggle_clockin_state_start"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    />
-                <Button
-                    android:drawableLeft="@drawable/ic_wifi"
-                    android:id="@+id/button_toggle_wifi"
-                    android:layout_alignParentRight="true"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/label_auto_detection_on"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/bottom_toolbar"
-                android:layout_width="match_parent"
+            android:id="@+id/bottom_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:padding="8dp">
+            <TextView
+                android:id="@+id/textview_mean_value"
+                android:layout_alignParentLeft="true"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:padding="8dp">
-                <TextView
-                    android:id="@+id/textview_mean_value"
-                    android:layout_alignParentLeft="true"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text=""
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="20sp"
-                    android:textStyle="normal"/>
-                <TextView
-                    android:id="@+id/textview_saldo"
-                    android:layout_alignParentRight="true"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text=""
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="20sp"
-                    android:textStyle="normal"/>
-            </RelativeLayout>
+                android:layout_width="wrap_content"
+                android:text=""
+                android:textColor="#FFFFFFFF"
+                android:textSize="20sp"
+                android:textStyle="normal"/>
+            <TextView
+                android:id="@+id/textview_saldo"
+                android:layout_alignParentRight="true"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text=""
+                android:textColor="#FFFFFFFF"
+                android:textSize="20sp"
+                android:textStyle="normal"/>
         </RelativeLayout>
-    </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>
 
