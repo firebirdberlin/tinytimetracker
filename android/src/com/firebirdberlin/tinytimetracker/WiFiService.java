@@ -51,6 +51,7 @@ public class WiFiService extends Service {
     public static int NOTIFICATION_ID_AP = 1340;
 
     private boolean showNotifications = false;
+    private boolean useAutoDetection = true;
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
     boolean tracked_wifi_network_found = false;
@@ -72,6 +73,7 @@ public class WiFiService extends Service {
         mContext = this;
         service_is_running = true;
         showNotifications = Settings.showNotifications(mContext);
+        useAutoDetection = Settings.useAutoDetection(mContext);
 
         wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
@@ -352,6 +354,7 @@ public class WiFiService extends Service {
     }
 
     private void findNewAccessPointsBySSID(LogDataSource datasource) {
+        if ( !useAutoDetection) return;
         ArrayList<AccessPoint> accessPoints =
             (ArrayList<AccessPoint>) datasource.getAllAccessPoints();
 

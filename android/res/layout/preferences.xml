@@ -19,6 +19,13 @@
             android:key="pref_key_show_notifications"
             android:disableDependentsState="false" />
 
+        <CheckBoxPreference
+            android:title="@string/pref_title_notification_new_access_points"
+            android:defaultValue="true"
+            android:summary="@string/pref_summary_notification_new_access_points"
+            android:key="pref_key_notification_new_access_points"
+            android:disableDependentsState="false" />
+
         <SwitchPreference
             android:key="pref_key_auto_disable_wifi"
             android:title="@string/pref_title_auto_disable_wifi"

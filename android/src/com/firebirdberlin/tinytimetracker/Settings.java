@@ -16,6 +16,7 @@ public class Settings extends AppCompatActivity {
     public static final String PREF_KEY_AUTO_DISABLE_WIFI = "pref_key_auto_disable_wifi";
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
     public static final String PREF_KEY_LAST_TRACKER_ID = "last_tracker_id";
+    public static final String PREF_KEY_AUTO_DETECTION = "pref_key_notification_new_access_points";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,11 @@ public class Settings extends AppCompatActivity {
     public static boolean showNotifications(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);
+    }
+
+    public static boolean useAutoDetection(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        return settings.getBoolean(Settings.PREF_KEY_AUTO_DETECTION, true);
     }
 
     public static boolean autoDisableWifi(Context context) {
