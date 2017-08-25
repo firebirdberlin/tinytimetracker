@@ -23,7 +23,6 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 
@@ -85,18 +84,10 @@ public class MainView extends View {
     }
 
     public void onEvent(OnLogEntryChanged event) {
-        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
+        if ( TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
             invalidate();
         }
-    }
-
-    public void toggleHighlight() {
-        if ( activated ){
-            setHighlightColor("#4caf50");
-        } else {
-            setHighlightColor(getSystemColor(android.R.attr.colorActivatedHighlight));
-        }
-        activated = !activated;
     }
 
     public void setActivated() {
@@ -126,16 +117,12 @@ public class MainView extends View {
             return;
         }
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         UnixTimestamp today = UnixTimestamp.startOfToday();
-        UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(mContext);
 
         UnixTimestamp duration = datasource.getTotalDurationSince(today.getTimestamp(), TinyTimeTracker.currentTracker.id);
         Long seconds_today = new Long(duration.getTimestamp() / 1000L);
         workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
-
-        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), TinyTimeTracker.currentTracker.id);
 
         int angle = 360;
         if (workingHoursInSeconds > 0) {

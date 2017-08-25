@@ -1,22 +1,16 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.AdapterView;
@@ -26,14 +20,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import android.support.v7.widget.CardView;
-import de.greenrobot.event.EventBus;
-
-import com.firebirdberlin.tinytimetracker.R;
-import com.firebirdberlin.tinytimetracker.CustomViewPager;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
-import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.Settings;
+import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
 import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
@@ -47,9 +37,16 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import de.greenrobot.event.EventBus;
+
 
 public class MainFragment extends Fragment implements View.OnClickListener {
-    private static String TAG = TinyTimeTracker.TAG + ".MainFragment";
+    private static String TAG = "MainFragment";
     private Button button_toggle_wifi = null;
     private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
@@ -79,9 +76,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         trackerToolbar.setVisibility(View.GONE);
         loadTrackers();
 
-        ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<TrackerEntry>(getActivity(),
-                                                                            R.layout.main_spinner,
-                                                                            trackers);
+        ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<>(getActivity(),
+                                                                R.layout.main_spinner,
+                                                                trackers);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -136,6 +133,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if(event != null) {
             handleOnTrackerAdded(event);
         }
+
+        updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
 
 
@@ -397,6 +396,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updateStatisticalValues(TrackerEntry tracker){
+        if (tracker == null) return;
+
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(getActivity());
         Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), tracker.id);
