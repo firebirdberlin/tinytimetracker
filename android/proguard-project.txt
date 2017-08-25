@@ -38,3 +38,6 @@
 -keepclassmembers class ** {
     public void onEvent*(**);
 }
+
+-dontwarn android.support.v4.**
+-dontwarn android.support.v7.**

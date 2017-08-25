@@ -42,7 +42,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 public class AddTrackerActivity extends AppCompatActivity {
-    private static String TAG = TinyTimeTracker.TAG + ".AddTrackerActivity";
+    private static String TAG = "AddTrackerActivity";
     private TrackerEntry tracker = null;
     private AccessPointAdapter accessPointAdapter = null;
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
@@ -60,7 +60,8 @@ public class AddTrackerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_tracker_activity);
 
-        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        this.getApplicationContext();
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.action_edit));
