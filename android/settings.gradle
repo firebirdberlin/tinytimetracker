@@ -1,4 +1,3 @@
-include ':external_libraries:appcompat', ':android-page-indicator'
-include ':external_libraries:design'
+include ':android-page-indicator'
 include ':externals:android-preferences'
 project(':android-page-indicator').projectDir = new File('externals/android-page-indicator')
