@@ -1,23 +1,5 @@
 package com.firebirdberlin.tinytimetracker;
 
-import java.util.Calendar;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONObject;
-import org.json.JSONException;
-
-import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
-import com.firebirdberlin.tinytimetracker.ui.CardFragment;
-import com.firebirdberlin.tinytimetracker.ui.MainFragment;
-import de.firebirdberlin.pageindicator.PageIndicator;
-import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
-
-import com.android.vending.billing.IInAppBillingService;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -30,10 +12,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,11 +35,29 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.LinearLayout;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
+
+import com.android.vending.billing.IInAppBillingService;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
+import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.ui.CardFragment;
+import com.firebirdberlin.tinytimetracker.ui.MainFragment;
+import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import de.firebirdberlin.pageindicator.PageIndicator;
 import de.greenrobot.event.EventBus;
 
 public class TinyTimeTracker extends AppCompatActivity {
@@ -411,15 +411,10 @@ public class TinyTimeTracker extends AppCompatActivity {
     }
 
     public static boolean startService(Context context) {
-        if (hasPermission(context, Manifest.permission.WAKE_LOCK)
-                && hasPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)) {
-
-            Intent intent = new Intent(context, WiFiService.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startService(intent);
-            return true;
-        }
-        return false;
+        Intent intent = new Intent(context, WiFiService.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startService(intent);
+        return true;
     }
 
     private void requestServicePermissions() {
@@ -446,7 +441,7 @@ public class TinyTimeTracker extends AppCompatActivity {
 
     public static void checkAndRequestPermission(Activity activity, String permission,
                                                  int requestCode) {
-        if (! hasPermission((Context) activity, permission) ) {
+        if (! hasPermission(activity, permission) ) {
             ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
         }
     }

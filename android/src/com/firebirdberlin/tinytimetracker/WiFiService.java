@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -10,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
@@ -20,12 +20,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import de.greenrobot.event.EventBus;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
@@ -33,12 +27,19 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 import com.firebirdberlin.tinytimetracker.services.AddAccessPointService;
-
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import de.greenrobot.event.EventBus;
+
 public class WiFiService extends Service {
-    private static String TAG = TinyTimeTracker.TAG + ".WiFiService";
+    private static String TAG = "WiFiService";
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
     private final Handler handler = new Handler();
     private NotificationManager notificationManager = null;
@@ -75,17 +76,20 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         useAutoDetection = Settings.useAutoDetection(mContext);
 
-        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
+        if (TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK) ) {
+            wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
-        if ( ! wifiLock.isHeld()) {
-            wifiLock.acquire();
+            if (!wifiLock.isHeld()) {
+                wifiLock.acquire();
+            }
         }
 
         // manually tracked accounts can be updated even if the device is complety in flight mode
         updateTrackersInManualMode();
 
-        if ( TinyTimeTracker.isAirplaneModeOn(mContext) ) {
-            Log.i(TAG, "Airplane mode enabled");
+        if ( TinyTimeTracker.isAirplaneModeOn(mContext) ||
+                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
+            Log.i(TAG, "Airplane mode enabled or permission not granted.");
 
             long now = System.currentTimeMillis();
             saveTimestampLastRun(now);
@@ -154,7 +158,7 @@ public class WiFiService extends Service {
 
         updateNotifications();
 
-        if (wifiLock.isHeld()) {
+        if (wifiLock != null && wifiLock.isHeld()) {
             wifiLock.release();
         }
 
@@ -208,16 +212,15 @@ public class WiFiService extends Service {
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
         int highlightColor = Utility.getColor(this, R.color.highlight);
-        Notification note = new NotificationCompat.Builder(this)
-                                                  .setContentTitle(title)
-                                                  .setContentText(text)
-                                                  .setColor(highlightColor)
-                                                  .setSmallIcon(R.drawable.ic_hourglass)
-                                                  .setOngoing(true)
-                                                  .setContentIntent(pIntent)
-                                                  .setPriority(Notification.PRIORITY_MAX)
-                                                  .build();
-        return note;
+        return new NotificationCompat.Builder(this)
+                                     .setContentTitle(title)
+                                     .setContentText(text)
+                                     .setColor(highlightColor)
+                                     .setSmallIcon(R.drawable.ic_hourglass)
+                                     .setOngoing(true)
+                                     .setContentIntent(pIntent)
+                                     .setPriority(Notification.PRIORITY_MAX)
+                                     .build();
     }
 
     private Notification buildNotificationNewAccessPoint(TrackerEntry tracker, String ssid, String bssid) {
@@ -293,7 +296,7 @@ public class WiFiService extends Service {
     }
 
     private Set<TrackerEntry> getTrackersToUpdate(LogDataSource datasource) {
-        Set<TrackerEntry> trackersToUpdate = new HashSet<TrackerEntry>();
+        Set<TrackerEntry> trackersToUpdate = new HashSet<>();
         List<ScanResult> networkList = wifiManager.getScanResults();
         Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
 
@@ -363,8 +366,8 @@ public class WiFiService extends Service {
         for (ScanResult network : networkList) {
             String ssid = network.SSID;
             String bssid = network.BSSID;
-            ArrayList<AccessPoint> accessPointsWithSSID = new ArrayList<AccessPoint>();
-            Set<Long> tracker_ids = new HashSet<Long>();
+            ArrayList<AccessPoint> accessPointsWithSSID = new ArrayList<>();
+            Set<Long> tracker_ids = new HashSet<>();
             // collect tracker_ids for this SSID
             for (AccessPoint ap : accessPoints) {
                 if (ap.ssid.equals(ssid)) {
@@ -472,14 +475,14 @@ public class WiFiService extends Service {
         if ( tracker != null ) {
             editor.putLong("last_tracker_id", tracker.id);
         }
-        editor.commit();
+        editor.apply();
     }
 
     private void saveTimestampLastRun(long now) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_wifi_detection_timestamp", now);
-        editor.commit();
+        editor.apply();
     }
 
     public void updateNotification(String title, String text) {
