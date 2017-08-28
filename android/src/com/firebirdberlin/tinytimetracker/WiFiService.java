@@ -212,7 +212,8 @@ public class WiFiService extends Service {
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
         int highlightColor = Utility.getColor(this, R.color.highlight);
-        return new NotificationCompat.Builder(this)
+
+        return new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_STATUS_NOTIFICATION)
                                      .setContentTitle(title)
                                      .setContentText(text)
                                      .setColor(highlightColor)
@@ -235,7 +236,7 @@ public class WiFiService extends Service {
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
-        NotificationCompat.Builder note = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder note = new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_NEW_ACCESS_POINT)
                                                           .setContentTitle(title)
                                                           .setContentText(text)
                                                           .setSmallIcon(R.drawable.ic_wifi_add)

@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -66,6 +68,8 @@ public class TinyTimeTracker extends AppCompatActivity {
     public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
     public static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
     public static final int REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT = 1002;
+    public static final String NOTIFICATIONCHANNEL_STATUS_NOTIFICATION = "NotificationChannel_Status_Notification";
+    public static final String NOTIFICATIONCHANNEL_NEW_ACCESS_POINT = "NotificationChannel_new_access_point";
     public static TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
     private FloatingActionButton action_button_add = null;
@@ -204,6 +208,8 @@ public class TinyTimeTracker extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        createNotificationChannels();
 
         // bind the in-app billing service
         Intent serviceIntent =
@@ -512,6 +518,35 @@ public class TinyTimeTracker extends AppCompatActivity {
             String locationProviders = Secure.getString(context.getContentResolver(),
                                                         Secure.LOCATION_PROVIDERS_ALLOWED);
             return !locationProviders.isEmpty();
+        }
+    }
+
+    private void createNotificationChannels() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            String description = getString(R.string.channel_description_status);
+
+            NotificationChannel mChannel = new NotificationChannel(
+                    NOTIFICATIONCHANNEL_STATUS_NOTIFICATION,
+                    getString(R.string.channel_name_status),
+                    NotificationManager.IMPORTANCE_LOW);
+            mChannel.setDescription(description);
+            mChannel.enableLights(false);
+            mChannel.enableVibration(false);
+            mNotificationManager.createNotificationChannel(mChannel);
+
+            NotificationChannel mChannel2 = new NotificationChannel(
+                    NOTIFICATIONCHANNEL_NEW_ACCESS_POINT,
+                    getString(R.string.channel_name_new_access_points),
+                    NotificationManager.IMPORTANCE_MIN);
+            description = getString(R.string.channel_description_new_access_points);
+            mChannel2.setDescription(description);
+            mChannel2.enableLights(true);
+            mChannel2.setLightColor(R.color.highlight);
+            mChannel2.enableVibration(false);
+            mNotificationManager.createNotificationChannel(mChannel2);
         }
     }
 }

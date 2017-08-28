@@ -20,6 +20,10 @@
     <string name="aggregation_year">Year</string>
     <string name="app_name">TinyTimeTracker</string>
     <string name="change">Change</string>
+    <string name="channel_description_new_access_points">Shows notifications for new access points for your current tracker.</string>
+    <string name="channel_description_status">Shows notifications indicating the status of your current tracker.</string>
+    <string name="channel_name_new_access_points">New access points</string>
+    <string name="channel_name_status">TinyTimeTracker status notifications</string>
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
     <string name="csv_export">CSV export</string>
