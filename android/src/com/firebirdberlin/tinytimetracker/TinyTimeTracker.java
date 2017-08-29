@@ -18,6 +18,8 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -68,19 +71,14 @@ public class TinyTimeTracker extends AppCompatActivity {
     public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
     public static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
     public static final int REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT = 1002;
-    public static final String NOTIFICATIONCHANNEL_STATUS_NOTIFICATION = "NotificationChannel_Status_Notification";
+    public static final String NOTIFICATIONCHANNEL_SERVICE_STATUS = "NotificationChannel_Service_Status";
+    public static final String NOTIFICATIONCHANNEL_TRACKER_STATUS = "NotificationChannel_Status_Notification";
     public static final String NOTIFICATIONCHANNEL_NEW_ACCESS_POINT = "NotificationChannel_new_access_point";
     public static TrackerEntry currentTracker = null;
-    EventBus bus = EventBus.getDefault();
-    private FloatingActionButton action_button_add = null;
-    private LinearLayout pagerLayout = null;
-    private CustomViewPager pager = null;
-    private PageIndicator pageIndicator = null;
     public boolean purchased_donation = false;
     public boolean purchased_csv_data_export = false;
-
+    EventBus bus = EventBus.getDefault();
     IInAppBillingService mService;
-
     ServiceConnection mServiceConn = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -96,6 +94,69 @@ public class TinyTimeTracker extends AppCompatActivity {
             getPurchases();
         }
     };
+    private FloatingActionButton action_button_add = null;
+    private LinearLayout pagerLayout = null;
+    private CustomViewPager pager = null;
+    private PageIndicator pageIndicator = null;
+
+    public static boolean startService(Context context) {
+        Intent intent = new Intent(context, WiFiService.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+        return true;
+    }
+
+    public static void checkAndRequestPermission(Activity activity, String permission,
+                                                 int requestCode) {
+        if (!hasPermission(activity, permission)) {
+            ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
+        }
+    }
+
+    public static boolean hasPermission(Context context, String permission) {
+        return (ContextCompat.checkSelfPermission(context, permission)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
+    public static void scheduleWiFiService(Context context) {
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
+        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 120000, sender);
+    }
+
+    @SuppressLint("NewApi")
+    public static boolean isAirplaneModeOn(Context context) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+            return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
+        } else {
+            return System.getInt(context.getContentResolver(), System.AIRPLANE_MODE_ON, 0) != 0;
+        }
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
+
+            } catch (SettingNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            return locationMode != Secure.LOCATION_MODE_OFF;
+
+        } else {
+            String locationProviders = Secure.getString(context.getContentResolver(),
+                    Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !locationProviders.isEmpty();
+        }
+    }
 
     private void getPurchases() {
         if (mService == null) {
@@ -220,13 +281,13 @@ public class TinyTimeTracker extends AppCompatActivity {
         // runtime permissions for the WifiService
         requestServicePermissions();
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-        action_button_add = (FloatingActionButton) findViewById(R.id.action_button_add);
-        pagerLayout = (LinearLayout) findViewById(R.id.pager_layout);
-        pager = (CustomViewPager) findViewById(R.id.pager);
-        pageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
+        action_button_add = findViewById(R.id.action_button_add);
+        pagerLayout = findViewById(R.id.pager_layout);
+        pager = findViewById(R.id.pager);
+        pageIndicator = findViewById(R.id.page_indicator);
         pageIndicator.setPageCount(3);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
         pager.setOnPageChangeListener(new OnPageChangeListener() {
@@ -253,31 +314,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         }
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
-
-        public MyPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int pos) {
-            switch(pos) {
-            case 0:
-            default:
-                return new MainFragment();
-            case 1:
-                return new CardFragment();
-            case 2:
-                return new StatsFragment();
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return 3;
-        }
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -297,7 +333,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         super.onPause();
     }
 
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -307,7 +342,6 @@ public class TinyTimeTracker extends AppCompatActivity {
         else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -416,13 +450,6 @@ public class TinyTimeTracker extends AppCompatActivity {
      startActivity(Intent.createChooser(sharingIntent, description));
     }
 
-    public static boolean startService(Context context) {
-        Intent intent = new Intent(context, WiFiService.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startService(intent);
-        return true;
-    }
-
     private void requestServicePermissions() {
         checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
         checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
@@ -445,25 +472,6 @@ public class TinyTimeTracker extends AppCompatActivity {
             return calendar.getTimeInMillis();
     }
 
-    public static void checkAndRequestPermission(Activity activity, String permission,
-                                                 int requestCode) {
-        if (! hasPermission(activity, permission) ) {
-            ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
-        }
-    }
-
-    public static boolean hasPermission(Context context, String permission) {
-        return (ContextCompat.checkSelfPermission(context, permission)
-                 == PackageManager.PERMISSION_GRANTED);
-    }
-
-    public static void scheduleWiFiService(Context context) {
-        Intent intent = new Intent(context, AlarmReceiver.class);
-        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
-        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 120000, sender);
-    }
-
     public void enableBootReceiver(Context context) {
         ComponentName receiver = new ComponentName(context, BootReceiver.class);
         PackageManager pm = context.getPackageManager();
@@ -480,16 +488,6 @@ public class TinyTimeTracker extends AppCompatActivity {
                                       PackageManager.DONT_KILL_APP);
     }
 
-    @SuppressLint("NewApi")
-    public static boolean isAirplaneModeOn(Context context) {
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
-            return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
-        }
-        else {
-            return System.getInt(context.getContentResolver(), System.AIRPLANE_MODE_ON, 0) != 0;
-        }
-    }
-
     public void onEvent(OnTrackerSelected event) {
         invalidateOptionsMenu();
         Log.d(TAG, "currentTracker: " + currentTracker.toString());
@@ -501,52 +499,75 @@ public class TinyTimeTracker extends AppCompatActivity {
         Log.d(TAG, "currentTracker: null");
     }
 
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
-            try {
-                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
-
-            } catch (SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return locationMode != Secure.LOCATION_MODE_OFF;
-
-        }else{
-            String locationProviders = Secure.getString(context.getContentResolver(),
-                                                        Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !locationProviders.isEmpty();
-        }
-    }
-
     private void createNotificationChannels() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationManager mNotificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-            String description = getString(R.string.channel_description_status);
 
-            NotificationChannel mChannel = new NotificationChannel(
-                    NOTIFICATIONCHANNEL_STATUS_NOTIFICATION,
+            NotificationChannel mChannel = prepareNotificationChannel(
+                    NOTIFICATIONCHANNEL_TRACKER_STATUS,
                     getString(R.string.channel_name_status),
+                    getString(R.string.channel_description_status),
                     NotificationManager.IMPORTANCE_LOW);
-            mChannel.setDescription(description);
-            mChannel.enableLights(false);
-            mChannel.enableVibration(false);
             mNotificationManager.createNotificationChannel(mChannel);
 
-            NotificationChannel mChannel2 = new NotificationChannel(
+            mChannel = prepareNotificationChannel(
+                    NOTIFICATIONCHANNEL_SERVICE_STATUS,
+                    getString(R.string.channel_name_service),
+                    getString(R.string.channel_description_service),
+                    NotificationManager.IMPORTANCE_MIN);
+            mNotificationManager.createNotificationChannel(mChannel);
+
+            mChannel = prepareNotificationChannel(
                     NOTIFICATIONCHANNEL_NEW_ACCESS_POINT,
                     getString(R.string.channel_name_new_access_points),
-                    NotificationManager.IMPORTANCE_MIN);
-            description = getString(R.string.channel_description_new_access_points);
-            mChannel2.setDescription(description);
-            mChannel2.enableLights(true);
-            mChannel2.setLightColor(R.color.highlight);
-            mChannel2.enableVibration(false);
-            mNotificationManager.createNotificationChannel(mChannel2);
+                    getString(R.string.channel_description_new_access_points),
+                    NotificationManager.IMPORTANCE_LOW);
+            mChannel.enableLights(true);
+            mChannel.setLightColor(R.color.highlight);
+            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            mChannel.setSound(uri, new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build());
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    NotificationChannel prepareNotificationChannel(String channelname, String name, String desc, int importance) {
+        NotificationChannel mChannel = new NotificationChannel(channelname, name, importance);
+        mChannel.setDescription(desc);
+        mChannel.enableLights(false);
+        mChannel.enableVibration(false);
+        mChannel.setSound(null, null);
+        return mChannel;
+
+    }
+
+    private class MyPagerAdapter extends FragmentPagerAdapter {
+
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int pos) {
+            switch (pos) {
+                case 0:
+                default:
+                    return new MainFragment();
+                case 1:
+                    return new CardFragment();
+                case 2:
+                    return new StatsFragment();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
         }
     }
 }

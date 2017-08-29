@@ -15,9 +15,11 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -39,24 +41,37 @@ import java.util.UUID;
 import de.greenrobot.event.EventBus;
 
 public class WiFiService extends Service {
-    private static String TAG = "WiFiService";
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
+    public static int NOTIFICATION_ID_AP = 1340;
+    private static String TAG = "WiFiService";
+    private static int NOTIFICATION_ID = 1337;
+    private static int NOTIFICATION_ID_WIFI = 1338;
+    private static int NOTIFICATION_ID_ERROR = 1339;
     private final Handler handler = new Handler();
+    boolean tracked_wifi_network_found = false;
     private NotificationManager notificationManager = null;
     private WifiManager wifiManager = null;
     private WifiLock wifiLock = null;
     private Context mContext = null;
-    private static int NOTIFICATION_ID = 1337;
-    private static int NOTIFICATION_ID_WIFI = 1338;
-    private static int NOTIFICATION_ID_ERROR = 1339;
-    public static int NOTIFICATION_ID_AP = 1340;
-
     private boolean showNotifications = false;
     private boolean useAutoDetection = true;
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
-    boolean tracked_wifi_network_found = false;
     private TrackerEntry active_tracker = null;
+    private Runnable stopOnTimeout = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(TAG, "WIFI timeout");
+            stopSelf();
+        }
+    };
+    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            Log.i(TAG, "WiFi Scan successfully completed");
+            handler.removeCallbacks(stopOnTimeout);
+            getWiFiNetworks();
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -75,6 +90,12 @@ public class WiFiService extends Service {
         service_is_running = true;
         showNotifications = Settings.showNotifications(mContext);
         useAutoDetection = Settings.useAutoDetection(mContext);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            Notification note = buildServiceNotification();
+            startForeground(NOTIFICATION_ID, note);
+        }
+
 
         if (TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK) ) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
@@ -106,7 +127,7 @@ public class WiFiService extends Service {
 
         final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
-        Log.i(TAG, "Receiver registered.");
+        Log.i(TAG, "Receiver registerd.");
 
         boolean success = wifiManager.startScan();
         if (! success) {
@@ -178,15 +199,6 @@ public class WiFiService extends Service {
         return false;
     }
 
-
-    private Runnable stopOnTimeout = new Runnable() {
-        @Override
-        public void run() {
-            Log.i(TAG, "WIFI timeout");
-            stopSelf();
-        }
-    };
-
     private void unregister(BroadcastReceiver receiver) {
         try {
             unregisterReceiver(receiver);
@@ -197,13 +209,18 @@ public class WiFiService extends Service {
         }
     }
 
-    private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
-        public void onReceive(Context c, Intent i) {
-            Log.i(TAG, "WiFi Scan successfully completed");
-            handler.removeCallbacks(stopOnTimeout);
-            getWiFiNetworks();
-        }
-    };
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    private Notification buildServiceNotification() {
+        int highlightColor = Utility.getColor(this, R.color.highlight);
+        return new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_SERVICE_STATUS)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.service_in_progress))
+                .setColor(highlightColor)
+                .setSmallIcon(R.drawable.ic_hourglass)
+                .setOngoing(true)
+                .setPriority(Notification.PRIORITY_MIN)
+                .build();
+    }
 
     @SuppressLint("NewApi")
     private Notification buildNotification(String title, String text) {
@@ -213,7 +230,7 @@ public class WiFiService extends Service {
 
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
-        return new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_STATUS_NOTIFICATION)
+        return new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_TRACKER_STATUS)
                                      .setContentTitle(title)
                                      .setContentText(text)
                                      .setColor(highlightColor)
@@ -512,13 +529,16 @@ public class WiFiService extends Service {
 
     public int getBatteryLevel() {
         Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        if (batteryIntent != null) {
+            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        if(level == -1 || scale == -1) {
-            return 50;
+            if (level == -1 || scale == -1) {
+                return 50;
+            }
+
+            return (int) ((float) level / (float) scale * 100.0f);
         }
-
-        return (int) ((float)level / (float)scale * 100.0f);
+        return 50;
     }
 }
