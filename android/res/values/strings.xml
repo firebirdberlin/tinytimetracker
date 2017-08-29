@@ -72,6 +72,7 @@
     <string name="service_in_progress">Background service is active.</string>
     <string name="title_warning_location_services_off">Error</string>
     <string name="warning_location_services_off">Location services are currently disabled. You should enable location services in order to make TinyTimeTracker work.</string>
+    <string name="warning_location_permission_not_granted">The permission to access the coarse location is currently not granted. You should grant this permission in order to allow scanning for WiFi networks.</string>
     <string name="welcome_text_pt1">TinyTimeTracker helps to track your daily activities, projects and work times. You can easily start and stop the time tracking.  You can also monitor WiFi access points near you, if your activity is bound to a distinct place.</string>
     <string name="welcome_text_pt2">The app is open source. Contributions are appreciated.</string>
     <string name="welcome_text_pt3">Start by adding your first account using the button below.</string>

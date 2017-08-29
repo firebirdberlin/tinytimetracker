@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardview_warn_gps_off"
+    android:id="@+id/cardview_warn_location_permission_not_granted"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -11,25 +10,27 @@
     card_view:cardCornerRadius="4dp"
     card_view:cardElevation="10dp"
     card_view:cardUseCompatPadding="true">
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
+
         <TextView
-            android:id="@+id/textview_warn_gps_off"
+            android:id="@+id/textview_warn_location_permission_not_granted"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="@string/warning_location_services_off"
+            android:text="@string/warning_location_permission_not_granted"
             android:textSize="16sp"
-            android:textStyle="normal"/>
+            android:textStyle="normal" />
 
         <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <Button
-                android:id="@+id/button_location_providers"
+                android:id="@+id/button_grant_location_permission"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

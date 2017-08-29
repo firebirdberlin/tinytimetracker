@@ -1,46 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     >
 
     <include layout="@layout/card_gps_off"/>
+
+    <include layout="@layout/card_permission_not_granted" />
 
     <Spinner android:id="@+id/spinner_trackers"
         android:layout_width="match_parent"
         android:layout_height="80dip"/>
 
-    <RelativeLayout android:id="@+id/tracker_toolbar"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tracker_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        android:layout_height="wrap_content">
         <Button
             android:id="@+id/button_toggle_clockin_state"
-            android:layout_alignParentLeft="true"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:drawableLeft="@drawable/ic_play"
             style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:drawableLeft="@drawable/ic_play"
             android:text="@string/label_toggle_clockin_state_start"
             />
         <Button
             android:id="@+id/button_toggle_wifi"
-            android:layout_alignParentRight="true"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:drawableLeft="@drawable/ic_wifi"
             style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_weight="5"
+            android:drawableLeft="@drawable/ic_wifi"
             android:text="@string/label_auto_detection_on"
-            weight="5"
             />
     </RelativeLayout>
 
     <com.firebirdberlin.tinytimetracker.ui.MainView
         android:id="@+id/main_time_view"
         android:layout_width="wrap_content"
-        android:layout_weight="1"
         android:layout_height="0px"
+        android:layout_weight="1"
         />
 
     <RelativeLayout
@@ -50,18 +52,18 @@
         android:padding="8dp">
         <TextView
             android:id="@+id/textview_mean_value"
-            android:layout_alignParentLeft="true"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:text=""
             android:textColor="#FFFFFFFF"
             android:textSize="20sp"
             android:textStyle="normal"/>
         <TextView
             android:id="@+id/textview_saldo"
-            android:layout_alignParentRight="true"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:text=""
             android:textColor="#FFFFFFFF"
             android:textSize="20sp"

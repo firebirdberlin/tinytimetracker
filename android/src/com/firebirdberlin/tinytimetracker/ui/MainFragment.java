@@ -1,5 +1,6 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
@@ -47,30 +48,31 @@ import de.greenrobot.event.EventBus;
 
 public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = "MainFragment";
+    EventBus bus = EventBus.getDefault();
     private Button button_toggle_wifi = null;
     private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
     private CardView cardviewLocationProviderOff = null;
+    private CardView cardviewLocationPermission = null;
     private View trackerToolbar = null;
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
-    EventBus bus = EventBus.getDefault();
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
-        spinner = (Spinner) v.findViewById(R.id.spinner_trackers);
-        textviewMeanDuration = (TextView) v.findViewById(R.id.textview_mean_value);
-        textviewSaldo = (TextView) v.findViewById(R.id.textview_saldo);
-        cardviewLocationProviderOff = (CardView) v.findViewById(R.id.cardview_warn_gps_off);
-        trackerToolbar = (View) v.findViewById(R.id.tracker_toolbar);
-        button_toggle_wifi = (Button) v.findViewById(R.id.button_toggle_wifi);
-        button_toggle_clockin_state = (Button) v.findViewById(R.id.button_toggle_clockin_state);
+        spinner = v.findViewById(R.id.spinner_trackers);
+        textviewMeanDuration = v.findViewById(R.id.textview_mean_value);
+        textviewSaldo = v.findViewById(R.id.textview_saldo);
+        cardviewLocationProviderOff = v.findViewById(R.id.cardview_warn_gps_off);
+        cardviewLocationPermission = v.findViewById(R.id.cardview_warn_location_permission_not_granted);
+        trackerToolbar = v.findViewById(R.id.tracker_toolbar);
+        button_toggle_wifi = v.findViewById(R.id.button_toggle_wifi);
+        button_toggle_clockin_state = v.findViewById(R.id.button_toggle_clockin_state);
         button_toggle_wifi.setOnClickListener(this);
         button_toggle_clockin_state.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
@@ -96,7 +98,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-        timeView = (MainView) v.findViewById(R.id.main_time_view);
+        timeView = v.findViewById(R.id.main_time_view);
         timeView.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
                 handleClockinStateChange();
@@ -104,7 +106,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-        final Button buttonLocationProviders = (Button) v.findViewById(R.id.button_location_providers);
+        final Button buttonLocationProviders = v.findViewById(R.id.button_location_providers);
         buttonLocationProviders.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent viewIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -112,6 +114,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+        final Button buttonLocationPermission = v.findViewById(R.id.button_grant_location_permission);
+        buttonLocationPermission.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                TinyTimeTracker.checkAndRequestPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION,
+                        1);
+            }
+        });
         return v;
     }
 
@@ -126,6 +135,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationProviderOff.setVisibility(View.GONE);
+            }
+
+            if (!TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                cardviewLocationPermission.setVisibility(View.VISIBLE);
+            } else {
+                cardviewLocationPermission.setVisibility(View.GONE);
             }
         }
 

@@ -74,4 +74,5 @@
     <string name="channel_name_service">Status des Hintergrundservices</string>
     <string name="channel_name_status">Statusmeldungen zur Zeiterfassung</string>
     <string name="service_in_progress">Der Hintergrundservice ist aktiv.</string>
+    <string name="warning_location_permission_not_granted">"Die Berechtigung, um auf den Standort zuzugreifen ist zur Zeit nicht erteilt. Damit die App nach WLAN Netzwerken scannen kann, ist sie erforderlich. "</string>
 </resources>

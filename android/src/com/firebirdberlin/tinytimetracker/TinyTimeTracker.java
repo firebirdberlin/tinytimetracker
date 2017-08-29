@@ -517,6 +517,7 @@ public class TinyTimeTracker extends AppCompatActivity {
                     getString(R.string.channel_name_service),
                     getString(R.string.channel_description_service),
                     NotificationManager.IMPORTANCE_MIN);
+            mChannel.setShowBadge(false);
             mNotificationManager.createNotificationChannel(mChannel);
 
             mChannel = prepareNotificationChannel(
