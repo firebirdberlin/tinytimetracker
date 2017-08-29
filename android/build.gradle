@@ -24,7 +24,6 @@ allprojects {
 apply plugin: 'com.android.application'
 
 dependencies {
-
     compile project(':externals:android-preferences')
     compile project(':android-page-indicator')
     compile fileTree(include: '*.jar', dir: 'libs')
@@ -64,6 +63,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFile '/home/stefan/android/projects/tinytimetracker/android/proguard-project.txt'
         }
     }
