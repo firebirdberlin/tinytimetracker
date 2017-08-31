@@ -39,6 +39,8 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +60,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private CardView cardviewLocationPermission = null;
     private View trackerToolbar = null;
     private MainView timeView = null;
-    private List<TrackerEntry> trackers = new ArrayList<TrackerEntry>();
+    private List<TrackerEntry> trackers = new ArrayList<>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
 
     @Override
@@ -185,6 +187,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         datasource.close();
+        sortTrackers();
+    }
+
+    private void sortTrackers() {
+        Collections.sort(trackers, new Comparator<TrackerEntry>() {
+            @Override
+            public int compare(TrackerEntry e1, TrackerEntry e2) {
+                return e1.verbose_name.compareTo(e2.verbose_name);
+            }
+        });
+
     }
 
     @Override
@@ -209,12 +222,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             datasource.close();
             setWifiIndicator(tracker);
             Log.i(TAG, "button_toggle_wifi click done ...");
-            return;
-        }
-
+        } else
         if ( v.equals(button_toggle_clockin_state) ) {
             handleClockinStateChange();
-            return;
         }
     }
 
@@ -259,7 +269,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         setClockinStateIndicator(tracker);
         setWifiIndicator(tracker);
         Log.i(TAG, "button_toggle_clockin_state click done ...");
-        return;
     }
 
     private void setWifiIndicator(TrackerEntry tracker) {
@@ -336,6 +345,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);
+        sortTrackers();
         adapter.notifyDataSetChanged();
         setSelection(event.tracker.id);
     }
