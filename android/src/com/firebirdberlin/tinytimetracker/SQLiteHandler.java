@@ -25,8 +25,13 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     public static final String COLUMN_SSID = "ssid";
     public static final String COLUMN_BSSID = "bssid";
 
+    public static final String TABLE_TIME_BALANCE = "time_balance";
+    public static final String COLUMN_INSERT_TIME = "insert_time";
+    public static final String COLUMN_MINUTES = "minutes";
+    public static final String COLUMN_NOTE = "note";
+
     private static final String DATABASE_NAME = "trackers.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRACKERS =
@@ -59,6 +64,15 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         + COLUMN_BSSID + " TEXT not null, "
         + "UNIQUE(" + COLUMN_TRACKER_ID + ", " + COLUMN_SSID + ", " + COLUMN_BSSID +") ON CONFLICT REPLACE);";
 
+    private static final String DATABASE_CREATE_TIME_BALANCE =
+            "CREATE TABLE " + TABLE_TIME_BALANCE + "("
+                    + COLUMN_ID + " INTEGER primary key autoincrement, "
+                    + COLUMN_TRACKER_ID + " INTEGER REFERENCES " + TABLE_TRACKERS + "(" + COLUMN_ID + "),"
+                    + COLUMN_INSERT_TIME + " INTEGER not null, "
+                    + COLUMN_MINUTES + " INTEGER not null, "
+                    + COLUMN_NOTE + " TEXT);";
+
+
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -69,6 +83,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         database.execSQL(DATABASE_CREATE_LOGS);
         database.execSQL(DATABASE_CREATE_ACCESS_POINTS);
         database.execSQL(DATABASE_CREATE_IGNORED_ACCESS_POINTS);
+        database.execSQL(DATABASE_CREATE_TIME_BALANCE);
     }
 
     @Override
@@ -96,6 +111,10 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
         if (oldVersion < 6 && newVersion >= 6) {
             db.execSQL(DATABASE_CREATE_IGNORED_ACCESS_POINTS);
+        }
+
+        if (oldVersion < 7 && newVersion >= 7) {
+            db.execSQL(DATABASE_CREATE_TIME_BALANCE);
             return;
         }
 
@@ -104,6 +123,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOGS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ACCESS_POINTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_IGNORED_ACCESS_POINTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TIME_BALANCE);
         onCreate(db);
     }
 

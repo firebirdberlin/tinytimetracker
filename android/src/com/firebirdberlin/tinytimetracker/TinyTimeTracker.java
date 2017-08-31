@@ -349,10 +349,12 @@ public class TinyTimeTracker extends AppCompatActivity {
         inflater.inflate(R.menu.main_activity_actions, menu);
         MenuItem item_edit = menu.findItem(R.id.action_edit);
         MenuItem item_delete = menu.findItem(R.id.action_delete);
+        MenuItem item_add_time_balance = menu.findItem(R.id.action_add_time_balance);
         MenuItem item_donate = menu.findItem(R.id.action_donate);
         MenuItem item_pebble_app_store = menu.findItem(R.id.action_pebble_app_store);
         item_edit.setVisible(currentTracker != null);
         item_delete.setVisible(currentTracker != null);
+        item_add_time_balance.setVisible(currentTracker != null);
         item_donate.setVisible(mService != null && purchased_donation == false);
 
         boolean pebbleAppStoreIsInstalled =
@@ -388,6 +390,9 @@ public class TinyTimeTracker extends AppCompatActivity {
         case R.id.action_delete:
             confirmDeletion();
             return true;
+            case R.id.action_add_time_balance:
+                addTimeBalance();
+                return true;
         case R.id.action_settings:
             Settings.openSettings(this);
             return true;
@@ -428,6 +433,18 @@ public class TinyTimeTracker extends AppCompatActivity {
                 datasource.close();
             }
         }).show();
+    }
+
+    private void addTimeBalance() {
+        if (currentTracker == null) {
+            return;
+        }
+
+        final Context mContext = this;
+        LogDataSource datasource = new LogDataSource(mContext);
+        datasource.addTimeBalanceEntry(currentTracker, 10);
+        datasource.close();
+
     }
 
     private void openPebbleAppStore() {

@@ -426,7 +426,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
         LogDataSource datasource = new LogDataSource(getActivity());
         Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), tracker.id);
-        datasource.close();
+
         long meanDurationMillis = tracker.getMeanDurationMillis(totalDurationPair.first, totalDurationPair.second);
         UnixTimestamp meanDuration = new UnixTimestamp(meanDurationMillis);
         String text = meanDuration.durationAsHours();
@@ -436,8 +436,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         int workingHoursInSeconds = (int) (tracker.working_hours * 3600.f);
         if ( workingHoursInSeconds > 0 ) {
             Long overTimeMillis = tracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
-            UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
 
+            int timeBalanceInMinutes = datasource.getManualTimeBalanceInMinutes(tracker);
+            overTimeMillis += timeBalanceInMinutes * 60 * 1000;
+
+            UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
             String sign = (overTimeMillis < 0 ) ? "- ": "+ ";
             String textSaldo = sign + overtime.durationAsHours();
             textviewSaldo.setText(textSaldo);
@@ -445,6 +448,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         } else {
             textviewSaldo.setVisibility(View.INVISIBLE);
         }
+        datasource.close();
     }
 
     private void postTrackerSelected(TrackerEntry tracker) {

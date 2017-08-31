@@ -1,11 +1,5 @@
 package com.firebirdberlin.tinytimetracker;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.List;
-import java.util.Set;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -13,7 +7,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.Pair;
-import de.greenrobot.event.EventBus;
 
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
@@ -24,14 +17,20 @@ import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
-import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import de.greenrobot.event.EventBus;
 
 
 public class LogDataSource {
-    private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
     public static final int AGGRETATION_DAY = 0;
     public static final int AGGRETATION_WEEK = 1;
     public static final int AGGRETATION_YEAR = 2;
+    private static String TAG = TinyTimeTracker.TAG + ".LogDataSource";
     private Context mContext = null;
     private SQLiteDatabase database = null;
     private SQLiteHandler dbHelper;
@@ -83,7 +82,7 @@ public class LogDataSource {
     public AccessPoint save(AccessPoint accessPoint) {
         init();
 
-        if (accessPoint.getTrackerID() == accessPoint.NOT_SAVED) {
+        if (accessPoint.getTrackerID() == AccessPoint.NOT_SAVED) {
             return accessPoint;
         }
 
@@ -710,4 +709,38 @@ public class LogDataSource {
 
         return result;
     }
+
+    public void addTimeBalanceEntry(TrackerEntry tracker, int minutes) {
+        init();
+        long now = System.currentTimeMillis();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHandler.COLUMN_TRACKER_ID, tracker.id);
+        values.put(SQLiteHandler.COLUMN_INSERT_TIME, now);
+        values.put(SQLiteHandler.COLUMN_MINUTES, minutes);
+        values.put(SQLiteHandler.COLUMN_NOTE, "");
+
+        database.insert(SQLiteHandler.TABLE_TIME_BALANCE, null, values);
+        bus.post(new OnTrackerChanged(tracker));
+    }
+
+    public int getManualTimeBalanceInMinutes(TrackerEntry tracker) {
+        init();
+        int minutes = 0;
+
+        Cursor cursor = database.rawQuery(
+                "SELECT SUM(minutes) FROM time_balance WHERE tracker_id=?",
+                new String[]{String.valueOf(tracker.id)});
+
+        try {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                minutes = cursor.getInt(0);
+            }
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return minutes;
+    }
+
 }

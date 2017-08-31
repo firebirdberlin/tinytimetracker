@@ -2,7 +2,8 @@
 <resources>
     <string-array name="empty_array"/>
     <string name="action_add_access_point">add Access Point</string>
-    <string name="action_add">Add Tracker</string>
+    <string name="action_add">AddTracker</string>
+    <string name="action_add_time_balancing_entry">Add time balancing entry</string>
     <string name="action_delete_access_point">delete Access Point</string>
     <string name="action_delete">Delete Tracker</string>
     <string name="action_delete_log_entry">delete</string>
