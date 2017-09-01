@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="empty_array"/>
+    <string name="abbreviation_hour">h</string>
+    <string name="abbreviation_minute">min</string>
     <string name="action_add_access_point">add Access Point</string>
     <string name="action_add">AddTracker</string>
     <string name="action_add_time_balancing_entry">Add time balancing entry</string>
@@ -36,6 +38,7 @@
     <string name="dialog_msg_wifi_networks_progress">Scanning for WiFi networks</string>
     <string name="dialog_title_database_backup">Database files</string>
     <string name="dialog_title_share_database">Select an application</string>
+    <string name="dialog_title_time_balancing_entry">Time balancing</string>
     <string name="dialog_title_thank_you">Thanks</string>
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
     <string name="dialog_title_wifi_networks_progress">Scanning</string>

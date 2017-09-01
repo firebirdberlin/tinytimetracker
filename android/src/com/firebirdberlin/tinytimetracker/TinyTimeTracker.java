@@ -66,7 +66,8 @@ import java.util.List;
 import de.firebirdberlin.pageindicator.PageIndicator;
 import de.greenrobot.event.EventBus;
 
-public class TinyTimeTracker extends AppCompatActivity {
+public class TinyTimeTracker extends AppCompatActivity
+        implements AddTimeBalanceDialogFragment.AddTimeBalanceDialogListener {
     public static final String TAG = "TinyTimeTracker";
     public static final String ITEM_DONATION = "donation";
     public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
@@ -442,14 +443,16 @@ public class TinyTimeTracker extends AppCompatActivity {
         }
         AddTimeBalanceDialogFragment dialogFragment = new AddTimeBalanceDialogFragment();
         dialogFragment.show(getSupportFragmentManager(), null);
+    }
 
-/*        final Context mContext = this;
+    public void onTimeBalanceEntryAdded(int minutes) {
+        final Context mContext = this;
         LogDataSource datasource = new LogDataSource(mContext);
-        datasource.addTimeBalanceEntry(currentTracker, 10);
+        datasource.addTimeBalanceEntry(currentTracker, minutes);
         datasource.close();
-*/
 
     }
+
 
     private void openPebbleAppStore() {
         try {
