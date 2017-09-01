@@ -57,6 +57,7 @@ public class AddTimeBalanceDialogFragment extends DialogFragment {
         minuteTextEdit = view.findViewById(R.id.minuteText);
 
         builder.setTitle(R.string.dialog_title_time_balancing_entry)
+                .setIcon(R.drawable.ic_scales)
                 .setView(view)
 
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
