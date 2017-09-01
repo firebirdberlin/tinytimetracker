@@ -19,7 +19,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.LinearLayoutManager;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
@@ -189,11 +190,13 @@ public class CardFragment extends Fragment {
         }
     }
 
+    @Subscribe
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         refresh();
     }
 
+    @Subscribe
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( TinyTimeTracker.currentTracker == null ) return;
         if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
@@ -201,10 +204,12 @@ public class CardFragment extends Fragment {
         }
     }
 
+    @Subscribe
     public void onEvent(OnTrackerDeleted event) {
         refresh();
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
@@ -212,6 +217,7 @@ public class CardFragment extends Fragment {
         }
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryDeleted event) {
         if ( TinyTimeTracker.currentTracker != null ) {
             refresh();

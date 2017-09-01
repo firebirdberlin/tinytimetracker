@@ -13,7 +13,8 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
@@ -49,6 +50,7 @@ public class MainView extends View {
         init();
     }
 
+    @Subscribe
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( TinyTimeTracker.currentTracker == null ) return;
         if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
@@ -61,10 +63,12 @@ public class MainView extends View {
         textColor = getSystemColor(android.R.attr.textColor);
     }
 
+    @Subscribe
     public void onEvent(OnTrackerSelected event) {
         invalidate();
     }
 
+    @Subscribe
     public void onEvent(OnTrackerChanged event) {
         if (TinyTimeTracker.currentTracker == null || event == null || event.tracker == null) {
             return;
@@ -75,14 +79,17 @@ public class MainView extends View {
         }
     }
 
+    @Subscribe
     public void onEvent(OnTrackerDeleted event) {
         invalidate();
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryDeleted event) {
         invalidate();
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {

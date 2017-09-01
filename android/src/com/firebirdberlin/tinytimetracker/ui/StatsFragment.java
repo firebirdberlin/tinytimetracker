@@ -18,7 +18,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.RadioGroup;
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.CSVExport;
@@ -251,6 +252,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     }
 
 
+    @Subscribe
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( TinyTimeTracker.currentTracker == null ) return;
         if (event.success &&
@@ -260,15 +262,18 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         }
     }
 
+    @Subscribe
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         refresh();
     }
 
+    @Subscribe
     public void onEvent(OnTrackerDeleted event) {
         refresh();
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
@@ -276,6 +281,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         }
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryDeleted event) {
         if ( TinyTimeTracker.currentTracker != null ) {
             refresh();

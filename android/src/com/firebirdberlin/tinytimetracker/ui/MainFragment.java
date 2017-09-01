@@ -45,7 +45,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 
 public class MainFragment extends Fragment implements View.OnClickListener {
@@ -350,6 +351,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         setSelection(event.tracker.id);
     }
 
+    @Subscribe
     public void onEvent(OnTrackerChanged event) {
         Log.i(TAG, "OnTrackerChanged");
         loadTrackers();
@@ -362,6 +364,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    @Subscribe
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         if ( event == null || event.newTracker == null) return;
@@ -372,6 +375,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         updateStatisticalValues(event.newTracker);
     }
 
+    @Subscribe
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( TinyTimeTracker.currentTracker == null ) return;
         if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
@@ -380,6 +384,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     @SuppressWarnings("unchecked")
+    @Subscribe
     public void onEvent(OnTrackerDeleted event) {
         Log.i(TAG, "OnTrackerDeleted");
         textviewMeanDuration.setText("");
@@ -397,18 +402,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         adapter.notifyDataSetChanged();
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryDeleted event) {
         if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.tracker_id ) {
             updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
+    @Subscribe
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
             updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
+    @Subscribe
     public void onEvent(OnDatabaseImported event) {
         Log.i(TAG, "OnDatabaseImported");
         loadTrackers();
@@ -416,6 +424,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         adapter.notifyDataSetChanged();
     }
 
+    @Subscribe
     public void onEvent(OnLocationModeChanged event) {
         onResume();
     }

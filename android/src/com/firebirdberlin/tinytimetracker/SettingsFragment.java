@@ -17,7 +17,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.util.Log;
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 // The callback interface
 interface FileChooserListener {

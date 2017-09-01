@@ -24,6 +24,7 @@ allprojects {
 apply plugin: 'com.android.application'
 
 dependencies {
+    compile 'org.greenrobot:eventbus:3.0.0'
     compile project(':externals:android-preferences')
     compile project(':android-page-indicator')
     compile fileTree(include: '*.jar', dir: 'libs')

@@ -56,6 +56,7 @@ import com.firebirdberlin.tinytimetracker.ui.CardFragment;
 import com.firebirdberlin.tinytimetracker.ui.MainFragment;
 import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,7 +65,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 public class TinyTimeTracker extends AppCompatActivity
         implements AddTimeBalanceDialogFragment.AddTimeBalanceDialogListener {
@@ -512,11 +513,13 @@ public class TinyTimeTracker extends AppCompatActivity
                                       PackageManager.DONT_KILL_APP);
     }
 
+    @Subscribe
     public void onEvent(OnTrackerSelected event) {
         invalidateOptionsMenu();
         Log.d(TAG, "currentTracker: " + currentTracker.toString());
     }
 
+    @Subscribe
     public void onEvent(OnTrackerDeleted event) {
         invalidateOptionsMenu();
         pager.setCurrentItem(0);

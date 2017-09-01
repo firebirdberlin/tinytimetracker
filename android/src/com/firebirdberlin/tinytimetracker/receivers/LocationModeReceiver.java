@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.BroadcastReceiver;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
 
