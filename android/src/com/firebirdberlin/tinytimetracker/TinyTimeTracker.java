@@ -51,6 +51,7 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+import com.firebirdberlin.tinytimetracker.ui.AddTimeBalanceDialogFragment;
 import com.firebirdberlin.tinytimetracker.ui.CardFragment;
 import com.firebirdberlin.tinytimetracker.ui.MainFragment;
 import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
@@ -439,11 +440,14 @@ public class TinyTimeTracker extends AppCompatActivity {
         if (currentTracker == null) {
             return;
         }
+        AddTimeBalanceDialogFragment dialogFragment = new AddTimeBalanceDialogFragment();
+        dialogFragment.show(getSupportFragmentManager(), null);
 
-        final Context mContext = this;
+/*        final Context mContext = this;
         LogDataSource datasource = new LogDataSource(mContext);
         datasource.addTimeBalanceEntry(currentTracker, 10);
         datasource.close();
+*/
 
     }
 

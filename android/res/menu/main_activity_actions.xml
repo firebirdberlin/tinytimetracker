@@ -1,5 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
+    <item
+        android:id="@+id/action_add_time_balance"
+        android:icon="@drawable/ic_hourglass"
+        android:title="@string/action_add_time_balancing_entry"
+        app:showAsAction="ifRoom|collapseActionView" />
     <item android:id="@+id/action_edit"
         android:icon="@drawable/ic_edit"
         android:title="@string/action_edit"
@@ -11,11 +16,6 @@
     <item android:id="@+id/action_delete"
         android:icon="@drawable/ic_delete"
         android:title="@string/action_delete"
-        app:showAsAction="ifRoom|collapseActionView" />
-    <item
-        android:id="@+id/action_add_time_balance"
-        android:icon="@drawable/ic_hourglass"
-        android:title="@string/action_add_time_balancing_entry"
         app:showAsAction="ifRoom|collapseActionView" />
     <item android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
