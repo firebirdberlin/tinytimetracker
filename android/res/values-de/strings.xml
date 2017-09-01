@@ -67,12 +67,20 @@
 <string name="welcome_text_pt1">Diese App zeichnet Ihre täglichen Aktivitäten, Projekte und Arbeitszeiten auf. Mit einem einfach Knopfdruck lässt sich die Aufzeichnung starten und stoppen. Sie können ebenfalls WLAN Basisstationen überwachen falls die überwachte Tätigkeit an einen festen Ort gebunden ist.</string>
 <string name="welcome_text_pt2">Die App ist Open Source. Beiträge sind herzlich willkommen.</string>
 <string name="welcome_text_pt3">Nun können Sie beginnen, Ihr erstes Konto mit dem Knopf unten rechts anzulegen.</string>
-    <string name="channel_description_new_access_points">Zeigt Benachrichtigungen für neue Access Points.</string>
-    <string name="channel_description_service">Zeigt an, dass der Hintergrundservice aktiv ist.</string>
-    <string name="channel_description_status">Zeigt Benachrichtigungen über den Status des aktiven Zeitkontos.</string>
-    <string name="channel_name_new_access_points">Neue Access Points</string>
-    <string name="channel_name_service">Status des Hintergrundservices</string>
-    <string name="channel_name_status">Statusmeldungen zur Zeiterfassung</string>
-    <string name="service_in_progress">Der Hintergrundservice ist aktiv.</string>
-    <string name="warning_location_permission_not_granted">"Die Berechtigung, um auf den Standort zuzugreifen ist zur Zeit nicht erteilt. Damit die App nach WLAN Netzwerken scannen kann, ist sie erforderlich. "</string>
+<string name="channel_description_new_access_points">Zeigt Benachrichtigungen für neue Access Points.</string>
+<string name="channel_description_service">Zeigt an, dass der Hintergrundservice aktiv ist.</string>
+<string name="channel_description_status">Zeigt Benachrichtigungen über den Status des aktiven Zeitkontos.</string>
+<string name="channel_name_new_access_points">Neue Access Points</string>
+<string name="channel_name_service">Status des Hintergrundservices</string>
+<string name="channel_name_status">Statusmeldungen zur Zeiterfassung</string>
+<string name="service_in_progress">Der Hintergrundservice ist aktiv.</string>
+<string name="warning_location_permission_not_granted">"Die Berechtigung, um auf den Standort zuzugreifen ist zur Zeit nicht erteilt. Damit die App nach WLAN Netzwerken scannen kann, ist sie erforderlich. "</string>
+<string name="abbreviation_hour">h</string>
+<string name="abbreviation_minute">min</string>
+<string name="action_add_time_balancing_entry">Zeitausgleich</string>
+<string name="dialog_title_time_balancing_entry">Zeitausgleich</string>
+<string-array name="time_balance_type">
+    <item>Zeitausgleich</item>
+    <item>Überstunden</item>
+</string-array>
 </resources>
