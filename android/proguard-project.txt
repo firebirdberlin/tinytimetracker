@@ -35,9 +35,11 @@
     public static int e(...);
 }
 
+-keepattributes *Annotation*
 -keepclassmembers class ** {
-    public void onEvent*(**);
+    @org.greenrobot.eventbus.Subscribe <methods>;
 }
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
 
 -dontwarn android.support.v7.**
 -keep class android.support.v7.** { *; }
