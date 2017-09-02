@@ -10,10 +10,10 @@ installdebug: debug
 	adb $(OPT) install -r bin/TinyTimeTracker-debug.apk
 
 install: release
-	adb $(OPT) install -r bin/TinyTimeTracker-release.apk
+	adb $(OPT) install -r release/android-release.apk
 
 uninstall:
-	adb uninstall ${PACKAGE_NAME}
+	adb $(OPT) uninstall ${PACKAGE_NAME}
 
 clean:
 	ant clean
