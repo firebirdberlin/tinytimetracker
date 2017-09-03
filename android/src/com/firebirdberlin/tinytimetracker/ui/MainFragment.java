@@ -38,15 +38,15 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 
 public class MainFragment extends Fragment implements View.OnClickListener {
@@ -180,15 +180,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         datasource.open();
         List<TrackerEntry> trackers_loaded = datasource.getTrackers();
         trackers.clear();
-        trackerIDToSelectionIDMap.clear();
 
-        for (TrackerEntry e : trackers_loaded) {
-            trackerIDToSelectionIDMap.put(e.id, trackers.size());
-            trackers.add(e);
-        }
+        trackers.addAll(trackers_loaded);
+        sortTrackers();
+
 
         datasource.close();
-        sortTrackers();
+
     }
 
     private void sortTrackers() {
@@ -199,6 +197,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+        trackerIDToSelectionIDMap.clear();
+        for (int i = 0; i < trackers.size(); i++) {
+            TrackerEntry e = trackers.get(i);
+            trackerIDToSelectionIDMap.put(e.id, i);
+        }
     }
 
     @Override
@@ -344,7 +347,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     public void handleOnTrackerAdded(OnTrackerAdded event) {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
-        trackerIDToSelectionIDMap.put(event.tracker.id, trackers.size());
         adapter.add(event.tracker);
         sortTrackers();
         adapter.notifyDataSetChanged();
@@ -447,7 +449,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             Long overTimeMillis = tracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
 
             int timeBalanceInMinutes = datasource.getManualTimeBalanceInMinutes(tracker);
-            overTimeMillis += timeBalanceInMinutes * 60 * 1000;
+            overTimeMillis += timeBalanceInMinutes * 60L * 1000L;
 
             UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
             String sign = (overTimeMillis < 0 ) ? "- ": "+ ";
