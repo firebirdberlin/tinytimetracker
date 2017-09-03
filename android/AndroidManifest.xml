@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.firebirdberlin.tinytimetracker"
-      android:versionCode="52"
-      android:versionName="1.7.24">
+    android:versionCode="53"
+    android:versionName="1.7.25">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -16,8 +16,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="com.android.vending.BILLING" />
 
-    <application android:label="@string/app_name"
+    <application
         android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
         android:theme="@style/MainTheme" >
 
         <activity android:name="TinyTimeTracker"
@@ -41,14 +42,14 @@
         </activity>
 
         <service
+            android:name=".WiFiService"
             android:enabled="true"
-            android:exported="false"
-            android:name=".WiFiService" />
+            android:exported="false" />
 
         <service
+            android:name=".services.AddAccessPointService"
             android:enabled="true"
-            android:exported="false"
-            android:name=".services.AddAccessPointService" />
+            android:exported="false" />
 
         <receiver android:name=".AlarmReceiver" android:enabled="true">
         </receiver>
