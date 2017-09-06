@@ -32,13 +32,13 @@ import com.firebirdberlin.tinytimetracker.services.AddAccessPointService;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import org.greenrobot.eventbus.EventBus;
 
 public class WiFiService extends Service {
     private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
@@ -250,7 +250,8 @@ public class WiFiService extends Service {
         String string_action_ignore = mContext.getString(R.string.new_access_point_action_ignore);
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
-        PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+
+        PendingIntent pIntent = PendingIntent.getActivity(mContext, 1, intent, 0);
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
         NotificationCompat.Builder note = new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_NEW_ACCESS_POINT)
@@ -261,7 +262,7 @@ public class WiFiService extends Service {
                                                           .setContentIntent(pIntent);
 
         Intent addIntent = AddAccessPointService.addIntent(this, tracker.id, ssid, bssid);
-        PendingIntent pAddIntent = PendingIntent.getService(this, 0, addIntent,
+        PendingIntent pAddIntent = PendingIntent.getService(this, 2, addIntent,
                                                             PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.WearableExtender wearableExtender =
@@ -273,7 +274,7 @@ public class WiFiService extends Service {
         wearableExtender.addAction(addAction);
 
         Intent ignoreIntent = AddAccessPointService.ignoreIntent(this, tracker.id, ssid, bssid);
-        PendingIntent pIgnoreIntent = PendingIntent.getService(this, 0, ignoreIntent,
+        PendingIntent pIgnoreIntent = PendingIntent.getService(this, 3, ignoreIntent,
                                                                PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Action ignoreAction =
             new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, string_action_ignore, pIgnoreIntent)
