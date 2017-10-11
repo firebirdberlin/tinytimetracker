@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -59,33 +61,71 @@ public class AddTimeBalanceDialogFragment extends DialogFragment {
         builder.setTitle(R.string.dialog_title_time_balancing_entry)
                 .setIcon(R.drawable.ic_scales)
                 .setView(view)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNeutralButton(android.R.string.cancel, null);
 
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        final AlertDialog dialog = builder.create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(final DialogInterface dialog) {
+
+                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
                     @Override
-                    public void onClick(DialogInterface dialog, int id) {
+                    public void onClick(View view) {
                         int minutes = 0;
+                        boolean minuteValid = true;
+                        boolean hourValid = true;
+
                         String hourText = hourTextEdit.getText().toString();
-                        if (!hourText.isEmpty()) {
-                            minutes += Integer.parseInt(hourText) * 60;
+                        if ( !hourText.isEmpty() ) {
+                            try {
+                                minutes += Integer.parseInt(hourText) * 60;
+                            } catch (NumberFormatException e) {
+                                hourValid = false;
+                            }
                         }
+
                         String minuteText = minuteTextEdit.getText().toString();
-                        if (!minuteText.isEmpty()) {
-                            minutes += Integer.parseInt(minuteText);
+                        if ( !minuteText.isEmpty() ) {
+                            try {
+                                int minute = Integer.parseInt(minuteText);
+
+                                if ( minute >= 60 ) {
+                                    minuteValid = false;
+                                } else {
+                                    minutes += minute;
+                                }
+                            } catch (NumberFormatException e) {
+                                minuteValid = false;
+                            }
                         }
-                        if (spinner.getSelectedItemPosition() == 0) {
+
+                        if ( spinner.getSelectedItemPosition() == 0 ) {
                             minutes *= -1;
                         }
 
-                        mListener.onTimeBalanceEntryAdded(minutes);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        AddTimeBalanceDialogFragment.this.getDialog().cancel();
+                        if ( !minuteValid ) {
+                            minuteTextEdit.setTextColor(Color.RED);
+                        }
+
+                        if ( !hourValid ) {
+                            hourTextEdit.setTextColor(Color.RED);
+                        }
+
+                        if ( minuteValid && hourValid) {
+                            mListener.onTimeBalanceEntryAdded(minutes);
+                            dialog.dismiss();
+                        }
                     }
                 });
+            }
+        });
 
-        return builder.create();
+        return dialog;
     }
 
     public interface AddTimeBalanceDialogListener {

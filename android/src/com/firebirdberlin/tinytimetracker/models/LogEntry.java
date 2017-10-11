@@ -35,12 +35,10 @@ public class LogEntry {
 
     public void setTimestampStart(long timestamp) {
         timestamp_start = new UnixTimestamp(timestamp);
-        return;
     }
 
     public void setTimestampEnd(long timestamp) {
         timestamp_end = new UnixTimestamp(timestamp);
-        return;
     }
 
     public long getTimeDiffSeconds() {
