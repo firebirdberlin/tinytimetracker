@@ -4,8 +4,10 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -467,5 +469,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         EventBus bus = EventBus.getDefault();
         TinyTimeTracker.currentTracker = tracker;
         bus.postSticky(new OnTrackerSelected(tracker));
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor prefEditor = settings.edit();
+        prefEditor.putLong("currentTrackerId", tracker.id);
+        prefEditor.commit();
     }
 }
