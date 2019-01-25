@@ -1,9 +1,7 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -17,29 +15,38 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.RadioGroup;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
-import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.CSVExport;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.LogEntryListAdapter;
+import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.Utility;
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryAdded;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
-import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 
 public class StatsFragment extends ListFragment implements View.OnClickListener {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
-    final List<LogEntry> log_entries = new ArrayList<LogEntry>();
+    final List<LogEntry> log_entries = new ArrayList<>();
     LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Button btnCSVExport = null;
@@ -50,10 +57,10 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        mContext = (Context) getActivity();
+        mContext = getActivity();
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
-        radio_group_aggregation = (RadioGroup) v.findViewById(R.id.radio_group_aggregation);
-        btnCSVExport = (Button) v.findViewById(R.id.button_csv_export);
+        radio_group_aggregation = v.findViewById(R.id.radio_group_aggregation);
+        btnCSVExport = v.findViewById(R.id.button_csv_export);
         return v;
     }
 
@@ -113,9 +120,9 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 
-        LogEntry entry = log_entry_adapter.getItem(info.position);
+        final LogEntry entry = log_entry_adapter.getItem(info.position);
 
-        LogDataSource datasource = new LogDataSource(mContext);
+        final LogDataSource datasource = new LogDataSource(mContext);
         switch (item.getItemId()) {
         case R.id.action_delete:
             datasource.delete(entry);
@@ -142,6 +149,41 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
                 log_entry_adapter.remove(entry);
             }
             datasource.close();
+            return true;
+        case R.id.action_add:
+
+            final DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    final Calendar now = Calendar.getInstance();
+                    now.set(Calendar.YEAR, year);
+                    now.set(Calendar.MONTH, monthOfYear);
+                    now.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                            Log.d(TAG, "onTimeSet");
+                            now.set(Calendar.HOUR_OF_DAY, hour);
+                            now.set(Calendar.MINUTE, minute);
+                            Toast.makeText(mContext, String.valueOf(now.getTimeInMillis()), Toast.LENGTH_LONG);
+                            final LogDataSource datasource = new LogDataSource(mContext);
+                            LogEntry e = new LogEntry(LogEntry.NOT_SAVED, entry.tracker_id, now.getTimeInMillis(), now.getTimeInMillis());
+                            datasource.save(e);
+                            datasource.close();
+
+                        }
+                    };
+                    new TimePickerDialog(getContext(), onTimeSetListener, 9, 0, true).show();
+                }
+
+            };
+
+            Calendar now = Calendar.getInstance();
+            new DatePickerDialog(getContext(), onDateSetListener,
+                                 now.get(Calendar.YEAR), now.get(Calendar.MONTH),
+                                 now.get(Calendar.DAY_OF_MONTH))
+                    .show();
+
             return true;
         default:
             datasource.close();
@@ -286,5 +328,10 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
         if ( TinyTimeTracker.currentTracker != null ) {
             refresh();
         }
+    }
+
+    @Subscribe
+    public void onEvent(OnLogEntryAdded event) {
+        refresh();
     }
 }
