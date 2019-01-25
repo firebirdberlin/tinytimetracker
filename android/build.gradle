@@ -5,10 +5,11 @@ buildscript {
         maven {
             url "https://maven.google.com"
         }
+        google()
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.2.0-rc03'
     }
 }
 
@@ -37,7 +38,7 @@ dependencies {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '28.0.2'
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -67,5 +68,8 @@ android {
             shrinkResources true
             proguardFile '/home/stefan/android/projects/tinytimetracker/android/proguard-project.txt'
         }
+    }
+    defaultConfig {
+        minSdkVersion = 14
     }
 }

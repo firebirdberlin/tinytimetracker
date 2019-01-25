@@ -1,14 +1,19 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/action_edit"
           android:title="@string/action_edit_log_entry"
           android:icon="@drawable/ic_edit"
-          android:showAsAction="ifRoom|collapseActionView" />
+          app:showAsAction="ifRoom|collapseActionView" />
+    <item android:id="@+id/action_add"
+          android:title="@string/action_add_log_entry"
+          android:icon="@drawable/ic_add"
+          app:showAsAction="ifRoom|collapseActionView" />
     <item android:id="@+id/action_delete"
           android:title="@string/action_delete_log_entry"
           android:icon="@drawable/ic_delete"
-          android:showAsAction="ifRoom|collapseActionView" />
+          app:showAsAction="ifRoom|collapseActionView" />
     <item android:id="@+id/action_join"
           android:title="@string/action_join_log_entry"
           android:icon="@drawable/ic_edit"
-          android:showAsAction="ifRoom|collapseActionView" />
+          app:showAsAction="ifRoom|collapseActionView" />
 </menu>

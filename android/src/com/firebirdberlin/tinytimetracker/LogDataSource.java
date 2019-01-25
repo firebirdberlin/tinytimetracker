@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.util.Pair;
 
+import com.firebirdberlin.tinytimetracker.events.OnLogEntryAdded;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
@@ -106,7 +107,6 @@ public class LogDataSource {
     public LogEntry save(LogEntry log_entry) {
         init();
         ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_ID, log_entry.getID());
         values.put(SQLiteHandler.COLUMN_TRACKER_ID, log_entry.getTrackerID());
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_START, log_entry.getTimestampStart());
         values.put(SQLiteHandler.COLUMN_TIMESTAMP_END, log_entry.getTimestampEnd());
@@ -114,6 +114,7 @@ public class LogDataSource {
         if (log_entry.id == LogEntry.NOT_SAVED) {
             long id = database.insert(SQLiteHandler.TABLE_LOGS, null, values);
             log_entry.id = id;
+            bus.post(new OnLogEntryAdded(log_entry));
         }
         else {
             values.put(SQLiteHandler.COLUMN_ID, log_entry.id);

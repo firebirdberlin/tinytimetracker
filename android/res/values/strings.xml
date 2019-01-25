@@ -5,6 +5,7 @@
     <string name="abbreviation_minute">min</string>
     <string name="action_add_access_point">add Access Point</string>
     <string name="action_add">AddTracker</string>
+    <string name="action_add_log_entry">add</string>
     <string name="action_add_time_balancing_entry">Time balancing</string>
     <string name="action_delete_access_point">delete Access Point</string>
     <string name="action_delete">Delete Tracker</string>
