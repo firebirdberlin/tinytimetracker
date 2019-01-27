@@ -83,4 +83,5 @@
     <item>Zeitausgleich</item>
     <item>Überstunden</item>
 </string-array>
+    <string name="action_add_log_entry">Eintrag hinzufügen</string>
 </resources>
