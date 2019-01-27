@@ -9,7 +9,7 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.0-rc03'
+        classpath 'com.android.tools.build:gradle:3.3.0'
     }
 }
 
@@ -38,7 +38,6 @@ dependencies {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '28.0.2'
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -51,7 +50,7 @@ android {
         }
 
         // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
 
         // Move the build types to build-types/<type>
         // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
@@ -70,6 +69,7 @@ android {
         }
     }
     defaultConfig {
-        minSdkVersion = 14
+        minSdkVersion 14
+        targetSdkVersion 28
     }
 }
