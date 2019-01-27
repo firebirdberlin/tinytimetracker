@@ -59,7 +59,7 @@
             android:key="version"
             android:icon="@drawable/ic_hourglass"
             android:title="TinyTimeTracker"
-            android:summary="2017 - Stefan Fruhner (stefan.fruhner@gmail.com)">
+            android:summary="2019 - Stefan Fruhner (stefan.fruhner@gmail.com)">
 
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
@@ -70,7 +70,7 @@
             android:title="Translations wanted !"
             android:summary="Please add or update the translation for your language.">
             <intent android:action="android.intent.action.VIEW"
-                android:data="https://fhain.zzzz.io/apps/TinyTimeTracker/translation"/>
+                android:data="https://nightclock.duckdns.org/apps/TinyTimeTracker/translation"/>
         </Preference>
 
         <Preference
