@@ -45,6 +45,10 @@
 -keep class android.support.v7.** { *; }
 -keep interface android.support.v7.** { *; }
 
+-dontwarn androidx.**
+-keep class androidx.** { *; }
+-keep interface androidx.** { *; }
+
 # BadParcelableException
 -keep class * implements android.os.Parcelable {
    public static final android.os.Parcelable$Creator *;
