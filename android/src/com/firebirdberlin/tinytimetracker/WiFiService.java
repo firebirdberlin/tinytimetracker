@@ -75,6 +75,11 @@ public class WiFiService extends Service {
 
     @Override
     public void onCreate() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            Notification note = buildServiceNotification();
+            startForeground(NOTIFICATION_ID, note);
+        }
+
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     }
@@ -91,13 +96,7 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         useAutoDetection = Settings.useAutoDetection(mContext);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            Notification note = buildServiceNotification();
-            startForeground(NOTIFICATION_ID, note);
-        }
-
-
-        if (TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK) ) {
+        if (TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK)) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
             if (!wifiLock.isHeld()) {
@@ -108,8 +107,8 @@ public class WiFiService extends Service {
         // manually tracked accounts can be updated even if the device is complety in flight mode
         updateTrackersInManualMode();
 
-        if ( TinyTimeTracker.isAirplaneModeOn(mContext) ||
-                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) ) {
+        if (TinyTimeTracker.isAirplaneModeOn(mContext) ||
+                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             Log.i(TAG, "Airplane mode enabled or permission not granted.");
 
             long now = System.currentTimeMillis();
@@ -120,7 +119,7 @@ public class WiFiService extends Service {
         }
 
         Log.i(TAG, "WIFI SERVICE starts ...");
-        if ( ! wifiManager.isWifiEnabled() ) {
+        if (!wifiManager.isWifiEnabled()) {
             Log.i(TAG, "WIFI is currently disabled");
             wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
@@ -130,8 +129,8 @@ public class WiFiService extends Service {
         Log.i(TAG, "Receiver registerd.");
 
         boolean success = wifiManager.startScan();
-        if (! success) {
-            if ( isPebbleConnected()) {
+        if (!success) {
+            if (isPebbleConnected()) {
                 sendDataToPebble("");
             }
 
@@ -147,11 +146,11 @@ public class WiFiService extends Service {
         LogDataSource datasource = new LogDataSource(this);
         datasource.open();
         Set<TrackerEntry> trackersToUpdate = datasource.getTrackersInManualMode();
-        for (TrackerEntry tracker : trackersToUpdate ) {
+        for (TrackerEntry tracker : trackersToUpdate) {
             Log.i(TAG, "Updating tracker in manual mode: " + tracker.verbose_name);
             datasource.updateTrackerInManualMode(tracker);
         }
-        if (trackersToUpdate.size() > 0 ) {
+        if (trackersToUpdate.size() > 0) {
             active_tracker = trackersToUpdate.iterator().next();
         }
         datasource.close();
@@ -173,7 +172,7 @@ public class WiFiService extends Service {
         handler.removeCallbacks(stopOnTimeout);
         unregister(wifiReceiver);
 
-        if ( shallDisableWifi() ) {
+        if (shallDisableWifi()) {
             wifiManager.setWifiEnabled(false);
         }
 
@@ -190,10 +189,9 @@ public class WiFiService extends Service {
     private boolean shallDisableWifi() {
         boolean autoDisableWifi = Settings.autoDisableWifi(mContext);
 
-        if ( autoDisableWifi && !tracked_wifi_network_found ) {
+        if (autoDisableWifi && !tracked_wifi_network_found) {
             return true;
-        } else
-        if ( !autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled() ) {
+        } else if (!autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled()) {
             return true;
         }
         return false;
@@ -203,8 +201,7 @@ public class WiFiService extends Service {
         try {
             unregisterReceiver(receiver);
             Log.i(TAG, "Receiver unregistered.");
-        }
-        catch( IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // receiver was not registered
         }
     }
@@ -231,14 +228,14 @@ public class WiFiService extends Service {
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
         return new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_TRACKER_STATUS)
-                                     .setContentTitle(title)
-                                     .setContentText(text)
-                                     .setColor(highlightColor)
-                                     .setSmallIcon(R.drawable.ic_hourglass)
-                                     .setOngoing(true)
-                                     .setContentIntent(pIntent)
-                                     .setPriority(Notification.PRIORITY_MAX)
-                                     .build();
+                .setContentTitle(title)
+                .setContentText(text)
+                .setColor(highlightColor)
+                .setSmallIcon(R.drawable.ic_hourglass)
+                .setOngoing(true)
+                .setContentIntent(pIntent)
+                .setPriority(Notification.PRIORITY_MAX)
+                .build();
     }
 
     private Notification buildNotificationNewAccessPoint(TrackerEntry tracker, String ssid, String bssid) {
@@ -255,30 +252,30 @@ public class WiFiService extends Service {
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
         NotificationCompat.Builder note = new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_NEW_ACCESS_POINT)
-                                                          .setContentTitle(title)
-                                                          .setContentText(text)
-                                                          .setSmallIcon(R.drawable.ic_wifi_add)
-                                                          .setColor(highlightColor)
-                                                          .setContentIntent(pIntent);
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_wifi_add)
+                .setColor(highlightColor)
+                .setContentIntent(pIntent);
 
         Intent addIntent = AddAccessPointService.addIntent(this, tracker.id, ssid, bssid);
         PendingIntent pAddIntent = PendingIntent.getService(this, 2, addIntent,
-                                                            PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.WearableExtender wearableExtender =
-            new NotificationCompat.WearableExtender().setHintHideIcon(true);
+                new NotificationCompat.WearableExtender().setHintHideIcon(true);
 
         NotificationCompat.Action addAction =
-            new NotificationCompat.Action.Builder(R.drawable.ic_add, string_action_add, pAddIntent).build();
+                new NotificationCompat.Action.Builder(R.drawable.ic_add, string_action_add, pAddIntent).build();
         note.addAction(addAction);
         wearableExtender.addAction(addAction);
 
         Intent ignoreIntent = AddAccessPointService.ignoreIntent(this, tracker.id, ssid, bssid);
         PendingIntent pIgnoreIntent = PendingIntent.getService(this, 3, ignoreIntent,
-                                                               PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Action ignoreAction =
-            new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, string_action_ignore, pIgnoreIntent)
-                                         .build();
+                new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, string_action_ignore, pIgnoreIntent)
+                        .build();
         note.addAction(ignoreAction);
         wearableExtender.addAction(ignoreAction);
 
@@ -301,7 +298,7 @@ public class WiFiService extends Service {
 
         this.tracked_wifi_network_found = (trackersToUpdate.size() > 0);
 
-        if ( this.tracked_wifi_network_found && active_tracker == null) {
+        if (this.tracked_wifi_network_found && active_tracker == null) {
             // use the first result for notifications
             active_tracker = trackersToUpdate.iterator().next();
         } else {
@@ -351,7 +348,7 @@ public class WiFiService extends Service {
     private void updateTrackers(LogDataSource datasource, Set<TrackerEntry> trackersToUpdate) {
         EventBus bus = EventBus.getDefault();
         long now = System.currentTimeMillis();
-        for (TrackerEntry tracker: trackersToUpdate) {
+        for (TrackerEntry tracker : trackersToUpdate) {
             LogEntry log_entry = null;
             switch (tracker.operation_state) {
 
@@ -376,9 +373,9 @@ public class WiFiService extends Service {
     }
 
     private void findNewAccessPointsBySSID(LogDataSource datasource) {
-        if ( !useAutoDetection) return;
+        if (!useAutoDetection) return;
         ArrayList<AccessPoint> accessPoints =
-            (ArrayList<AccessPoint>) datasource.getAllAccessPoints();
+                (ArrayList<AccessPoint>) datasource.getAllAccessPoints();
 
         List<ScanResult> networkList = wifiManager.getScanResults();
 
@@ -397,15 +394,15 @@ public class WiFiService extends Service {
 
             // remove tracker_ids if the BSSID already exists
             for (AccessPoint ap : accessPointsWithSSID) {
-                if (ap.bssid.equals(bssid) ) {
+                if (ap.bssid.equals(bssid)) {
                     tracker_ids.remove(ap.getTrackerID());
                 }
             }
             // tracker_ids now only contains items which do not track this BSSID
-            if (tracker_ids.size() > 0 ) {
+            if (tracker_ids.size() > 0) {
                 TrackerEntry tracker = datasource.getTracker(tracker_ids.iterator().next());
                 Log.i(TAG, String.format("New AP found %d %s %s", tracker.id, ssid, bssid));
-                if (! datasource.accessPointIsIgnored(tracker.id, ssid, bssid)) {
+                if (!datasource.accessPointIsIgnored(tracker.id, ssid, bssid)) {
                     Notification note = buildNotificationNewAccessPoint(tracker, ssid, bssid);
                     notificationManager.notify(NOTIFICATION_ID_AP, note);
                     break;
@@ -420,8 +417,8 @@ public class WiFiService extends Service {
         long lastRunTime = settings.getLong("last_wifi_detection_timestamp", -1L);
 
         LogEntry latestLogEntry = datasource.getLatestLogEntry(tracker.id);
-        if ( latestLogEntry != null ) {
-            if ( lastRunTime > 0L && latestLogEntry.getTimestampEnd() == lastRunTime ) {
+        if (latestLogEntry != null) {
+            if (lastRunTime > 0L && latestLogEntry.getTimestampEnd() == lastRunTime) {
                 return lastRunTime;
             } else {
                 return now - millisConnectionLost;
@@ -447,15 +444,15 @@ public class WiFiService extends Service {
             // user has left the office for less than 90 mins
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
             long last_tracker_id = settings.getLong("last_tracker_id", -1L);
-            if ( last_tracker_id != -1L ) {
+            if (last_tracker_id != -1L) {
                 TrackerEntry tracker = fetchTrackerByID(last_tracker_id);
-                if ( tracker != null ) {
+                if (tracker != null) {
                     long last_seen = settings.getLong("last_seen", 0L);
                     long delta = (now - last_seen) / 1000L;
                     long seconds_today = evaluateDurationToday(tracker).toSeconds();
                     long workingSeconds = (long) (3600 * tracker.working_hours);
 
-                    if ( seconds_today > 0 &&  delta < 90 * 60 && seconds_today < workingSeconds) {
+                    if (seconds_today > 0 && delta < 90 * 60 && seconds_today < workingSeconds) {
                         formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
                     }
                 }
@@ -464,7 +461,7 @@ public class WiFiService extends Service {
 
         updateNotification(formattedWorkTime, trackerVerboseName);
 
-        if ( isPebbleConnected() ) {
+        if (isPebbleConnected()) {
             sendDataToPebble(formattedWorkTime);
         }
     }
@@ -491,7 +488,7 @@ public class WiFiService extends Service {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong("last_seen", now);
-        if ( tracker != null ) {
+        if (tracker != null) {
             editor.putLong("last_tracker_id", tracker.id);
         }
         editor.apply();
@@ -505,7 +502,7 @@ public class WiFiService extends Service {
     }
 
     public void updateNotification(String title, String text) {
-        if ( !showNotifications || title.isEmpty() ) {
+        if (!showNotifications || title.isEmpty()) {
             notificationManager.cancel(NOTIFICATION_ID_WIFI);
             return;
         }
