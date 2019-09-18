@@ -145,12 +145,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     void setupWarnings() {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (!TinyTimeTracker.isLocationEnabled(getActivity())) {
-                cardviewLocationProviderOff.setVisibility(View.VISIBLE);
-            } else {
-                cardviewLocationProviderOff.setVisibility(View.GONE);
-            }
-
             boolean shallShowWifiCard = false;
             for (TrackerEntry tracker : trackers) {
                 if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC
@@ -159,6 +153,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     break;
                 }
             }
+
+            if (shallShowWifiCard && !TinyTimeTracker.isLocationEnabled(getActivity())) {
+                cardviewLocationProviderOff.setVisibility(View.VISIBLE);
+            } else {
+                cardviewLocationProviderOff.setVisibility(View.GONE);
+            }
+
 
             if (shallShowWifiCard
                     && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
@@ -307,12 +308,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 visible = false;
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
+                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi_blue_24dp, 0, 0, 0);
                 button_toggle_wifi.setText(R.string.label_auto_detection_off);
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC:
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi, 0, 0, 0);
+                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi_blue_24dp, 0, 0, 0);
                 button_toggle_wifi.setText(R.string.label_auto_detection_on);
             default:
                 break;
@@ -354,13 +355,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 View parent = (View) button_toggle_clockin_state.getParent();
                 int parent_width = parent.getWidth();
                 int new_x = (parent_width - button_toggle_clockin_state.getWidth()) / 2;
-                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
+                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop_blue_24dp, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
                 button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
                 timeView.setActivated();
                 break;
             default:
-                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
+                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_blue_24dp, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
                 button_toggle_clockin_state.animate().setStartDelay(0).setDuration(300).x(0);
                 timeView.setDeactivated();

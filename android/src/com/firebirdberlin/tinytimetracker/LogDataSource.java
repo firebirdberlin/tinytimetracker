@@ -364,6 +364,7 @@ public class LogDataSource {
             List<TrackerEntry> trackers = getTrackers();
             if (trackers.size() == 0) {
                 TrackerEntry newTracker = new TrackerEntry("Account 1", "WLAN");
+                newTracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
                 newTracker = save(newTracker, false);
                 TinyTimeTracker.currentTracker = newTracker;
                 bus.post(new OnTrackerAdded(newTracker));

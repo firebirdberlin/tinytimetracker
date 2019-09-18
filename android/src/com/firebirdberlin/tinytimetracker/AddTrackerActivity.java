@@ -306,7 +306,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         }
         new AlertDialog.Builder(this)
         .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
-        .setIcon(R.drawable.ic_wifi)
+        .setIcon(R.drawable.ic_wifi_blue_24dp)
         .setSingleChoiceItems(adapter, 1,
         new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
@@ -351,7 +351,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
             .setMessage(R.string.warning_location_services_off)
             .setTitle(getResources().getString(R.string.title_warning_location_services_off))
-            .setIcon(R.drawable.ic_wifi)
+            .setIcon(R.drawable.ic_wifi_blue_24dp)
             .setPositiveButton(android.R.string.ok, null)
             .show();
     }

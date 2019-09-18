@@ -53,7 +53,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
                     + COLUMN_WORKING_HOURS + ", "
                     + COLUMN_VERBOSE + ", "
                     + COLUMN_OPERATION_STATE + ") "
-                    + "VALUES ('WLAN', 'Account 1', 8, 'Account 1', 0);";
+                    + "VALUES ('WLAN', 'Account 1', 8, 'Account 1', 1);";
 
     private static final String DATABASE_CREATE_LOGS =
         "CREATE TABLE " + TABLE_LOGS + "("
