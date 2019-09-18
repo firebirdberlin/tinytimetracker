@@ -139,23 +139,35 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         bus.register(this);
 
-        if (Build.VERSION.SDK_INT >= 23){
-            if ( ! TinyTimeTracker.isLocationEnabled(getActivity()) ) {
+        setupWarnings();
+        updateStatisticalValues(TinyTimeTracker.currentTracker);
+    }
+
+    void setupWarnings() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!TinyTimeTracker.isLocationEnabled(getActivity())) {
                 cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationProviderOff.setVisibility(View.GONE);
             }
 
-            if (!TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            boolean shallShowWifiCard = false;
+            for (TrackerEntry tracker : trackers) {
+                if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC
+                        || tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED) {
+                    shallShowWifiCard = true;
+                    break;
+                }
+            }
+
+            if (shallShowWifiCard
+                    && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 cardviewLocationPermission.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationPermission.setVisibility(View.GONE);
             }
         }
-
-        updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
-
 
     @Override
     public void onPause() {
@@ -185,9 +197,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         trackers.addAll(trackers_loaded);
         sortTrackers();
 
-
         datasource.close();
-
     }
 
     private void sortTrackers() {
@@ -238,6 +248,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                         1
                 );
             }
+            setupWarnings();
             Log.i(TAG, "button_toggle_wifi click done ...");
         } else
         if ( v.equals(button_toggle_clockin_state) ) {
