@@ -123,8 +123,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         final Button buttonLocationPermission = v.findViewById(R.id.button_grant_location_permission);
         buttonLocationPermission.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                TinyTimeTracker.checkAndRequestPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION,
-                        1);
+                TinyTimeTracker.checkAndRequestPermission(
+                        getActivity(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        1
+                );
             }
         });
         return v;
@@ -209,6 +212,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         if ( v.equals(button_toggle_wifi) ) {
             Log.i(TAG, "button_toggle_wifi clicked");
+            boolean shallCheckPerms =
+                    (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED);
+
             switch (tracker.operation_state) {
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED;
@@ -219,10 +225,19 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 default:
                     break;
             }
+
             LogDataSource datasource = new LogDataSource(getActivity());
             datasource.save(tracker);
             datasource.close();
             setWifiIndicator(tracker);
+
+            if (shallCheckPerms) {
+                TinyTimeTracker.checkAndRequestPermission(
+                        getActivity(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        1
+                );
+            }
             Log.i(TAG, "button_toggle_wifi click done ...");
         } else
         if ( v.equals(button_toggle_clockin_state) ) {
