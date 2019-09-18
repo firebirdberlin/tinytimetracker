@@ -1,3 +1,4 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <cache-path path="/" name="allfiles" />
+    <external-path path="TinyTimeTracker/" name="databases"/>
 </paths>

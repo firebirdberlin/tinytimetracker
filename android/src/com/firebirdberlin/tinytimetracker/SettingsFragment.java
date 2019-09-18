@@ -35,7 +35,7 @@ public class SettingsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
         toggleEnabledState();
-        Preference pref_data_export = (Preference) findPreference("pref_key_data_export");
+        Preference pref_data_export = findPreference("pref_key_data_export");
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @SuppressLint("NewApi")
             public boolean onPreferenceClick(Preference preference) {
@@ -51,7 +51,7 @@ public class SettingsFragment extends PreferenceFragment {
                 return true;
             }
         });
-        Preference pref_data_import = (Preference) findPreference("pref_key_data_import");
+        Preference pref_data_import = findPreference("pref_key_data_import");
         pref_data_import.setSummary(DbImportExport.DATABASE_DIRECTORY.getAbsolutePath());
         pref_data_import.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
@@ -66,7 +66,7 @@ public class SettingsFragment extends PreferenceFragment {
             }
         });
 
-        Preference pref_data_share = (Preference) findPreference("pref_key_data_share");
+        Preference pref_data_share = findPreference("pref_key_data_share");
         pref_data_share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 chooseFile( new FileChooserListener() {

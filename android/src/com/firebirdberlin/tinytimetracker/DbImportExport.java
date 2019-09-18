@@ -8,10 +8,14 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.v4.app.ShareCompat;
+import android.support.v4.content.FileProvider;
 import android.text.format.DateFormat;
 import android.util.Log;
 import java.util.Arrays;
@@ -36,7 +40,8 @@ public class DbImportExport {
 
 
     /** Contains: /data/data/com.example.app/databases/example.db **/
-    private static final File DATA_DIRECTORY_DATABASE = new File(Environment.getDataDirectory() +
+    private static final File DATA_DIRECTORY_DATABASE =
+            new File(Environment.getDataDirectory() +
             "/data/" + PACKAGE_NAME +
             "/databases/" + DATABASE_NAME +
             DATABASE_NAME_EXT );
@@ -79,13 +84,20 @@ public class DbImportExport {
     }
 
     protected static void shareFile(Context context, String filename) {
-        Uri uri = Uri.parse(filename);
-        Intent email = new Intent(android.content.Intent.ACTION_SEND);
-        email.setType("application/octet-stream");
-        email.putExtra(Intent.EXTRA_STREAM, uri);
-        email.putExtra(android.content.Intent.EXTRA_STREAM, Uri.parse("file:" + filename));
-        context.startActivity(Intent.createChooser(email,
-                              context.getResources().getString(R.string.dialog_title_share_database)));
+        File file = new File(filename);
+        String chooserTitle = context.getResources().getString(R.string.dialog_title_share_database);
+        final Uri uri = FileProvider.getUriForFile(
+                context, "com.firebirdberlin.tinytimetracker.fileprovider", file
+        );
+        final Intent intent = ShareCompat.IntentBuilder.from((Activity) context)
+            .setType("text/csv")
+            .setSubject(file.getName())
+            .setStream(uri)
+            .setChooserTitle(chooserTitle)
+            .createChooserIntent()
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        context.startActivity(intent);
     }
 
     /** Replaces current database with the IMPORT_FILE if

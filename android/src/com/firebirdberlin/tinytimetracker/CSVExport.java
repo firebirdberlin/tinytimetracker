@@ -39,7 +39,9 @@ public class CSVExport {
             return;
         }
         String chooserTitle = context.getResources().getString(R.string.dialog_title_share_database);
-        final Uri uri = FileProvider.getUriForFile(context, "com.firebirdberlin.tinytimetracker.fileprovider", file);
+        final Uri uri = FileProvider.getUriForFile(
+                context, "com.firebirdberlin.tinytimetracker.fileprovider", file
+        );
         final Intent intent = ShareCompat.IntentBuilder.from((Activity) context)
             .setType("text/csv")
             .setSubject(subject)
