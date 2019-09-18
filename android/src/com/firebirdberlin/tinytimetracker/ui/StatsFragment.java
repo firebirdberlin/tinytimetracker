@@ -195,7 +195,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener 
     public void onClick(View v) {
         if ( v.equals(btnCSVExport) ) {
             TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
-            if ( mainActivity.purchased_csv_data_export ) {
+            if ( mainActivity.purchased_pro) {
                 exportCSV();
             } else {
                 mainActivity.purchaseIntent(TinyTimeTracker.ITEM_CSV_DATA_EXPORT,

@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
@@ -30,7 +29,6 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -61,7 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
 import org.greenrobot.eventbus.EventBus;
@@ -78,7 +75,7 @@ public class TinyTimeTracker extends AppCompatActivity
     public static final String NOTIFICATIONCHANNEL_NEW_ACCESS_POINT = "NotificationChannel_new_access_point";
     public static TrackerEntry currentTracker = null;
     public boolean purchased_donation = false;
-    public boolean purchased_csv_data_export = false;
+    public boolean purchased_pro = false;
     EventBus bus = EventBus.getDefault();
     IInAppBillingService mService;
     ServiceConnection mServiceConn = new ServiceConnection() {
@@ -195,11 +192,11 @@ public class TinyTimeTracker extends AppCompatActivity
 
                 if (sku.equals(ITEM_DONATION)) {
                     purchased_donation = true;
-                    purchased_csv_data_export = true;
+                    purchased_pro = true;
                     invalidateOptionsMenu();
                 }
                 if (sku.equals(ITEM_CSV_DATA_EXPORT)) {
-                    purchased_csv_data_export = true;
+                    purchased_pro = true;
                 }
 
                 // do something with this purchase information
@@ -216,16 +213,17 @@ public class TinyTimeTracker extends AppCompatActivity
         if (mService == null) return;
         try {
             String developerPayload = "abcdefghijklmnopqrstuvwxyz";
-            Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
-                    sku, "inapp",developerPayload);
+            Bundle buyIntentBundle =
+                    mService.getBuyIntent(
+                            3, getPackageName(),
+                            sku, "inapp", developerPayload
+                    );
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-            startIntentSenderForResult(pendingIntent.getIntentSender(),
-                    REQUEST_CODE, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
-                    Integer.valueOf(0));
-        } catch (RemoteException e1) {
-            return;
-        } catch (SendIntentException e2) {
-            return;
+            startIntentSenderForResult(
+                    pendingIntent.getIntentSender(),
+                    REQUEST_CODE, new Intent(), 0, 0,
+                    0);
+        } catch (RemoteException | SendIntentException ignored) {
         }
     }
 
@@ -243,12 +241,12 @@ public class TinyTimeTracker extends AppCompatActivity
                     String sku = jo.getString("productId");
                     if (sku.equals(ITEM_DONATION) ) {
                         purchased_donation = true;
-                        purchased_csv_data_export = true;
+                        purchased_pro = true;
                         invalidateOptionsMenu();
                         showThankYouDialog();
                     } else
                     if (sku.equals(ITEM_CSV_DATA_EXPORT) ) {
-                        purchased_csv_data_export = true;
+                        purchased_pro = true;
                     }
                 }
                 catch (JSONException e) {
@@ -374,7 +372,7 @@ public class TinyTimeTracker extends AppCompatActivity
 
             return true;
         case R.id.action_add:
-            AddTrackerActivity.open(this);
+            onClickAddTracker();
             return true;
         case R.id.action_delete:
             confirmDeletion();
@@ -399,8 +397,12 @@ public class TinyTimeTracker extends AppCompatActivity
         }
     }
 
-    public void onAddTracker(View v) {
-        AddTrackerActivity.open(this);
+    public void onClickAddTracker() {
+        if (purchased_pro) {
+            AddTrackerActivity.open(this);
+        } else {
+            purchaseIntent(ITEM_CSV_DATA_EXPORT, REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT);
+        }
     }
 
     private void confirmDeletion() {
