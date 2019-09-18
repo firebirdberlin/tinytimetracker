@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
@@ -30,7 +29,6 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -61,8 +59,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
 import org.greenrobot.eventbus.EventBus;
@@ -79,7 +75,7 @@ public class TinyTimeTracker extends AppCompatActivity
     public static final String NOTIFICATIONCHANNEL_NEW_ACCESS_POINT = "NotificationChannel_new_access_point";
     public static TrackerEntry currentTracker = null;
     public boolean purchased_donation = false;
-    public boolean purchased_csv_data_export = false;
+    public boolean purchased_pro = false;
     EventBus bus = EventBus.getDefault();
     IInAppBillingService mService;
     ServiceConnection mServiceConn = new ServiceConnection() {
@@ -97,7 +93,6 @@ public class TinyTimeTracker extends AppCompatActivity
             getPurchases();
         }
     };
-    private FloatingActionButton action_button_add = null;
     private LinearLayout pagerLayout = null;
     private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
@@ -197,11 +192,11 @@ public class TinyTimeTracker extends AppCompatActivity
 
                 if (sku.equals(ITEM_DONATION)) {
                     purchased_donation = true;
-                    purchased_csv_data_export = true;
+                    purchased_pro = true;
                     invalidateOptionsMenu();
                 }
                 if (sku.equals(ITEM_CSV_DATA_EXPORT)) {
-                    purchased_csv_data_export = true;
+                    purchased_pro = true;
                 }
 
                 // do something with this purchase information
@@ -218,16 +213,17 @@ public class TinyTimeTracker extends AppCompatActivity
         if (mService == null) return;
         try {
             String developerPayload = "abcdefghijklmnopqrstuvwxyz";
-            Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
-                    sku, "inapp",developerPayload);
+            Bundle buyIntentBundle =
+                    mService.getBuyIntent(
+                            3, getPackageName(),
+                            sku, "inapp", developerPayload
+                    );
             PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-            startIntentSenderForResult(pendingIntent.getIntentSender(),
-                    REQUEST_CODE, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
-                    Integer.valueOf(0));
-        } catch (RemoteException e1) {
-            return;
-        } catch (SendIntentException e2) {
-            return;
+            startIntentSenderForResult(
+                    pendingIntent.getIntentSender(),
+                    REQUEST_CODE, new Intent(), 0, 0,
+                    0);
+        } catch (RemoteException | SendIntentException ignored) {
         }
     }
 
@@ -245,12 +241,12 @@ public class TinyTimeTracker extends AppCompatActivity
                     String sku = jo.getString("productId");
                     if (sku.equals(ITEM_DONATION) ) {
                         purchased_donation = true;
-                        purchased_csv_data_export = true;
+                        purchased_pro = true;
                         invalidateOptionsMenu();
                         showThankYouDialog();
                     } else
                     if (sku.equals(ITEM_CSV_DATA_EXPORT) ) {
-                        purchased_csv_data_export = true;
+                        purchased_pro = true;
                     }
                 }
                 catch (JSONException e) {
@@ -287,7 +283,6 @@ public class TinyTimeTracker extends AppCompatActivity
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-        action_button_add = findViewById(R.id.action_button_add);
         pagerLayout = findViewById(R.id.pager_layout);
         pager = findViewById(R.id.pager);
         pageIndicator = findViewById(R.id.page_indicator);
@@ -325,10 +320,6 @@ public class TinyTimeTracker extends AppCompatActivity
         if(event != null) {
             pager.setCurrentItem(0);
         }
-
-        LogDataSource datasource = new LogDataSource(this);
-        List<TrackerEntry> trackers = datasource.getTrackers();
-        datasource.close();
     }
 
     @Override
@@ -365,15 +356,8 @@ public class TinyTimeTracker extends AppCompatActivity
             Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
 
-        if (currentTracker == null) {
-            action_button_add.show();
-            pagerLayout.setVisibility(View.GONE);
-            pager.setPagingEnabled(false);
-        } else {
-            action_button_add.hide();
-            pagerLayout.setVisibility(View.VISIBLE);
-            pager.setPagingEnabled(true);
-        }
+        pagerLayout.setVisibility(View.VISIBLE);
+        pager.setPagingEnabled(true);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -388,7 +372,7 @@ public class TinyTimeTracker extends AppCompatActivity
 
             return true;
         case R.id.action_add:
-            AddTrackerActivity.open(this);
+            onClickAddTracker();
             return true;
         case R.id.action_delete:
             confirmDeletion();
@@ -413,8 +397,12 @@ public class TinyTimeTracker extends AppCompatActivity
         }
     }
 
-    public void onAddTracker(View v) {
-        AddTrackerActivity.open(this);
+    public void onClickAddTracker() {
+        if (purchased_pro) {
+            AddTrackerActivity.open(this);
+        } else {
+            purchaseIntent(ITEM_CSV_DATA_EXPORT, REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT);
+        }
     }
 
     private void confirmDeletion() {
@@ -424,18 +412,21 @@ public class TinyTimeTracker extends AppCompatActivity
 
         final Context mContext = this;
         new AlertDialog.Builder(this)
-        .setTitle(this.getResources().getString(R.string.confirm_delete)
-                  + " '" + currentTracker.verbose_name + "'")
-        .setMessage(this.getResources().getString(R.string.confirm_delete_question))
-        .setIcon(R.drawable.ic_delete)
-        .setNegativeButton(android.R.string.no, null)
-        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                LogDataSource datasource = new LogDataSource(mContext);
-                datasource.delete(currentTracker);
-                datasource.close();
-            }
-        }).show();
+                .setTitle(
+                        this.getResources().getString(R.string.confirm_delete)
+                        + " '" + currentTracker.verbose_name + "'"
+                )
+                .setMessage(this.getResources().getString(R.string.confirm_delete_question))
+                .setIcon(R.drawable.ic_delete)
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        LogDataSource datasource = new LogDataSource(mContext);
+                        datasource.delete(currentTracker);
+
+                        datasource.close();
+                    }
+                }).show();
     }
 
     private void addTimeBalance() {
@@ -478,23 +469,6 @@ public class TinyTimeTracker extends AppCompatActivity
     private void requestServicePermissions() {
         checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
         checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
-
-        try {
-            long installed = getPackageManager().getPackageInfo(getPackageName(), 0).firstInstallTime;
-            if (installed < getDateAsLong(2016, 6, 1)) {
-                checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 1);
-            }
-        }
-        catch (NameNotFoundException e ) {
-        }
-    }
-
-    public long getDateAsLong(int year, int month, int day) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_MONTH, day);
-            calendar.set(Calendar.MONTH, month - 1);
-            calendar.set(Calendar.YEAR, year);
-            return calendar.getTimeInMillis();
     }
 
     public void enableBootReceiver(Context context) {
@@ -523,7 +497,7 @@ public class TinyTimeTracker extends AppCompatActivity
     public void onEvent(OnTrackerDeleted event) {
         invalidateOptionsMenu();
         pager.setCurrentItem(0);
-        Log.d(TAG, "currentTracker: null");
+        Log.d(TAG, "OnTrackerDeleted: currentTracker: null");
     }
 
     private void createNotificationChannels() {

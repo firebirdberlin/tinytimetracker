@@ -1,6 +1,7 @@
 package com.firebirdberlin.tinytimetracker;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -33,5 +34,25 @@ public class Utility {
     public static int getColor(Context context, int resid) {
         return ResourcesCompat.getColor(context.getResources(), resid, null);
     }
+
+    public static long getFirstInstallTime(Context context) {
+        try {
+            return context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0)
+                    .firstInstallTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return -1L;
+        }
+    }
+
+    public static long getDateAsLong(int year, int month, int day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.MONTH, month - 1);
+        calendar.set(Calendar.YEAR, year);
+        return calendar.getTimeInMillis();
+    }
+
 }
 

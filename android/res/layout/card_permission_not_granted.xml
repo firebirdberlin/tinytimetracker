@@ -17,7 +17,6 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textview_warn_location_permission_not_granted"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"

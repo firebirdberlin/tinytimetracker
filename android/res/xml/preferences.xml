@@ -65,6 +65,12 @@
                 android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
         </de.firebirdberlin.preference.VersionPreference>
 
+        <de.firebirdberlin.preference.AppDetailsPreference
+            android:key="appDetails"
+            android:icon="@drawable/ic_info_outline_blue_24dp"
+            android:title="@string/manage_permissions"
+            />
+
         <Preference
             android:icon="@drawable/ic_globe"
             android:title="Translations wanted !"
@@ -86,23 +92,23 @@
             android:icon="@drawable/ic_share"
             android:title="@string/action_recommend"/>
 
-        <PreferenceScreen
-            android:title="@string/pref_credits"
-            android:key="pref_key_credits_detail">
-            <Preference
-                android:key="pref_static_icon_1"
-                android:title="Icon: hourglass"
-                android:summary="RRZEicons">
-                <intent android:action="android.intent.action.VIEW"
-                    android:data="https://commons.wikimedia.org/wiki/File:Hourglass_2.svg" />
-            </Preference>
-            <Preference
-                android:key="pref_static_icon_2"
-                android:title="Icons"
-                android:summary="icons8">
-                <intent android:action="android.intent.action.VIEW"
-                    android:data="https://icons8.com/" />
-            </Preference>
-        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_credits"
+        android:key="pref_key_credits_detail">
+        <Preference
+            android:key="pref_static_icon_1"
+            android:title="Icon: hourglass"
+            android:summary="RRZEicons">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://commons.wikimedia.org/wiki/File:Hourglass_2.svg" />
+        </Preference>
+        <Preference
+            android:key="pref_static_icon_2"
+            android:title="Icons"
+            android:summary="icons8">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://icons8.com/" />
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
+
 public class SQLiteHandler extends SQLiteOpenHelper {
 
     public static final String TABLE_TRACKERS = "trackers";
@@ -32,6 +34,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "trackers.db";
     private static final int DATABASE_VERSION = 7;
+    private Context context;
 
     // Database creation sql statement
     private static final String DATABASE_CREATE_TRACKERS =
@@ -42,6 +45,15 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         + COLUMN_WORKING_HOURS + " REAL not null, "
         + COLUMN_VERBOSE + " TEXT not null, "
         + COLUMN_OPERATION_STATE + " INTEGER not null);";
+
+    private static final String DATABASE_INSERT_DEFAULT_TRACKER =
+            "INSERT INTO " + TABLE_TRACKERS + " ("
+                    + COLUMN_METHOD + ", "
+                    + COLUMN_NAME + ", "
+                    + COLUMN_WORKING_HOURS + ", "
+                    + COLUMN_VERBOSE + ", "
+                    + COLUMN_OPERATION_STATE + ") "
+                    + "VALUES ('WLAN', 'Account 1', 8, 'Account 1', 1);";
 
     private static final String DATABASE_CREATE_LOGS =
         "CREATE TABLE " + TABLE_LOGS + "("
@@ -75,6 +87,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
 
     public SQLiteHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
     }
 
     @Override
@@ -84,6 +97,8 @@ public class SQLiteHandler extends SQLiteOpenHelper {
         database.execSQL(DATABASE_CREATE_ACCESS_POINTS);
         database.execSQL(DATABASE_CREATE_IGNORED_ACCESS_POINTS);
         database.execSQL(DATABASE_CREATE_TIME_BALANCE);
+
+        database.execSQL(DATABASE_INSERT_DEFAULT_TRACKER);
     }
 
     @Override

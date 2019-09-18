@@ -42,6 +42,7 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,8 +123,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         final Button buttonLocationPermission = v.findViewById(R.id.button_grant_location_permission);
         buttonLocationPermission.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                TinyTimeTracker.checkAndRequestPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION,
-                        1);
+                TinyTimeTracker.checkAndRequestPermission(
+                        getActivity(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        1
+                );
             }
         });
         return v;
@@ -135,28 +139,36 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         bus.register(this);
 
-        if (Build.VERSION.SDK_INT >= 23){
-            if ( ! TinyTimeTracker.isLocationEnabled(getActivity()) ) {
+        setupWarnings();
+        updateStatisticalValues(TinyTimeTracker.currentTracker);
+    }
+
+    void setupWarnings() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            boolean shallShowWifiCard = false;
+            for (TrackerEntry tracker : trackers) {
+                if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC
+                        || tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED) {
+                    shallShowWifiCard = true;
+                    break;
+                }
+            }
+
+            if (shallShowWifiCard && !TinyTimeTracker.isLocationEnabled(getActivity())) {
                 cardviewLocationProviderOff.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationProviderOff.setVisibility(View.GONE);
             }
 
-            if (!TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+            if (shallShowWifiCard
+                    && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 cardviewLocationPermission.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationPermission.setVisibility(View.GONE);
             }
         }
-
-        OnTrackerAdded event = bus.removeStickyEvent(OnTrackerAdded.class);
-        if(event != null) {
-            handleOnTrackerAdded(event);
-        }
-
-        updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
-
 
     @Override
     public void onPause() {
@@ -186,9 +198,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         trackers.addAll(trackers_loaded);
         sortTrackers();
 
-
         datasource.close();
-
     }
 
     private void sortTrackers() {
@@ -213,6 +223,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         if ( v.equals(button_toggle_wifi) ) {
             Log.i(TAG, "button_toggle_wifi clicked");
+            boolean shallCheckPerms =
+                    (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED);
+
             switch (tracker.operation_state) {
                 case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                     tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED;
@@ -223,10 +236,20 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 default:
                     break;
             }
+
             LogDataSource datasource = new LogDataSource(getActivity());
             datasource.save(tracker);
             datasource.close();
             setWifiIndicator(tracker);
+
+            if (shallCheckPerms) {
+                TinyTimeTracker.checkAndRequestPermission(
+                        getActivity(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        1
+                );
+            }
+            setupWarnings();
             Log.i(TAG, "button_toggle_wifi click done ...");
         } else
         if ( v.equals(button_toggle_clockin_state) ) {
@@ -285,12 +308,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 visible = false;
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi, 0, 0, 0);
+                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi_blue_24dp, 0, 0, 0);
                 button_toggle_wifi.setText(R.string.label_auto_detection_off);
                 break;
             case TrackerEntry.OPERATION_STATE_AUTOMATIC:
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi, 0, 0, 0);
+                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi_blue_24dp, 0, 0, 0);
                 button_toggle_wifi.setText(R.string.label_auto_detection_on);
             default:
                 break;
@@ -332,19 +355,29 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 View parent = (View) button_toggle_clockin_state.getParent();
                 int parent_width = parent.getWidth();
                 int new_x = (parent_width - button_toggle_clockin_state.getWidth()) / 2;
-                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop, 0, 0, 0);
+                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop_blue_24dp, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
                 button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
                 timeView.setActivated();
                 break;
             default:
-                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play, 0, 0, 0);
+                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_blue_24dp, 0, 0, 0);
                 button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
                 button_toggle_clockin_state.animate().setStartDelay(0).setDuration(300).x(0);
                 timeView.setDeactivated();
                 break;
         }
         button_toggle_clockin_state.invalidate();
+    }
+
+    // UI updates must run on MainThread
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onEvent(OnTrackerAdded event) {
+        Log.d(TAG, "OnTrackerAdded: a tracker was added: " + event.tracker.verbose_name);
+        if(event != null) {
+            handleOnTrackerAdded(event);
+        }
+        bus.removeStickyEvent(OnTrackerAdded.class);
     }
 
     public void handleOnTrackerAdded(OnTrackerAdded event) {
