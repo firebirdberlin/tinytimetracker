@@ -68,7 +68,7 @@
         <de.firebirdberlin.preference.AppDetailsPreference
             android:key="appDetails"
             android:icon="@drawable/ic_info_outline_blue_24dp"
-            android:title="Manage permissions"
+            android:title="@string/manage_permissions"
             />
 
         <Preference
