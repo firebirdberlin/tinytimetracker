@@ -62,7 +62,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
 import org.greenrobot.eventbus.EventBus;
@@ -97,7 +96,6 @@ public class TinyTimeTracker extends AppCompatActivity
             getPurchases();
         }
     };
-    private FloatingActionButton action_button_add = null;
     private LinearLayout pagerLayout = null;
     private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
@@ -287,7 +285,6 @@ public class TinyTimeTracker extends AppCompatActivity
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
-        action_button_add = findViewById(R.id.action_button_add);
         pagerLayout = findViewById(R.id.pager_layout);
         pager = findViewById(R.id.pager);
         pageIndicator = findViewById(R.id.page_indicator);
@@ -325,10 +322,6 @@ public class TinyTimeTracker extends AppCompatActivity
         if(event != null) {
             pager.setCurrentItem(0);
         }
-
-        LogDataSource datasource = new LogDataSource(this);
-        List<TrackerEntry> trackers = datasource.getTrackers();
-        datasource.close();
     }
 
     @Override
@@ -365,15 +358,8 @@ public class TinyTimeTracker extends AppCompatActivity
             Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
         item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
 
-        if (currentTracker == null) {
-            action_button_add.show();
-            pagerLayout.setVisibility(View.GONE);
-            pager.setPagingEnabled(false);
-        } else {
-            action_button_add.hide();
-            pagerLayout.setVisibility(View.VISIBLE);
-            pager.setPagingEnabled(true);
-        }
+        pagerLayout.setVisibility(View.VISIBLE);
+        pager.setPagingEnabled(true);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -424,18 +410,21 @@ public class TinyTimeTracker extends AppCompatActivity
 
         final Context mContext = this;
         new AlertDialog.Builder(this)
-        .setTitle(this.getResources().getString(R.string.confirm_delete)
-                  + " '" + currentTracker.verbose_name + "'")
-        .setMessage(this.getResources().getString(R.string.confirm_delete_question))
-        .setIcon(R.drawable.ic_delete)
-        .setNegativeButton(android.R.string.no, null)
-        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                LogDataSource datasource = new LogDataSource(mContext);
-                datasource.delete(currentTracker);
-                datasource.close();
-            }
-        }).show();
+                .setTitle(
+                        this.getResources().getString(R.string.confirm_delete)
+                        + " '" + currentTracker.verbose_name + "'"
+                )
+                .setMessage(this.getResources().getString(R.string.confirm_delete_question))
+                .setIcon(R.drawable.ic_delete)
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        LogDataSource datasource = new LogDataSource(mContext);
+                        datasource.delete(currentTracker);
+
+                        datasource.close();
+                    }
+                }).show();
     }
 
     private void addTimeBalance() {
@@ -523,7 +512,7 @@ public class TinyTimeTracker extends AppCompatActivity
     public void onEvent(OnTrackerDeleted event) {
         invalidateOptionsMenu();
         pager.setCurrentItem(0);
-        Log.d(TAG, "currentTracker: null");
+        Log.d(TAG, "OnTrackerDeleted: currentTracker: null");
     }
 
     private void createNotificationChannels() {

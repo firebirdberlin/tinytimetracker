@@ -58,6 +58,10 @@ public class LogDataSource {
     }
 
     public TrackerEntry save(TrackerEntry tracker) {
+        return save(tracker, true);
+    }
+
+    public TrackerEntry save(TrackerEntry tracker, boolean withEvent) {
         init();
         ContentValues values = new ContentValues();
         values.put(SQLiteHandler.COLUMN_NAME, tracker.ssid);
@@ -69,12 +73,16 @@ public class LogDataSource {
         if (tracker.id == TrackerEntry.NOT_SAVED) {
             long id = database.insert(SQLiteHandler.TABLE_TRACKERS, null, values);
             tracker.id = id;
-            bus.postSticky(new OnTrackerAdded(tracker));
+            if (withEvent) {
+                bus.postSticky(new OnTrackerAdded(tracker));
+            }
         }
         else {
             values.put(SQLiteHandler.COLUMN_ID, tracker.id);
             database.replace(SQLiteHandler.TABLE_TRACKERS, null, values);
-            bus.post(new OnTrackerChanged(tracker));
+            if (withEvent) {
+                bus.post(new OnTrackerChanged(tracker));
+            }
         }
 
         return tracker;
@@ -352,8 +360,16 @@ public class LogDataSource {
         boolean success = (rows_affected > 0);
 
         if (success) {
-            TinyTimeTracker.currentTracker = null;
-            bus.post(new OnTrackerDeleted(tracker));
+
+            List<TrackerEntry> trackers = getTrackers();
+            if (trackers.size() == 0) {
+                TrackerEntry newTracker = new TrackerEntry("Account 1", "WLAN");
+                newTracker = save(newTracker, false);
+                TinyTimeTracker.currentTracker = newTracker;
+                bus.post(new OnTrackerAdded(newTracker));
+            } else {
+                bus.post(new OnTrackerDeleted(tracker));
+            }
         }
 
         return success;

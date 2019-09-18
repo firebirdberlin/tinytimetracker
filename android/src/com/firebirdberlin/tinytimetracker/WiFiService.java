@@ -183,6 +183,7 @@ public class WiFiService extends Service {
         }
 
         wifiLock = null;
+
         Log.i(TAG, "Bye bye.");
     }
 

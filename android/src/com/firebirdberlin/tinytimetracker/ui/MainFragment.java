@@ -42,6 +42,7 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -147,11 +148,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             } else {
                 cardviewLocationPermission.setVisibility(View.GONE);
             }
-        }
-
-        OnTrackerAdded event = bus.removeStickyEvent(OnTrackerAdded.class);
-        if(event != null) {
-            handleOnTrackerAdded(event);
         }
 
         updateStatisticalValues(TinyTimeTracker.currentTracker);
@@ -345,6 +341,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 break;
         }
         button_toggle_clockin_state.invalidate();
+    }
+
+    // UI updates must run on MainThread
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onEvent(OnTrackerAdded event) {
+        Log.d(TAG, "OnTrackerAdded: a tracker was added: " + event.tracker.verbose_name);
+        if(event != null) {
+            handleOnTrackerAdded(event);
+        }
+        bus.removeStickyEvent(OnTrackerAdded.class);
     }
 
     public void handleOnTrackerAdded(OnTrackerAdded event) {
