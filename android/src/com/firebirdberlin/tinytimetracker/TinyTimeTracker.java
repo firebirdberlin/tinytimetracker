@@ -467,23 +467,6 @@ public class TinyTimeTracker extends AppCompatActivity
     private void requestServicePermissions() {
         checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
         checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
-
-        try {
-            long installed = getPackageManager().getPackageInfo(getPackageName(), 0).firstInstallTime;
-            if (installed < getDateAsLong(2016, 6, 1)) {
-                checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION, 1);
-            }
-        }
-        catch (NameNotFoundException e ) {
-        }
-    }
-
-    public long getDateAsLong(int year, int month, int day) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.DAY_OF_MONTH, day);
-            calendar.set(Calendar.MONTH, month - 1);
-            calendar.set(Calendar.YEAR, year);
-            return calendar.getTimeInMillis();
     }
 
     public void enableBootReceiver(Context context) {
