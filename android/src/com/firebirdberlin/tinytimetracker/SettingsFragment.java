@@ -1,38 +1,41 @@
 package com.firebirdberlin.tinytimetracker;
 
-import java.io.File;
-import java.util.ArrayList;
-
-import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import android.util.Log;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+
+import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
+
 import org.greenrobot.eventbus.EventBus;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import de.firebirdberlin.preference.SeekBarPreferenceDialogFragment;
+import de.firebirdberlin.preference.SeekBarPreference;
 
 // The callback interface
 interface FileChooserListener {
     public void onClick(String absoluteFilePath);
 }
 
-public class SettingsFragment extends PreferenceFragment {
-    public static final String TAG = TinyTimeTracker.TAG + ".SettingsFragment";
+public class SettingsFragment extends PreferenceFragmentCompat {
+    public static final String TAG = "SettingsFragment";
     private String result = null;
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
 
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.preferences);
         toggleEnabledState();
         Preference pref_data_export = findPreference("pref_key_data_export");
@@ -123,8 +126,8 @@ public class SettingsFragment extends PreferenceFragment {
 
     private void toggleEnabledState() {
         boolean enabled = false;
-        Preference pref_data_import = (Preference) findPreference("pref_key_data_import");
-        Preference pref_data_share = (Preference) findPreference("pref_key_data_share");
+        Preference pref_data_import = findPreference("pref_key_data_import");
+        Preference pref_data_share = findPreference("pref_key_data_share");
         if (hasPermissionWriteExternalStorage() ) {
             File[] files = DbImportExport.listFiles();
             enabled = (files != null && files.length > 0);
@@ -163,5 +166,17 @@ public class SettingsFragment extends PreferenceFragment {
             }
         })
         .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+        Log.i(TAG, preference.getKey());
+        if (preference instanceof SeekBarPreference) {
+            DialogFragment dialogFragment = SeekBarPreferenceDialogFragment.newInstance(
+                    (SeekBarPreference) preference
+            );
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(getFragmentManager(), null);
+        } else super.onDisplayPreferenceDialog(preference);
     }
 }

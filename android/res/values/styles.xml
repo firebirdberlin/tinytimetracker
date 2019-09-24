@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="MainTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:colorAccent">#3498db</item>
+        <item name="colorAccent">#3498db</item>
         <item name="android:colorActivatedHighlight">@color/highlight</item>
         <item name="colorPrimary">#212121</item>
         <item name="colorControlActivated">#3498db</item>

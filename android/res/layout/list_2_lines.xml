@@ -3,13 +3,13 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingStart="12dp"
     android:paddingEnd="12dip"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:minHeight="?attr/listPreferredItemHeightSmall"
     android:background="@android:color/transparent">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical">
@@ -19,8 +19,8 @@
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceListItem"
-            android:textColor="?android:attr/textColorAlertDialogListItem"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:textColor="?attr/textColorAlertDialogListItem"
             android:singleLine="true"
             android:ellipsize="marquee" />
 
@@ -28,7 +28,7 @@
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textAppearance="?attr/textAppearanceListItemSmall"
             android:textColor="?android:attr/textColorHighlight"
             android:singleLine="true"
             android:ellipsize="marquee" />

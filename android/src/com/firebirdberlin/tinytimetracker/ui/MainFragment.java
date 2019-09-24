@@ -8,8 +8,10 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.cardview.widget.CardView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -124,7 +126,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         buttonLocationPermission.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 TinyTimeTracker.checkAndRequestPermission(
-                        getActivity(),
+                        (AppCompatActivity) getActivity(),
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         1
                 );
@@ -244,7 +246,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
             if (shallCheckPerms) {
                 TinyTimeTracker.checkAndRequestPermission(
-                        getActivity(),
+                        (AppCompatActivity) getActivity(),
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                         1
                 );

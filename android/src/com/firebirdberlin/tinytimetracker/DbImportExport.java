@@ -1,25 +1,25 @@
 package com.firebirdberlin.tinytimetracker;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.v4.app.ShareCompat;
-import android.support.v4.content.FileProvider;
-import android.text.format.DateFormat;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ShareCompat;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 
 public class DbImportExport {
 
@@ -89,7 +89,7 @@ public class DbImportExport {
         final Uri uri = FileProvider.getUriForFile(
                 context, "com.firebirdberlin.tinytimetracker.fileprovider", file
         );
-        final Intent intent = ShareCompat.IntentBuilder.from((Activity) context)
+        final Intent intent = ShareCompat.IntentBuilder.from((AppCompatActivity) context)
             .setType("text/csv")
             .setSubject(file.getName())
             .setStream(uri)

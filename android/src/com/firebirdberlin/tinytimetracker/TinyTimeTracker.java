@@ -2,9 +2,7 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -28,21 +26,23 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings.System;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 
 import com.android.vending.billing.IInAppBillingService;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
@@ -54,6 +54,7 @@ import com.firebirdberlin.tinytimetracker.ui.CardFragment;
 import com.firebirdberlin.tinytimetracker.ui.MainFragment;
 import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +62,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
-import org.greenrobot.eventbus.EventBus;
 
 public class TinyTimeTracker extends AppCompatActivity
         implements AddTimeBalanceDialogFragment.AddTimeBalanceDialogListener {
@@ -108,7 +108,7 @@ public class TinyTimeTracker extends AppCompatActivity
         return true;
     }
 
-    public static void checkAndRequestPermission(Activity activity, String permission,
+    public static void checkAndRequestPermission(AppCompatActivity activity, String permission,
                                                  int requestCode) {
         if (!hasPermission(activity, permission)) {
             ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);

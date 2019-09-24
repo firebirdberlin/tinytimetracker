@@ -1,9 +1,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
+        android:iconSpaceReserved="false"
         android:title="@string/pref_wifi_settings"
         android:key="pref_key_worktime_settings">
-
         <de.firebirdberlin.preference.SeekBarPreference
+            android:iconSpaceReserved="false"
             android:dialogMessage="@string/pref_summary_seconds_connection_lost"
             android:key="pref_key_absence_time"
             android:defaultValue="20"
@@ -13,6 +14,7 @@
             android:text="@string/pref_unit_notification_interval_minutes"/>
 
         <CheckBoxPreference
+            android:iconSpaceReserved="false"
             android:title="@string/pref_title_show_notifications"
             android:defaultValue="false"
             android:summary="@string/pref_summary_show_notifications"
@@ -20,6 +22,7 @@
             android:disableDependentsState="false" />
 
         <CheckBoxPreference
+            android:iconSpaceReserved="false"
             android:title="@string/pref_title_notification_new_access_points"
             android:defaultValue="true"
             android:summary="@string/pref_summary_notification_new_access_points"
@@ -27,6 +30,7 @@
             android:disableDependentsState="false" />
 
         <SwitchPreference
+            android:iconSpaceReserved="false"
             android:key="pref_key_auto_disable_wifi"
             android:title="@string/pref_title_auto_disable_wifi"
             android:defaultValue="false" />
@@ -34,18 +38,22 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:iconSpaceReserved="false"
         android:title="@string/pref_data_export"
         android:key="pref_key_data_backup">
 
         <Preference
+            android:iconSpaceReserved="false"
             android:title="@string/pref_title_export"
             android:key="pref_key_data_export"/>
 
         <Preference
+            android:iconSpaceReserved="false"
             android:title="@string/pref_title_import"
             android:key="pref_key_data_import"/>
 
         <Preference
+            android:iconSpaceReserved="false"
             android:title="@string/pref_title_share"
             android:key="pref_key_data_share"/>
 

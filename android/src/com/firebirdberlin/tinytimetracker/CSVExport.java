@@ -1,15 +1,16 @@
 package com.firebirdberlin.tinytimetracker;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.net.Uri;
-import android.support.v4.content.FileProvider;
-import android.support.v4.app.ShareCompat;
+import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ShareCompat;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 public class CSVExport {
     private static String TAG = TinyTimeTracker.TAG + ".CSVExport";
@@ -42,7 +43,7 @@ public class CSVExport {
         final Uri uri = FileProvider.getUriForFile(
                 context, "com.firebirdberlin.tinytimetracker.fileprovider", file
         );
-        final Intent intent = ShareCompat.IntentBuilder.from((Activity) context)
+        final Intent intent = ShareCompat.IntentBuilder.from((AppCompatActivity) context)
             .setType("text/csv")
             .setSubject(subject)
             .setStream(uri)

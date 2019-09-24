@@ -26,8 +26,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="Settings"
-                  android:parentActivityName="TinyTimeTracker" >
+        <activity
+            android:name="Settings"
+            android:parentActivityName="TinyTimeTracker"
+            >
         </activity>
         <activity android:name="AddTrackerActivity"
             android:parentActivityName="TinyTimeTracker"
@@ -74,7 +76,7 @@
         </receiver>
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="com.firebirdberlin.tinytimetracker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
