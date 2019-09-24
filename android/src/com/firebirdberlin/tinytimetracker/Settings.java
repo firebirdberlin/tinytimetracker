@@ -30,19 +30,7 @@ public class Settings extends AppCompatActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
-        /*
-        ViewGroup root = (ViewGroup) findViewById(android.R.id.list).getParent().getParent().getParent();
-        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.toolbar, root, false);
-        root.addView(toolbar, 0); // insert at top
-
-        toolbar.setTitle(getResources().getString(R.string.action_settings));
-        setSupportActionBar(toolbar);
-        // Enable the Up button
-
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-*/
+        getSupportActionBar().setTitle(R.string.action_settings);
     }
 
     public static void openSettings(Context context) {

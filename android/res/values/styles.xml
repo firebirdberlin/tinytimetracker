@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="PreferencesTheme" parent="Theme.AppCompat">
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+        <item name="colorAccent">#3498db</item>
+    </style>
     <style name="MainTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorAccent">#3498db</item>
         <item name="android:colorActivatedHighlight">@color/highlight</item>
