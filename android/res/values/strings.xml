@@ -3,10 +3,10 @@
     <string name="abbreviation_hour">h</string>
     <string name="abbreviation_minute">min</string>
     <string name="action_add_access_point">add Access Point</string>
-    <string name="action_add_log_entry">add</string>
     <string name="action_add">Add account</string>
+    <string name="action_add_log_entry">add</string>
     <string name="action_add_time_balancing_entry">Time balancing</string>
-    <string name="action_delete_access_point">delete Access Point</string>
+    <string name="action_delete_access_point">delete access point(s)</string>
     <string name="action_delete">Delete account</string>
     <string name="action_delete_log_entry">delete</string>
     <string name="action_donate">Donate</string>
@@ -35,8 +35,8 @@
     <string name="dialog_msg_wifi_networks_progress">Scanning for WiFi networks</string>
     <string name="dialog_title_database_backup">Database files</string>
     <string name="dialog_title_share_database">Select an application</string>
-    <string name="dialog_title_time_balancing_entry">Time balancing</string>
     <string name="dialog_title_thank_you">Thanks</string>
+    <string name="dialog_title_time_balancing_entry">Time balancing</string>
     <string name="dialog_title_wifi_networks">Active WiFi networks</string>
     <string name="dialog_title_wifi_networks_progress">Scanning</string>
     <string name="edit_tracker_access_point_list">Tracked Access Points</string>
@@ -69,8 +69,8 @@
     <string name="recommend_app_subject">I would like to recommend this time tracking app to you.</string>
     <string name="service_in_progress">Background service is active.</string>
     <string name="title_warning_location_services_off">Error</string>
-    <string name="warning_location_services_off">Location services are currently disabled. You should enable location services in order to make TinyTimeTracker work.</string>
     <string name="warning_location_permission_not_granted">The permission to access the coarse location is currently not granted. You should grant this permission in order to allow scanning for WiFi networks.</string>
+    <string name="warning_location_services_off">Location services are currently disabled. You should enable location services in order to make TinyTimeTracker work.</string>
     <string-array name="time_balance_type">
         <item>Time off</item>
         <item>Overtime</item>

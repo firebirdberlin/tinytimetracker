@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="abbreviation_hour">h</string>
+    <string name="abbreviation_minute">min</string>
     <string name="action_add_access_point">Access Point hinzufügen</string>
     <string name="action_add">Konto hinzufügen</string>
-    <string name="action_delete_access_point">Access Point löschen</string>
+    <string name="action_add_time_balancing_entry">Zeitausgleich</string>
+    <string name="action_delete_access_point">Access Point(s) löschen</string>
     <string name="action_delete">Konto löschen</string>
     <string name="action_delete_log_entry">Eintrag löschen</string>
     <string name="action_donate">Spenden</string>
@@ -16,6 +19,12 @@
     <string name="aggregation_week">Woche</string>
     <string name="app_name">Zeiterfassung</string>
     <string name="change">Ändern</string>
+    <string name="channel_description_new_access_points">Zeigt Benachrichtigungen für neue Access Points.</string>
+    <string name="channel_description_service">Zeigt an, dass der Hintergrundservice aktiv ist.</string>
+    <string name="channel_description_status">Zeigt Benachrichtigungen über den Status des aktiven Zeitkontos.</string>
+    <string name="channel_name_new_access_points">Neue Access Points</string>
+    <string name="channel_name_service">Status des Hintergrundservices</string>
+    <string name="channel_name_status">Statusmeldungen zur Zeiterfassung</string>
     <string name="confirm_delete">Lösche</string>
     <string name="confirm_delete_question">Soll dieses Konto mit allen Daten wirklich gelöscht werden ?</string>
     <string name="csv_export">CSV Export</string>
@@ -26,6 +35,7 @@
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
     <string name="dialog_title_thank_you">Danke</string>
+    <string name="dialog_title_time_balancing_entry">Zeitausgleich</string>
     <string name="dialog_title_wifi_networks">Aktive WLAN Netzwerke</string>
     <string name="dialog_title_wifi_networks_progress">Suche</string>
     <string name="edit_tracker_access_point_list">Zugeordnete Access Points</string>
@@ -56,20 +66,10 @@
     <string name="pref_wifi_settings">WLAN</string>
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
-    <string name="title_warning_location_services_off">Fehler</string>
-    <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
-    <string name="channel_description_new_access_points">Zeigt Benachrichtigungen für neue Access Points.</string>
-    <string name="channel_description_service">Zeigt an, dass der Hintergrundservice aktiv ist.</string>
-    <string name="channel_description_status">Zeigt Benachrichtigungen über den Status des aktiven Zeitkontos.</string>
-    <string name="channel_name_new_access_points">Neue Access Points</string>
-    <string name="channel_name_service">Status des Hintergrundservices</string>
-    <string name="channel_name_status">Statusmeldungen zur Zeiterfassung</string>
     <string name="service_in_progress">Der Hintergrundservice ist aktiv.</string>
+    <string name="title_warning_location_services_off">Fehler</string>
     <string name="warning_location_permission_not_granted">"Die Berechtigung, um auf den Standort zuzugreifen ist zur Zeit nicht erteilt. Damit die App nach WLAN Netzwerken scannen kann, ist sie erforderlich. "</string>
-    <string name="abbreviation_hour">h</string>
-    <string name="abbreviation_minute">min</string>
-    <string name="action_add_time_balancing_entry">Zeitausgleich</string>
-    <string name="dialog_title_time_balancing_entry">Zeitausgleich</string>
+    <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
     <string-array name="time_balance_type">
         <item>Zeitausgleich</item>
         <item>Überstunden</item>

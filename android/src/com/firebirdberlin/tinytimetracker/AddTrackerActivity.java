@@ -186,30 +186,44 @@ public class AddTrackerActivity extends AppCompatActivity {
             onChooseWifi(null);
             return true;
         case R.id.action_delete:
-            AccessPoint accessPoint = accessPoints.remove(info.position);
-            LogDataSource datasource = new LogDataSource(this);
-            datasource.delete(accessPoint);
-            datasource.close();
-            accessPointAdapter.notifyDataSetChanged();
+            removeAccessPoint(info.position);
             return true;
         default:
             return super.onContextItemSelected(item);
         }
     }
 
+    void removeAccessPoint(int position) {
+        AccessPoint accessPoint = accessPoints.remove(position);
+        HashSet<AccessPoint> toDelete = new HashSet<>();
+        toDelete.add(accessPoint);
+
+        if (accessPoint.bssid.isEmpty()) {
+            String ssid = accessPoint.ssid;
+            while (position < accessPoints.size()) {
+                AccessPoint ap = accessPoints.get(position);
+                if (!ap.ssid.equals(ssid)) break;
+                accessPoints.remove(position);
+                toDelete.add(ap);
+            }
+        }
+        LogDataSource datasource = new LogDataSource(this);
+        for (AccessPoint ap : toDelete) {
+            datasource.delete(ap);
+        }
+        datasource.close();
+        accessPointAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_COARSE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "permission ACCESS_COARSE_LOCATION granted");
-                    onChooseWifi(null);
-                } else {
-                    Log.e(TAG, "permission ACCESS_COARSE_LOCATION denied");
-                }
-                return;
+        if (requestCode == PERMISSIONS_REQUEST_COARSE_LOCATION) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "permission ACCESS_COARSE_LOCATION granted");
+                onChooseWifi(null);
+            } else {
+                Log.e(TAG, "permission ACCESS_COARSE_LOCATION denied");
             }
         }
     }
@@ -267,7 +281,6 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     private void showAddWifiDialog() {
-        final Context context = this;
         final LinkedList<AccessPoint> activeAccessPoints = new LinkedList<AccessPoint>();
         final AccessPointAdapter adapter = new AccessPointAdapter(
                 this, R.layout.list_2_lines, activeAccessPoints
@@ -276,8 +289,6 @@ public class AddTrackerActivity extends AppCompatActivity {
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
-
-                Log.i(TAG, String.format("%s (%s)", network.BSSID, network.SSID));
                 if (accessPointAdapter.indexOfBSSID(network.SSID, network.BSSID) == -1) {
                     AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
                     adapter.add(accessPoint);
@@ -370,7 +381,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         String verbose_name = edit_tracker_verbose_name.getText().toString();
         String working_hours = edit_tracker_working_hours.getText().toString();
 
-        if (validateInputs(verbose_name) == false) {
+        if (!validateInputs(verbose_name)) {
             return;
         }
 

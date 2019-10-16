@@ -8,10 +8,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.cardview.widget.CardView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -24,6 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
 
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.R;
@@ -145,7 +145,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
 
-    void setupWarnings() {
+    private void setupWarnings() {
         if (Build.VERSION.SDK_INT >= 23) {
             boolean shallShowWifiCard = false;
             for (TrackerEntry tracker : trackers) {
@@ -178,7 +178,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         bus.unregister(this);
     }
 
-    void setSelection(long trackerID) {
+    private void setSelection(long trackerID) {
         int item = 0;
         if (trackerIDToSelectionIDMap.containsKey(trackerID)) {
             item = trackerIDToSelectionIDMap.get(trackerID);
@@ -376,13 +376,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerAdded event) {
         Log.d(TAG, "OnTrackerAdded: a tracker was added: " + event.tracker.verbose_name);
-        if(event != null) {
-            handleOnTrackerAdded(event);
-        }
+        handleOnTrackerAdded(event);
         bus.removeStickyEvent(OnTrackerAdded.class);
     }
 
-    public void handleOnTrackerAdded(OnTrackerAdded event) {
+    @SuppressWarnings("unchecked")
+    private void handleOnTrackerAdded(OnTrackerAdded event) {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         adapter.add(event.tracker);
         sortTrackers();
