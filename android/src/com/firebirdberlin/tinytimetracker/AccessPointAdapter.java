@@ -84,10 +84,19 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
 
     void setActive(String ssid, String bssid) {
         activeBSSIDs.add(bssid + "|" + ssid);
+        activeSSIDs.add(ssid);
     }
 
     void setInactive(String ssid, String bssid) {
         activeBSSIDs.remove(bssid + "|" + ssid);
+
+        for (String item : activeBSSIDs) {
+            String[] parts = item.split("\\|");
+            if (parts[1].equals(ssid)) {
+                return;
+            }
+        }
+        activeSSIDs.remove(ssid);
     }
 
     boolean isActive(String ssid, String bssid) {
@@ -96,7 +105,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
 
     boolean toggleActive(String ssid, String bssid) {
         if (isActive(ssid, bssid)) {
-            activeBSSIDs.remove(bssid + "|" + ssid);
+            setInactive(ssid, bssid);
             return false;
         } else {
             setActive(ssid, bssid);
@@ -104,8 +113,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         }
     }
 
-    void setActive(String ssid) {
-        activeSSIDs.add(ssid);
+    private void setActive(String ssid) {
         HashSet<String> bssids = new HashSet<>();
         for (int i = 0; i < getCount(); i++) {
             AccessPoint ap = getItem(i);
@@ -118,8 +126,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         }
     }
 
-    void setInactive(String ssid) {
-        activeSSIDs.remove(ssid);
+    private void setInactive(String ssid) {
         HashSet<String> bssids = new HashSet<>();
         for (int i = 0; i < getCount(); i++) {
             AccessPoint ap = getItem(i);
