@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,6 +37,7 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -86,16 +86,19 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     private void init(LogDataSource datasource) {
-        edit_tracker_verbose_name = (EditText) findViewById(R.id.edit_tracker_verbose_name);
-        edit_tracker_working_hours = (EditText) findViewById(R.id.edit_tracker_working_hours);
-        listView = (ListView) findViewById(R.id.wifi_list_view);
+        edit_tracker_verbose_name = findViewById(R.id.edit_tracker_verbose_name);
+        edit_tracker_working_hours = findViewById(R.id.edit_tracker_working_hours);
+        listView = findViewById(R.id.wifi_list_view);
         if (tracker != null) {
             edit_tracker_verbose_name.setText("");
             edit_tracker_verbose_name.append(tracker.verbose_name);
             edit_tracker_working_hours.setText("");
             edit_tracker_working_hours.append(String.valueOf(tracker.working_hours));
             accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
-            sort();
+            HashSet<String> ssids = new HashSet<>();
+            for (AccessPoint ap : accessPoints) ssids.add(ap.ssid);
+            for (String ssid : ssids) accessPoints.add(new AccessPoint(ssid, ""));
+            sort(accessPoints);
         } else {
             edit_tracker_working_hours.setText("");
             edit_tracker_working_hours.append("8");
@@ -229,7 +232,7 @@ public class AddTrackerActivity extends AppCompatActivity {
 
         boolean res = wifiManager.setWifiEnabled(true);
         Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
-        boolean success = wifiManager.startScan();
+        wifiManager.startScan();
         String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
         String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
         progress = ProgressDialog.show(this,title, msg, true);
@@ -264,9 +267,11 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     private void showAddWifiDialog() {
-        final LinkedList<AccessPoint> accessPoints = new LinkedList<AccessPoint>();
-        final AccessPointAdapter adapter = new AccessPointAdapter(this, R.layout.list_2_lines,
-                                                                  accessPoints);
+        final Context context = this;
+        final LinkedList<AccessPoint> activeAccessPoints = new LinkedList<AccessPoint>();
+        final AccessPointAdapter adapter = new AccessPointAdapter(
+                this, R.layout.list_2_lines, activeAccessPoints
+        );
 
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
@@ -276,32 +281,16 @@ public class AddTrackerActivity extends AppCompatActivity {
                 if (accessPointAdapter.indexOfBSSID(network.SSID, network.BSSID) == -1) {
                     AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
                     adapter.add(accessPoint);
+                    adapter.addUnique(new AccessPoint(network.SSID, ""));
                 }
             }
         }
 
-        // Usually the configuration does not know BSSIDs. The only exception is when
-        // the device may only connect to a single access point known by BSSID. Normally, every
-        // BSSID is allowed.
-        List<WifiConfiguration> configList = wifiManager.getConfiguredNetworks();
-        if (configList != null ) {
-            for (WifiConfiguration network : configList) {
-                String ssid = ( network.SSID == null ) ? "" : network.SSID.replace("\"","");
-                String bssid = (network.BSSID == null) ? "" : network.BSSID;
-                bssid = bssid.matches("^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$") ? bssid : "";
-                if ( network.SSID != null &&
-                        ! accessPointAdapter.containsSSID(ssid) &&
-                        ! adapter.containsSSID(ssid) &&
-                        accessPointAdapter.indexOfBSSID(ssid, bssid) == -1 ) {
-                    AccessPoint accessPoint = new AccessPoint(ssid, bssid);
-                    adapter.add(accessPoint);
-                }
-            }
-        }
+        sort(activeAccessPoints);
 
         determineActiveNetworks();
 
-        if (networkList == null && configList == null) {
+        if (networkList == null) {
             return;
         }
         new AlertDialog.Builder(this)
@@ -316,7 +305,11 @@ public class AddTrackerActivity extends AppCompatActivity {
                     edit_tracker_verbose_name.append(accessPoint.ssid);
                 }
 
-                adapter.toggleActive(accessPoint.ssid, accessPoint.bssid);
+                if (accessPoint.bssid.isEmpty()) {
+                    adapter.toggleActive(accessPoint.ssid);
+                } else {
+                    adapter.toggleActive(accessPoint.ssid, accessPoint.bssid);
+                }
                 adapter.notifyDataSetChanged();
 
                 edit_tracker_working_hours.requestFocus();
@@ -338,11 +331,13 @@ public class AddTrackerActivity extends AppCompatActivity {
                         for (int i = 0; i < adapter.getCount() ; i++ ) {
                             AccessPoint accessPoint = adapter.getItem(i);
                             if ( adapter.isActive(accessPoint.ssid, accessPoint.bssid) ) {
+                                accessPointAdapter.addUnique(new AccessPoint(accessPoint.ssid, ""));
                                 accessPointAdapter.addUnique(accessPoint);
-                                sort();
                             }
                         }
-                }
+                        sort(accessPoints);
+                        accessPointAdapter.notifyDataSetChanged();
+                    }
         })
         .show();
     }
@@ -396,6 +391,7 @@ public class AddTrackerActivity extends AppCompatActivity {
 
         for (int i = 0; i < accessPoints.size(); i++ ) {
             AccessPoint ap = accessPoints.get(i);
+            if (ap.bssid.isEmpty()) continue;
             ap.setTrackerID(tracker_id);
             datasource.save(ap);
         }
@@ -450,11 +446,15 @@ public class AddTrackerActivity extends AppCompatActivity {
         context.startActivity(myIntent);
     }
 
-    public void sort() {
+    void sort(List<AccessPoint> accessPoints) {
         Collections.sort(accessPoints, new Comparator<AccessPoint>() {
             @Override
             public int compare(AccessPoint item1, AccessPoint item2) {
-                return item1.bssid.compareTo(item2.bssid);
+                int comp1 = item1.ssid.compareTo(item2.ssid);
+                if (comp1 == 0) {
+                    return item1.bssid.compareTo(item2.bssid);
+                }
+                return comp1;
             }
         });
     }
