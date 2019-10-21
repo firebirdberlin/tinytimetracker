@@ -16,6 +16,7 @@
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_recommend">Weiterempfehlen</string>
     <string name="action_settings">Einstellungen</string>
+    <string name="activate_wifi_auto_discover">autom. Scan (1h)</string>
     <string name="aggregation_week">Woche</string>
     <string name="app_name">Zeiterfassung</string>
     <string name="change">Ändern</string>

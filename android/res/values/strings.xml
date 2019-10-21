@@ -17,6 +17,7 @@
     <string name="action_pebble_app_store">Open Pebble App Store</string>
     <string name="action_recommend">Recommend</string>
     <string name="action_settings">Settings</string>
+    <string name="activate_wifi_auto_discover">Discover (1h)</string>
     <string name="aggregation_week">Week</string>
     <string name="app_name">TinyTimeTracker</string>
     <string name="change">Change</string>

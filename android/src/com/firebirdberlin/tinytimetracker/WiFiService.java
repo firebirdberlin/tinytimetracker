@@ -19,9 +19,10 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-import android.util.Log;
 
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
@@ -35,6 +36,7 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -198,6 +200,12 @@ public class WiFiService extends Service {
         return false;
     }
 
+    private boolean isAutoDiscoverActive(long tracker_id) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        long now = System.currentTimeMillis();
+        return now < settings.getLong(String.format("wifi_auto_discover_%d", tracker_id), -1L);
+    }
+
     private void unregister(BroadcastReceiver receiver) {
         try {
             unregisterReceiver(receiver);
@@ -246,18 +254,20 @@ public class WiFiService extends Service {
         String message = mContext.getString(R.string.new_access_point_message);
         String string_action_add = mContext.getString(R.string.new_access_point_action_add);
         String string_action_ignore = mContext.getString(R.string.new_access_point_action_ignore);
+        String string_action_auto_discover = mContext.getString(R.string.activate_wifi_auto_discover);
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
 
         PendingIntent pIntent = PendingIntent.getActivity(mContext, 1, intent, 0);
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
-        NotificationCompat.Builder note = new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_NEW_ACCESS_POINT)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setSmallIcon(R.drawable.ic_wifi_add)
-                .setColor(highlightColor)
-                .setContentIntent(pIntent);
+        NotificationCompat.Builder note =
+                new NotificationCompat.Builder(this, TinyTimeTracker.NOTIFICATIONCHANNEL_NEW_ACCESS_POINT)
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setSmallIcon(R.drawable.ic_wifi_add)
+                        .setColor(highlightColor)
+                        .setContentIntent(pIntent);
 
         Intent addIntent = AddAccessPointService.addIntent(this, tracker.id, ssid, bssid);
         PendingIntent pAddIntent = PendingIntent.getService(this, 2, addIntent,
@@ -279,6 +289,17 @@ public class WiFiService extends Service {
                         .build();
         note.addAction(ignoreAction);
         wearableExtender.addAction(ignoreAction);
+
+        Intent autoDiscoverIntent = AddAccessPointService.autoDiscoverIntent(this, tracker.id);
+        PendingIntent pAutoDiscoverIntent = PendingIntent.getService(
+                this, 4, autoDiscoverIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        NotificationCompat.Action autoDiscoverAction =
+                new NotificationCompat.Action.Builder(
+                        R.drawable.ic_globe, string_action_auto_discover, pAutoDiscoverIntent)
+                        .build();
+        note.addAction(autoDiscoverAction);
+        wearableExtender.addAction(autoDiscoverAction);
 
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
         bigStyle.bigText(String.format(message, tracker.verbose_name, ssid, bssid));
@@ -375,39 +396,86 @@ public class WiFiService extends Service {
 
     private void findNewAccessPointsBySSID(LogDataSource datasource) {
         if (!useAutoDetection) return;
-        ArrayList<AccessPoint> accessPoints =
+        ArrayList<AccessPoint> knownAccessPoints =
                 (ArrayList<AccessPoint>) datasource.getAllAccessPoints();
 
         List<ScanResult> networkList = wifiManager.getScanResults();
 
+        HashMap<Long, HashSet<AccessPoint>> knownAccessPointsByTrackerId = new HashMap<>();
+        for (AccessPoint ap : knownAccessPoints) {
+            long tracker_id = ap.getTrackerID();
+            HashSet<AccessPoint> knownSet;
+            if (knownAccessPointsByTrackerId.containsKey(tracker_id)) {
+                knownSet = knownAccessPointsByTrackerId.get(tracker_id);
+            } else {
+                knownSet = new HashSet<>();
+                knownAccessPointsByTrackerId.put(tracker_id, knownSet);
+            }
+            knownSet.add(ap);
+        }
+
+        HashMap<Long, ArrayList<AccessPoint>> unknownAccessPointsByTrackerId = new HashMap<>();
         for (ScanResult network : networkList) {
             String ssid = network.SSID;
             String bssid = network.BSSID;
-            ArrayList<AccessPoint> accessPointsWithSSID = new ArrayList<>();
-            Set<Long> tracker_ids = new HashSet<>();
-            // collect tracker_ids for this SSID
-            for (AccessPoint ap : accessPoints) {
-                if (ap.ssid.equals(ssid)) {
-                    accessPointsWithSSID.add(ap);
-                    tracker_ids.add(ap.getTrackerID());
-                }
-            }
+            Log.i(TAG, "? " + ssid + " " + bssid);
 
-            // remove tracker_ids if the BSSID already exists
-            for (AccessPoint ap : accessPointsWithSSID) {
-                if (ap.bssid.equals(bssid)) {
-                    tracker_ids.remove(ap.getTrackerID());
+            for (long tracker_id : knownAccessPointsByTrackerId.keySet()) {
+                HashSet<String> ssids = new HashSet<>();
+                for (AccessPoint ap : knownAccessPointsByTrackerId.get(tracker_id)) {
+                    ssids.add(ap.ssid);
+                }
+                if (!ssids.contains(ssid)) continue;
+
+                boolean found = false;
+                for (AccessPoint ap : knownAccessPointsByTrackerId.get(tracker_id)) {
+                    found = (ap.ssid.equals(ssid) && ap.bssid.equals(bssid));
+                    if (found) break;
+                }
+                if (!found && !datasource.accessPointIsIgnored(tracker_id, ssid, bssid)) {
+                    AccessPoint unknownAccessPoint = new AccessPoint(ssid, bssid);
+                    unknownAccessPoint.tracker_id = tracker_id;
+                    ArrayList<AccessPoint> list;
+                    if (unknownAccessPointsByTrackerId.containsKey(tracker_id)) {
+                        list = unknownAccessPointsByTrackerId.get(tracker_id);
+                    } else {
+                        list = new ArrayList<>();
+                        unknownAccessPointsByTrackerId.put(tracker_id, list);
+                    }
+                    list.add(unknownAccessPoint);
                 }
             }
-            // tracker_ids now only contains items which do not track this BSSID
-            if (tracker_ids.size() > 0) {
-                TrackerEntry tracker = datasource.getTracker(tracker_ids.iterator().next());
-                Log.i(TAG, String.format("New AP found %d %s %s", tracker.id, ssid, bssid));
-                if (!datasource.accessPointIsIgnored(tracker.id, ssid, bssid)) {
-                    Notification note = buildNotificationNewAccessPoint(tracker, ssid, bssid);
-                    notificationManager.notify(NOTIFICATION_ID_AP, note);
-                    break;
+        }
+
+        for (long trackerId : unknownAccessPointsByTrackerId.keySet()) {
+            Log.i(TAG, String.format("Unknown APs for Tracker %d", trackerId));
+            for (AccessPoint ap : unknownAccessPointsByTrackerId.get(trackerId)) {
+                Log.i(TAG, String.format(" > %s (%s)", ap.ssid, ap.bssid));
+            }
+        }
+
+        // tracker_ids now only contains items which do not track this BSSID
+        if (unknownAccessPointsByTrackerId.size() > 0) {
+            Notification note = null;
+            for (long tracker_id : unknownAccessPointsByTrackerId.keySet()) {
+
+                ArrayList<AccessPoint> accessPoints = unknownAccessPointsByTrackerId.get(tracker_id);
+                AccessPoint ap = accessPoints.get(0);
+                if (isAutoDiscoverActive(tracker_id)) {
+                    for (AccessPoint newAP : accessPoints) {
+                        AccessPoint storedAccessPoint = datasource.getAccessPoint(newAP.tracker_id, newAP.ssid, newAP.bssid);
+                        if (storedAccessPoint == null) {
+                            datasource.save(newAP);
+                        }
+                    }
+                } else if (note == null) {
+                    TrackerEntry tracker = datasource.getTracker(tracker_id);
+                    Log.i(TAG, String.format("New AP found %d %s %s", tracker.id, ap.ssid, ap.bssid));
+                    note = buildNotificationNewAccessPoint(tracker, ap.ssid, ap.bssid);
                 }
+            }
+            if (note != null) {
+                notificationManager.notify(NOTIFICATION_ID_AP, note);
             }
         }
     }

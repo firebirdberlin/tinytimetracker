@@ -6,10 +6,10 @@ public class AccessPoint {
     private static String TAG = TinyTimeTracker.TAG + ".AccessPoint";
     public final static long NOT_SAVED = -1L;
 
-    public long id = -1L;
-    public long tracker_id = -1L;
-    public String ssid = "";
-    public String bssid = "";
+    public long id;
+    public long tracker_id;
+    public String ssid;
+    public String bssid;
 
 
     public AccessPoint(String ssid, String bssid){
@@ -53,6 +53,6 @@ public class AccessPoint {
     // Will be used by the ArrayAdapter in the ListView
     @Override
     public String toString() {
-        return String.valueOf(id) + ": " + ssid + " " + bssid;
+        return id + ": " + ssid + " " + bssid;
     }
 }
