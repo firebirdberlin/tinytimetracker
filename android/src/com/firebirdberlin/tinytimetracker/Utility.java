@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
@@ -54,5 +55,8 @@ public class Utility {
         return calendar.getTimeInMillis();
     }
 
+    public static boolean isDebuggable(Context context){
+        return ( 0 != ( context.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+    }
 }
 

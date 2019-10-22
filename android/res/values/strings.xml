@@ -33,6 +33,8 @@
     <string name="detail_last_month">last month</string>
     <string name="detail_this_month">this month</string>
     <string name="dialog_message_thank_you">Thank you very much for your donation.</string>
+    <string name="dialog_message_pending_purchase">Your purchase was not yet confirmed by Google Play.</string>
+    <string name="dialog_message_already_owned">This item was already bought.</string>
     <string name="dialog_msg_wifi_networks_progress">Scanning for WiFi networks</string>
     <string name="dialog_title_database_backup">Database files</string>
     <string name="dialog_title_share_database">Select an application</string>

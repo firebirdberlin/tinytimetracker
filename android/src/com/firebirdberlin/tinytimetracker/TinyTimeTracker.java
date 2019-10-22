@@ -11,8 +11,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioAttributes;
@@ -20,8 +18,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
@@ -44,7 +40,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 
-import com.android.vending.billing.IInAppBillingService;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
@@ -56,43 +51,17 @@ import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
 
-public class TinyTimeTracker extends AppCompatActivity
+public class TinyTimeTracker extends BillingHelperActivity
         implements AddTimeBalanceDialogFragment.AddTimeBalanceDialogListener {
     public static final String TAG = "TinyTimeTracker";
-    public static final String ITEM_DONATION = "donation";
-    public static final String ITEM_CSV_DATA_EXPORT = "csv_data_export";
-    public static final int REQUEST_CODE_PURCHASE_DONATION = 1001;
-    public static final int REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT = 1002;
     public static final String NOTIFICATIONCHANNEL_SERVICE_STATUS = "NotificationChannel_Service_Status";
     public static final String NOTIFICATIONCHANNEL_TRACKER_STATUS = "NotificationChannel_Status_Notification";
     public static final String NOTIFICATIONCHANNEL_NEW_ACCESS_POINT = "NotificationChannel_new_access_point";
     public static TrackerEntry currentTracker = null;
-    public boolean purchased_donation = false;
-    public boolean purchased_pro = false;
     EventBus bus = EventBus.getDefault();
-    IInAppBillingService mService;
-    ServiceConnection mServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-            Log.i(TAG, "In-app billing service disconnected !");
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name,
-                IBinder service) {
-            mService = IInAppBillingService.Stub.asInterface(service);
-            Log.i(TAG, "In-app billing service connected !");
-            getPurchases();
-        }
-    };
     private LinearLayout pagerLayout = null;
     private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
@@ -156,112 +125,18 @@ public class TinyTimeTracker extends AppCompatActivity
         }
     }
 
-    private void getPurchases() {
-        if (mService == null) {
-            Log.e(TAG, "mService is not connected !");
-            return;
-        }
 
-        Bundle ownedItems = null;
-        try {
-            ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException occurred !");
-            return;
-        }
-
-        if (ownedItems == null) return;
-
-        int response = ownedItems.getInt("RESPONSE_CODE");
-        if (response == 0) {
-            ArrayList<String> ownedSkus =
-                ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
-            ArrayList<String>  purchaseDataList =
-                ownedItems.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-            ArrayList<String>  signatureList =
-                ownedItems.getStringArrayList("INAPP_DATA_SIGNATURE_LIST");
-            String continuationToken =
-                ownedItems.getString("INAPP_CONTINUATION_TOKEN");
-
-            Log.i(TAG, "List of purchased items (" + String.valueOf(purchaseDataList.size()) + "):");
-            for (int i = 0; i < purchaseDataList.size(); ++i) {
-                String purchaseData = purchaseDataList.get(i);
-                String signature = signatureList.get(i);
-                String sku = ownedSkus.get(i);
-                Log.i(TAG, "Item "  + sku + " was already purchased.");
-
-                if (sku.equals(ITEM_DONATION)) {
-                    purchased_donation = true;
-                    purchased_pro = true;
-                    invalidateOptionsMenu();
-                }
-                if (sku.equals(ITEM_CSV_DATA_EXPORT)) {
-                    purchased_pro = true;
-                }
-
-                // do something with this purchase information
-                // e.g. display the updated list of products owned by user
-            }
-
-            // if continuationToken != null, call getPurchases again
-            // and pass in the token to retrieve more items
-        }
-
-    }
-
-    public void purchaseIntent(String sku, int REQUEST_CODE) {
-        if (mService == null) return;
-        try {
-            String developerPayload = "abcdefghijklmnopqrstuvwxyz";
-            Bundle buyIntentBundle =
-                    mService.getBuyIntent(
-                            3, getPackageName(),
-                            sku, "inapp", developerPayload
-                    );
-            PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-            startIntentSenderForResult(
-                    pendingIntent.getIntentSender(),
-                    REQUEST_CODE, new Intent(), 0, 0,
-                    0);
-        } catch (RemoteException | SendIntentException ignored) {
-        }
+    @Override
+    protected void onPurchasesInitialized() {
+        super.onPurchasesInitialized();
+        invalidateOptionsMenu();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_PURCHASE_DONATION ||
-                requestCode == REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT) {
-            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+    protected void onItemPurchased(String sku) {
+        super.onItemPurchased(sku);
+        invalidateOptionsMenu();
 
-            if (resultCode == RESULT_OK) {
-                try {
-                    JSONObject jo = new JSONObject(purchaseData);
-                    String sku = jo.getString("productId");
-                    if (sku.equals(ITEM_DONATION) ) {
-                        purchased_donation = true;
-                        purchased_pro = true;
-                        invalidateOptionsMenu();
-                        showThankYouDialog();
-                    } else
-                    if (sku.equals(ITEM_CSV_DATA_EXPORT) ) {
-                        purchased_pro = true;
-                    }
-                }
-                catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void showThankYouDialog() {
-        new AlertDialog.Builder(this)
-            .setTitle(getResources().getString(R.string.dialog_title_thank_you))
-            .setMessage(R.string.dialog_message_thank_you)
-            .setPositiveButton(android.R.string.ok, null)
-            .show();
     }
 
     @Override
@@ -270,12 +145,6 @@ public class TinyTimeTracker extends AppCompatActivity
         setContentView(R.layout.main);
 
         createNotificationChannels();
-
-        // bind the in-app billing service
-        Intent serviceIntent =
-            new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
 
         // runtime permissions for the WifiService
         requestServicePermissions();
@@ -301,15 +170,6 @@ public class TinyTimeTracker extends AppCompatActivity
         scheduleWiFiService(this);
         startService(this);
 
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        // unbind the in-app billing service
-        if (mService != null) {
-            unbindService(mServiceConn);
-        }
     }
 
     @Override
@@ -349,7 +209,7 @@ public class TinyTimeTracker extends AppCompatActivity
         item_edit.setVisible(currentTracker != null);
         item_delete.setVisible(currentTracker != null);
         item_add_time_balance.setVisible(currentTracker != null);
-        item_donate.setVisible(mService != null && purchased_donation == false);
+        item_donate.setVisible(!isPurchased(ITEM_DONATION));
 
         boolean pebbleAppStoreIsInstalled =
             Utility.isPackageInstalled(this, "com.getpebble.android") ||
@@ -390,7 +250,7 @@ public class TinyTimeTracker extends AppCompatActivity
             recommendApp();
             return true;
         case R.id.action_donate:
-            purchaseIntent(ITEM_DONATION, REQUEST_CODE_PURCHASE_DONATION);
+            launchBillingFlow(ITEM_DONATION);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -398,10 +258,10 @@ public class TinyTimeTracker extends AppCompatActivity
     }
 
     public void onClickAddTracker() {
-        if (purchased_pro) {
+        if (isPurchased(ITEM_PRO)) {
             AddTrackerActivity.open(this);
         } else {
-            purchaseIntent(ITEM_CSV_DATA_EXPORT, REQUEST_CODE_PURCHASE_CSV_DATA_EXPORT);
+            launchBillingFlow(ITEM_PRO);
         }
     }
 

@@ -32,6 +32,8 @@
     <string name="detail_last_month">letzter Monat</string>
     <string name="detail_this_month">dieser Monat</string>
     <string name="dialog_message_thank_you">Vielen Dank für Ihre Spende.</string>
+    <string name="dialog_message_already_owned">Sie besitzen dieses Produkt bereits.</string>
+    <string name="dialog_message_pending_purchase">Vielen Dank. Ihre Bestellung wurde von Google Play noch nicht bestätigt.</string>
     <string name="dialog_msg_wifi_networks_progress">Suche aktive WLAN Netzwerken.</string>
     <string name="dialog_title_database_backup">Datenbank auswählen</string>
     <string name="dialog_title_share_database">Anwendung auswählen</string>
