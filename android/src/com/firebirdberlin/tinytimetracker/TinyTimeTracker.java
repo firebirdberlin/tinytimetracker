@@ -237,9 +237,9 @@ public class TinyTimeTracker extends BillingHelperActivity
         case R.id.action_delete:
             confirmDeletion();
             return true;
-            case R.id.action_add_time_balance:
-                addTimeBalance();
-                return true;
+        case R.id.action_add_time_balance:
+            addTimeBalance();
+            return true;
         case R.id.action_settings:
             Settings.openSettings(this);
             return true;

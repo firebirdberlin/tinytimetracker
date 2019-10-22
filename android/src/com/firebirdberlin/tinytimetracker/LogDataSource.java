@@ -367,6 +367,7 @@ public class LogDataSource {
                 newTracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
                 newTracker = save(newTracker, false);
                 TinyTimeTracker.currentTracker = newTracker;
+                bus.post(new OnTrackerDeleted(tracker));
                 bus.post(new OnTrackerAdded(newTracker));
             } else {
                 bus.post(new OnTrackerDeleted(tracker));
