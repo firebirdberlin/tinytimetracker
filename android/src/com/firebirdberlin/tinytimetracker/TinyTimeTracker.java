@@ -365,7 +365,6 @@ public class TinyTimeTracker extends BillingHelperActivity
             NotificationManager mNotificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-
             NotificationChannel mChannel = prepareNotificationChannel(
                     NOTIFICATIONCHANNEL_TRACKER_STATUS,
                     getString(R.string.channel_name_status),

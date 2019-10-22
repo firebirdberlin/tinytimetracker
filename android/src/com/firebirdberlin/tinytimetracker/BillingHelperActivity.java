@@ -1,13 +1,12 @@
 package com.firebirdberlin.tinytimetracker;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
@@ -56,9 +55,11 @@ public abstract class BillingHelperActivity
     }
 
     public boolean isPurchased(String sku) {
-        if (Utility.isDebuggable(this)) {
+
+        if (Utility.isEmulator()) {
             return true;
         }
+
         boolean result = (purchases != null) ? purchases.get(sku) : false;
         Log.i(TAG, "Checking purchase " + sku + " => " + result);
         return result;
@@ -99,63 +100,6 @@ public abstract class BillingHelperActivity
         super.onDestroy();
     }
 
-/*
-    public void showPurchaseDialog() {
-        Log.i(TAG, "showPurchaseDialog()");
-        if (isPurchased(ITEM_DONATION)) return;
-        List<CharSequence> entries = new ArrayList<>();
-        final List<Integer> values = new ArrayList<>();
-
-        boolean purchased_pro = isPurchased(ITEM_PRO);
-        boolean purchased_donation = isPurchased(ITEM_DONATION);
-
-        if (!purchased_pro) {
-            entries.add(
-                    getProductWithPrice(prices, R.string.product_name_pro, ITEM_PRO)
-            );
-            values.add(PRODUCT_ID_PRO);
-        }
-
-        if (!purchased_donation) {
-            entries.add(
-                    getProductWithPrice(prices, R.string.product_name_donation, ITEM_DONATION)
-            );
-            values.add(PRODUCT_ID_DONATION);
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle(getResources().getString(R.string.buy))
-                .setItems(
-                        entries.toArray(new CharSequence[0]),
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int which) {
-                                Log.i(TAG, String.format("selected %d", which));
-                                int selected = values.get(which);
-                                switch (selected) {
-                                    case PRODUCT_ID_DONATION:
-                                        launchBillingFlow(ITEM_DONATION);
-                                        break;
-                                    case PRODUCT_ID_PRO:
-                                        launchBillingFlow(ITEM_PRO);
-                                        break;
-                                }
-                            }
-                        })
-                .setNeutralButton(android.R.string.cancel, null)
-                .show();
-    }
-
-    private String getProductWithPrice(HashMap<String, String> prices, int resId, String sku) {
-        String price = prices.get(sku);
-        if (price != null) {
-            return String.format("%s (%s)", getResources().getString(resId), price);
-        }
-        return getResources().getString(resId);
-    }
-*/
-
     public void launchBillingFlow(String sku) {
         SkuDetails skuDetails = getSkuDetails(sku);
         BillingFlowParams flowParams = BillingFlowParams.newBuilder()
@@ -165,6 +109,7 @@ public abstract class BillingHelperActivity
     }
 
     protected void onPurchasesInitialized() {
+        Log.i(TAG, "onPurchasesInitialized()");
     }
 
     protected void onItemPurchased(String sku) {
@@ -255,9 +200,12 @@ public abstract class BillingHelperActivity
     }
 
     void queryPurchases() {
+        Log.i(TAG, "queryPurchases()");
         Purchase.PurchasesResult result = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
         int responseCode = result.getResponseCode();
+
         if (responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.e(TAG, "response not OK");
             return;
         }
 
@@ -271,7 +219,7 @@ public abstract class BillingHelperActivity
             purchases.put(sku, purchased);
             Log.i(TAG, String.format("purchased %s = %s", sku, purchased));
             // ATTENTION only activate temporarily
-            //consumeItem(sku);
+            // consumeItem(sku);
         }
         onPurchasesInitialized();
     }

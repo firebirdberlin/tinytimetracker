@@ -1,14 +1,16 @@
 package com.firebirdberlin.tinytimetracker;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.text.format.DateFormat;
+
 import androidx.core.content.res.ResourcesCompat;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class Utility {
 
@@ -58,5 +60,17 @@ public class Utility {
     public static boolean isDebuggable(Context context){
         return ( 0 != ( context.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
     }
+
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+    }
 }
+
 

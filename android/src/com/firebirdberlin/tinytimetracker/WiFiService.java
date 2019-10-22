@@ -278,8 +278,6 @@ public class WiFiService extends Service {
 
         NotificationCompat.Action addAction =
                 new NotificationCompat.Action.Builder(R.drawable.ic_add, string_action_add, pAddIntent).build();
-        note.addAction(addAction);
-        wearableExtender.addAction(addAction);
 
         Intent ignoreIntent = AddAccessPointService.ignoreIntent(this, tracker.id, ssid, bssid);
         PendingIntent pIgnoreIntent = PendingIntent.getService(this, 3, ignoreIntent,
@@ -287,8 +285,6 @@ public class WiFiService extends Service {
         NotificationCompat.Action ignoreAction =
                 new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, string_action_ignore, pIgnoreIntent)
                         .build();
-        note.addAction(ignoreAction);
-        wearableExtender.addAction(ignoreAction);
 
         Intent autoDiscoverIntent = AddAccessPointService.autoDiscoverIntent(this, tracker.id);
         PendingIntent pAutoDiscoverIntent = PendingIntent.getService(
@@ -298,7 +294,12 @@ public class WiFiService extends Service {
                 new NotificationCompat.Action.Builder(
                         R.drawable.ic_globe, string_action_auto_discover, pAutoDiscoverIntent)
                         .build();
+
         note.addAction(autoDiscoverAction);
+        note.addAction(addAction);
+        note.addAction(ignoreAction);
+        wearableExtender.addAction(addAction);
+        wearableExtender.addAction(ignoreAction);
         wearableExtender.addAction(autoDiscoverAction);
 
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();

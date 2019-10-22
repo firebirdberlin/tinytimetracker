@@ -21,8 +21,8 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.File;
 import java.util.ArrayList;
 
-import de.firebirdberlin.preference.SeekBarPreferenceDialogFragment;
 import de.firebirdberlin.preference.SeekBarPreference;
+import de.firebirdberlin.preference.SeekBarPreferenceDialogFragment;
 
 // The callback interface
 interface FileChooserListener {
@@ -42,10 +42,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @SuppressLint("NewApi")
             public boolean onPreferenceClick(Preference preference) {
-
                 if ( ! hasPermissionWriteExternalStorage() ) {
                     requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                       PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                            PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                 } else {
                     DbImportExport.exportDb();
                     toggleEnabledState();
@@ -58,7 +57,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         pref_data_import.setSummary(DbImportExport.DATABASE_DIRECTORY.getAbsolutePath());
         pref_data_import.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                chooseFile( new FileChooserListener() {
+                chooseFile(new FileChooserListener() {
                     public void onClick(String absoluteFilePath) {
                         DbImportExport.restoreDb(absoluteFilePath);
                         EventBus bus = EventBus.getDefault();
@@ -72,7 +71,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         Preference pref_data_share = findPreference("pref_key_data_share");
         pref_data_share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                chooseFile( new FileChooserListener() {
+                chooseFile(new FileChooserListener() {
                     public void onClick(String absoluteFilePath) {
                         DbImportExport.shareFile(getActivity(), absoluteFilePath);
                     }
@@ -81,8 +80,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         });
 
-        Preference pref_key_recommendation = (Preference) findPreference("pref_key_recommendation");
-        pref_key_recommendation.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        setOnPreferenceClickListener("pref_key_recommendation", new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 String body = "https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker";
                 String subject = getResources().getString(R.string.recommend_app_subject);
@@ -95,6 +93,21 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 return true;
             }
         });
+
+        setOnPreferenceClickListener("pref_key_buy", new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                ((Settings) getActivity()).launchBillingFlow(BillingHelperActivity.ITEM_PRO);
+                return true;
+            }
+        });
+    }
+
+    private void setOnPreferenceClickListener(String key, Preference.OnPreferenceClickListener listener) {
+        Preference pref = findPreference(key);
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(listener);
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -107,24 +120,25 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "permission WRITE_EXTERNAL_STORAGE granted");
-                    DbImportExport.exportDb();
-                    toggleEnabledState();
-                } else {
-                    Log.e(TAG, "permission WRITE_EXTERNAL_STORAGE denied");
-                }
-                return;
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "permission WRITE_EXTERNAL_STORAGE granted");
+                DbImportExport.exportDb();
+                toggleEnabledState();
+            } else {
+                Log.e(TAG, "permission WRITE_EXTERNAL_STORAGE denied");
             }
         }
     }
 
-    private void toggleEnabledState() {
+    void toggleEnabledState() {
+        if (!isAdded()) {
+            return;
+        }
+        setVisible("pref_key_buy", !isPurchased());
+        setEnabled("pref_key_data_backup", isPurchased());
+        setEnabled("pref_key_notification_new_access_points", isPurchased());
         boolean enabled = false;
         Preference pref_data_import = findPreference("pref_key_data_import");
         Preference pref_data_share = findPreference("pref_key_data_share");
@@ -137,7 +151,25 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         pref_data_import.setEnabled(enabled);
     }
 
-    public void chooseFile(final FileChooserListener fileChooserListener) {
+    boolean isPurchased() {
+        return ((Settings) getActivity()).isPurchased(BillingHelperActivity.ITEM_PRO);
+    }
+
+    void setVisible(String key, boolean on) {
+        Preference pref = findPreference(key);
+        if (pref != null) {
+            pref.setVisible(on);
+        }
+    }
+
+    void setEnabled(String key, boolean on) {
+        Preference pref = findPreference(key);
+        if (pref != null) {
+            pref.setEnabled(on);
+        }
+    }
+
+    private void chooseFile(final FileChooserListener fileChooserListener) {
         final File file_list[] = DbImportExport.listFiles();
 
         if (file_list == null || file_list.length == 0) {

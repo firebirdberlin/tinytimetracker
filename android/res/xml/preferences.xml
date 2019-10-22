@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:iconSpaceReserved="false"
         android:title="@string/pref_wifi_settings"
@@ -21,14 +22,6 @@
             android:key="pref_key_show_notifications"
             android:disableDependentsState="false" />
 
-        <CheckBoxPreference
-            android:iconSpaceReserved="false"
-            android:title="@string/pref_title_notification_new_access_points"
-            android:defaultValue="true"
-            android:summary="@string/pref_summary_notification_new_access_points"
-            android:key="pref_key_notification_new_access_points"
-            android:disableDependentsState="false" />
-
         <SwitchPreference
             android:iconSpaceReserved="false"
             android:key="pref_key_auto_disable_wifi"
@@ -36,6 +29,19 @@
             android:defaultValue="false" />
 
     </PreferenceCategory>
+
+    <Preference
+        android:icon="@drawable/ic_shop_blue_24dp"
+        android:key="pref_key_buy"
+        android:title="@string/purchase_pro_version"
+        app:isPreferenceVisible="false" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:iconSpaceReserved="false"
+        android:key="pref_key_notification_new_access_points"
+        android:summary="@string/pref_summary_notification_new_access_points"
+        android:title="@string/pref_title_notification_new_access_points" />
 
     <PreferenceCategory
         android:iconSpaceReserved="false"
