@@ -92,7 +92,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
 
         for (String item : activeBSSIDs) {
             String[] parts = item.split("\\|");
-            if (parts[1].equals(ssid)) {
+            if (parts.length > 1 && parts[1].equals(ssid)) {
                 return;
             }
         }
