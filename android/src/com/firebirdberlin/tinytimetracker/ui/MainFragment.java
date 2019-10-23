@@ -84,8 +84,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         button_toggle_wifi.setOnClickListener(this);
         button_toggle_clockin_state.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
-        loadTrackers();
 
+        loadTrackers();
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<>(getActivity(),
                                                                 R.layout.main_spinner,
                                                                 trackers);
@@ -138,10 +138,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-
+        Log.i(TAG, "onResume()");
         bus.register(this);
 
         setupWarnings();
+        loadTrackers();
+
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        adapter.notifyDataSetChanged();
         updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
 
@@ -394,7 +398,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         Log.i(TAG, "OnTrackerChanged");
         loadTrackers();
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
-
         adapter.notifyDataSetChanged();
         if (TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.tracker.id) {
