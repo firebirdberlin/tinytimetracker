@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="highlight" type="color">#FFA000</item>
-    <item name="listItemActivated" type="color">#8bc34a</item>
+    <item name="highlight" type="color">#EF6C00</item>
+    <item name="highlightActive" type="color">#4caf50</item>
+    <item name="listItemActivated" type="color">#4caf50</item>
+    <item name="textColor" type="color">#000000</item>
+    <item name="colorBackgroundAlert" type="color">#EF9A9A</item>
 </resources>

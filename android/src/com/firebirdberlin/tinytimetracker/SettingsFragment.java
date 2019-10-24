@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -38,8 +40,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.preferences);
         toggleEnabledState();
-        Preference pref_data_export = findPreference("pref_key_data_export");
-        pref_data_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        setOnPreferenceClickListener("pref_key_data_export", new Preference.OnPreferenceClickListener() {
             @SuppressLint("NewApi")
             public boolean onPreferenceClick(Preference preference) {
                 if ( ! hasPermissionWriteExternalStorage() ) {
@@ -53,9 +54,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 return true;
             }
         });
-        Preference pref_data_import = findPreference("pref_key_data_import");
-        pref_data_import.setSummary(DbImportExport.DATABASE_DIRECTORY.getAbsolutePath());
-        pref_data_import.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        setSummary("pref_key_data_import", DbImportExport.DATABASE_DIRECTORY.getAbsolutePath());
+        setOnPreferenceClickListener("pref_key_data_import", new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 chooseFile(new FileChooserListener() {
                     public void onClick(String absoluteFilePath) {
@@ -68,17 +68,18 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         });
 
-        Preference pref_data_share = findPreference("pref_key_data_share");
-        pref_data_share.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                chooseFile(new FileChooserListener() {
-                    public void onClick(String absoluteFilePath) {
-                        DbImportExport.shareFile(getActivity(), absoluteFilePath);
+        setOnPreferenceClickListener("pref_key_data_share",
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        chooseFile(new FileChooserListener() {
+                            public void onClick(String absoluteFilePath) {
+                                DbImportExport.shareFile(getActivity(), absoluteFilePath);
+                            }
+                        } );
+                        return true;
                     }
-                } );
-                return true;
-            }
-        });
+                }
+        );
 
         setOnPreferenceClickListener("pref_key_recommendation", new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
@@ -101,6 +102,16 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 return true;
             }
         });
+
+        setOnPreferenceChangeListener("pref_key_theme", new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String theme = (String) newValue;
+                int mode = Settings.getDayNightTheme(theme);
+                AppCompatDelegate.setDefaultNightMode(mode);
+                return true;
+            }
+        });
     }
 
     private void setOnPreferenceClickListener(String key, Preference.OnPreferenceClickListener listener) {
@@ -109,6 +120,21 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             pref.setOnPreferenceClickListener(listener);
         }
     }
+
+    private void setOnPreferenceChangeListener(String key, Preference.OnPreferenceChangeListener listener) {
+        Preference pref = findPreference(key);
+        if (pref != null) {
+            pref.setOnPreferenceChangeListener(listener);
+        }
+    }
+
+    void setSummary(String key, String summary) {
+        Preference pref = findPreference(key);
+        if (pref != null) {
+            pref.setSummary(summary);
+        }
+    }
+
 
     @SuppressWarnings("deprecation")
     private boolean hasPermissionWriteExternalStorage() {

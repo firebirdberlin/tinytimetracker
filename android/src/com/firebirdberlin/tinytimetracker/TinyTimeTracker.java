@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -143,6 +144,8 @@ public class TinyTimeTracker extends BillingHelperActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        AppCompatDelegate.setDefaultNightMode(Settings.getDayNightTheme(this));
 
         createNotificationChannels();
 

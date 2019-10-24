@@ -71,6 +71,9 @@
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
     <string name="service_in_progress">Der Hintergrundservice ist aktiv.</string>
+    <string name="theme_auto">automatisch</string>
+    <string name="theme_dark">dunkel</string>
+    <string name="theme_light">hell</string>
     <string name="title_warning_location_services_off">Fehler</string>
     <string name="warning_location_permission_not_granted">"Die Berechtigung, um auf den Standort zuzugreifen ist zur Zeit nicht erteilt. Damit die App nach WLAN Netzwerken scannen kann, ist sie erforderlich. "</string>
     <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>

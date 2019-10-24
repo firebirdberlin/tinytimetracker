@@ -13,10 +13,14 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.View;
+
+import androidx.core.content.ContextCompat;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import com.firebirdberlin.tinytimetracker.LogDataSource;
+import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
@@ -30,6 +34,8 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 public class MainView extends View {
     private Context mContext;
     private int highlightColor;
+    private int highlightColorActive;
+    private int highlightColorInactive;
     private int textColor;
     private boolean activated = false;
     private int workingHoursInSeconds = 8 * 3600;
@@ -45,7 +51,7 @@ public class MainView extends View {
     public MainView(Context context, AttributeSet attrs) {
         super(context, attrs);
         bus.register(this);
-        mContext = (TinyTimeTracker) context;
+        mContext = context;
 
         init();
     }
@@ -59,8 +65,10 @@ public class MainView extends View {
     }
 
     private void init(){
-        highlightColor = getSystemColor(android.R.attr.colorActivatedHighlight);
-        textColor = getSystemColor(android.R.attr.textColor);
+        highlightColor = ContextCompat.getColor(mContext, R.color.highlight);
+        highlightColorInactive = ContextCompat.getColor(mContext, R.color.highlight);
+        highlightColorActive = ContextCompat.getColor(mContext, R.color.highlightActive);
+        textColor = ContextCompat.getColor(mContext, R.color.textColor);
     }
 
     @Subscribe
@@ -99,12 +107,12 @@ public class MainView extends View {
 
     public void setActivated() {
         activated = true;
-        setHighlightColor("#4caf50");
+        setHighlightColor(highlightColorActive);
     }
 
     public void setDeactivated() {
         activated = false;
-        setHighlightColor(getSystemColor(android.R.attr.colorActivatedHighlight));
+        setHighlightColor(highlightColorInactive);
     }
 
     private void setHighlightColor(String color) {

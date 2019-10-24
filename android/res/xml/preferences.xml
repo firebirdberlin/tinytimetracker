@@ -1,5 +1,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="Style">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/theme"
+            android:entryValues="@array/themeValues"
+            android:key="pref_key_theme"
+            android:title="Theme" />
+    </PreferenceCategory>
+
     <PreferenceCategory
         android:iconSpaceReserved="false"
         android:title="@string/pref_wifi_settings"

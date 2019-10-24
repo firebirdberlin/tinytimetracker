@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:visibility="gone"
-    card_view:cardBackgroundColor="#b71c1c"
+    card_view:cardBackgroundColor="@color/colorBackgroundAlert"
     card_view:cardCornerRadius="4dp"
     card_view:cardElevation="10dp"
     card_view:cardUseCompatPadding="true">

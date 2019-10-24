@@ -72,6 +72,9 @@
     <string name="recommend_app_desc">Choose an app to share your recommendation.</string>
     <string name="recommend_app_subject">I would like to recommend this time tracking app to you.</string>
     <string name="service_in_progress">Background service is active.</string>
+    <string name="theme_auto">automatic</string>
+    <string name="theme_dark">dark</string>
+    <string name="theme_light">light</string>
     <string name="title_warning_location_services_off">Error</string>
     <string name="warning_location_permission_not_granted">The permission to access the coarse location is currently not granted. You should grant this permission in order to allow scanning for WiFi networks.</string>
     <string name="warning_location_services_off">Location services are currently disabled. You should enable location services in order to make TinyTimeTracker work.</string>
