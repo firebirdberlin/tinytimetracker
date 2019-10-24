@@ -3,7 +3,7 @@
     <PreferenceCategory android:title="Style">
 
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="2"
             android:entries="@array/theme"
             android:entryValues="@array/themeValues"
             android:key="pref_key_theme"
