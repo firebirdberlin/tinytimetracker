@@ -1,10 +1,9 @@
 package com.firebirdberlin.tinytimetracker.models;
 
-import android.util.Log;
-import java.util.Calendar;
-import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class UnixTimestamp {
     private long timestamp;
@@ -115,6 +114,18 @@ public class UnixTimestamp {
     public static UnixTimestamp todayThreeYearsAgo() {
         Calendar cal = startOfTodayAsCalendar();
         cal.add(Calendar.YEAR, -3);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp todayOneYearAgo() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.add(Calendar.YEAR, -1);
+        return new UnixTimestamp(cal.getTimeInMillis());
+    }
+
+    public static UnixTimestamp todayThreeMonthsAgo() {
+        Calendar cal = startOfTodayAsCalendar();
+        cal.add(Calendar.MONTH, -3);
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 

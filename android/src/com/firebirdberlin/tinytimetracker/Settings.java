@@ -81,7 +81,7 @@ public class Settings extends BillingHelperActivity {
 
     public static int getDayNightTheme(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String theme = settings.getString(Settings.PREF_KEY_THEME, "1");
+        String theme = settings.getString(Settings.PREF_KEY_THEME, "2");
         return getDayNightTheme(theme);
     }
 

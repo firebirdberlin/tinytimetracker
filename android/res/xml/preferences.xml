@@ -1,13 +1,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <PreferenceCategory android:title="Style">
+    <PreferenceCategory android:title="@string/pref_category_theme">
 
         <ListPreference
             android:defaultValue="2"
             android:entries="@array/theme"
             android:entryValues="@array/themeValues"
             android:key="pref_key_theme"
-            android:title="Theme" />
+            android:title="@string/pref_title_theme" />
     </PreferenceCategory>
 
     <PreferenceCategory

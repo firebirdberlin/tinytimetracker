@@ -19,12 +19,12 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.greenrobot.eventbus.EventBus;
 
 
 public class LogDataSource {
@@ -742,13 +742,13 @@ public class LogDataSource {
         bus.post(new OnTrackerChanged(tracker));
     }
 
-    public int getManualTimeBalanceInMinutes(TrackerEntry tracker) {
+    public int getManualTimeBalanceInMinutes(TrackerEntry tracker, long from) {
         init();
         int minutes = 0;
 
         Cursor cursor = database.rawQuery(
-                "SELECT SUM(minutes) FROM time_balance WHERE tracker_id=?",
-                new String[]{String.valueOf(tracker.id)});
+                "SELECT SUM(minutes) FROM time_balance WHERE tracker_id=? AND insert_time >?",
+                new String[]{String.valueOf(tracker.id), String.valueOf(from)});
 
         try {
             if (cursor.getCount() > 0) {

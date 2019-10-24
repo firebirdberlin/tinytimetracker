@@ -473,9 +473,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private void updateStatisticalValues(TrackerEntry tracker){
         if (tracker == null) return;
 
-        UnixTimestamp todayThreeYearsAgo = UnixTimestamp.todayThreeYearsAgo();
+        UnixTimestamp reference = UnixTimestamp.todayThreeMonthsAgo();
+//        UnixTimestamp reference = UnixTimestamp.startOfLastMonth();
         LogDataSource datasource = new LogDataSource(getActivity());
-        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(todayThreeYearsAgo.getTimestamp(), tracker.id);
+        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(reference.getTimestamp(), tracker.id);
 
         long meanDurationMillis = tracker.getMeanDurationMillis(totalDurationPair.first, totalDurationPair.second);
         UnixTimestamp meanDuration = new UnixTimestamp(meanDurationMillis);
@@ -487,7 +488,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if ( workingHoursInSeconds > 0 ) {
             Long overTimeMillis = tracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
 
-            int timeBalanceInMinutes = datasource.getManualTimeBalanceInMinutes(tracker);
+            int timeBalanceInMinutes = datasource.getManualTimeBalanceInMinutes(tracker, reference.toCalendar().getTimeInMillis());
             overTimeMillis += timeBalanceInMinutes * 60L * 1000L;
 
             UnixTimestamp overtime = new UnixTimestamp(overTimeMillis);
