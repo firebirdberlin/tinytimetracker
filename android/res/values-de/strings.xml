@@ -49,6 +49,7 @@
     <string name="label_toggle_clockin_state_end">Stop</string>
     <string name="label_toggle_clockin_state_start">Start</string>
     <string name="manage_permissions">Berechtigungen</string>
+    <string name="message_no_data">Keine Daten</string>
     <string name="new_access_point_action_add">Hinzufügen</string>
     <string name="new_access_point_action_ignore">Ignorieren</string>
     <string name="new_access_point_message">Es wurde ein neuer Access Point für das Konto %1$s gefunden: %2$s (%3$s).</string>
