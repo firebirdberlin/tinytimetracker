@@ -41,6 +41,7 @@ import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+import com.firebirdberlin.tinytimetracker.models.WorkTimeStatistics;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -60,8 +61,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Button button_toggle_wifi = null;
     private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
+    private TextView textviewCummulatedTime = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
+    private TextView textviewWhen = null;
     private CardView cardviewLocationProviderOff = null;
     private CardView cardviewLocationPermission = null;
     private View trackerToolbar = null;
@@ -76,6 +79,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         spinner = v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = v.findViewById(R.id.textview_mean_value);
         textviewSaldo = v.findViewById(R.id.textview_saldo);
+        textviewWhen = v.findViewById(R.id.textview_when);
+        textviewCummulatedTime = v.findViewById(R.id.textview_cummulated_time);
         cardviewLocationProviderOff = v.findViewById(R.id.cardview_warn_gps_off);
         cardviewLocationPermission = v.findViewById(R.id.cardview_warn_location_permission_not_granted);
         trackerToolbar = v.findViewById(R.id.tracker_toolbar);
@@ -428,8 +433,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Subscribe
     public void onEvent(OnTrackerDeleted event) {
         Log.i(TAG, "OnTrackerDeleted");
+        textviewCummulatedTime.setText("");
         textviewMeanDuration.setText("");
         textviewSaldo.setText("");
+        textviewWhen.setText("");
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         adapter.remove(event.tracker);
         trackerToolbar.setVisibility(View.GONE);
@@ -473,20 +480,25 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private void updateStatisticalValues(TrackerEntry tracker){
         if (tracker == null) return;
 
-        UnixTimestamp reference = UnixTimestamp.todayThreeMonthsAgo();
-//        UnixTimestamp reference = UnixTimestamp.startOfLastMonth();
+        int reference_months = Settings.getReferenceMonths(getContext());
+        UnixTimestamp reference = UnixTimestamp.nMonthsAgo(reference_months);
         LogDataSource datasource = new LogDataSource(getActivity());
-        Pair<Long, Long> totalDurationPair = datasource.getTotalDurationPairSince(reference.getTimestamp(), tracker.id);
+        WorkTimeStatistics statistics = datasource.getTotalDurationPairSince(reference.getTimestamp(), tracker.id);
 
-        long meanDurationMillis = tracker.getMeanDurationMillis(totalDurationPair.first, totalDurationPair.second);
+        long meanDurationMillis = statistics.getMeanDurationMillis();
         UnixTimestamp meanDuration = new UnixTimestamp(meanDurationMillis);
         String text = meanDuration.durationAsHours();
-        textviewMeanDuration.setText(text);
+        textviewMeanDuration.setText("⌀ " + text);
 
+        String totalDuration = new UnixTimestamp(statistics.getTotalDurationMills()).durationAsHours();
+        textviewCummulatedTime.setText("Σ " + totalDuration);
+
+        String since = getString(R.string.since);
+        textviewWhen.setText(String.format("%s %s", since, reference.toDateString()));
 
         int workingHoursInSeconds = (int) (tracker.working_hours * 3600.f);
         if ( workingHoursInSeconds > 0 ) {
-            Long overTimeMillis = tracker.getOvertimeMillis(totalDurationPair.first, totalDurationPair.second);
+            Long overTimeMillis = statistics.getOvertimeMillis(tracker.working_hours);
 
             int timeBalanceInMinutes = datasource.getManualTimeBalanceInMinutes(tracker, reference.toCalendar().getTimeInMillis());
             overTimeMillis += timeBalanceInMinutes * 60L * 1000L;
@@ -511,6 +523,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor prefEditor = settings.edit();
         prefEditor.putLong("currentTrackerId", tracker.id);
-        prefEditor.commit();
+        prefEditor.apply();
     }
 }

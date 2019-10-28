@@ -18,6 +18,7 @@ import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+import com.firebirdberlin.tinytimetracker.models.WorkTimeStatistics;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -650,7 +651,7 @@ public class LogDataSource {
         return new UnixTimestamp(duration_millis);
     }
 
-    public Pair<Long, Long> getTotalDurationPairSince(long timestamp, long tracker_id) {
+    public WorkTimeStatistics getTotalDurationPairSince(long timestamp, long tracker_id) {
         init();
         long duration_millis = 0;
         long distinct_date_count = 0;
@@ -674,7 +675,7 @@ public class LogDataSource {
             if (cursor != null) cursor.close();
         }
 
-        return new Pair<Long, Long>(duration_millis, distinct_date_count);
+        return new WorkTimeStatistics(timestamp, duration_millis, distinct_date_count);
     }
 
     public LogEntry addTimeStamp(TrackerEntry tracker, long timestamp, long graceTime) {

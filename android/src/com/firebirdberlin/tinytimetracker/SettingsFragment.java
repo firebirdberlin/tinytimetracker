@@ -4,15 +4,22 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -110,6 +117,15 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 int mode = Settings.getDayNightTheme(theme);
                 AppCompatDelegate.setDefaultNightMode(mode);
                 return true;
+            }
+        });
+        EditTextPreference referenceTimePreference = findPreference("pref_key_reference_time_months");
+        referenceTimePreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
+            @Override
+            public void onBindEditText(@NonNull final EditText editText) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editText.setHint("3");
+                editText.setSelection(editText.getText().length());
             }
         });
     }

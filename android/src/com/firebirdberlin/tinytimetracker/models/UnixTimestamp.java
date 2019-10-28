@@ -111,21 +111,9 @@ public class UnixTimestamp {
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 
-    public static UnixTimestamp todayThreeYearsAgo() {
+    public static UnixTimestamp nMonthsAgo(int n) {
         Calendar cal = startOfTodayAsCalendar();
-        cal.add(Calendar.YEAR, -3);
-        return new UnixTimestamp(cal.getTimeInMillis());
-    }
-
-    public static UnixTimestamp todayOneYearAgo() {
-        Calendar cal = startOfTodayAsCalendar();
-        cal.add(Calendar.YEAR, -1);
-        return new UnixTimestamp(cal.getTimeInMillis());
-    }
-
-    public static UnixTimestamp todayThreeMonthsAgo() {
-        Calendar cal = startOfTodayAsCalendar();
-        cal.add(Calendar.MONTH, -3);
+        cal.add(Calendar.MONTH, -n);
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 

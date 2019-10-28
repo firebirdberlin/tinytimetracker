@@ -8,6 +8,15 @@
             android:entryValues="@array/themeValues"
             android:key="pref_key_theme"
             android:title="@string/pref_title_theme" />
+
+        <EditTextPreference
+            android:key="pref_key_reference_time_months"
+            app:allowDividerAbove="true"
+            app:allowDividerBelow="true"
+            android:title="@string/pref_title_reference_time_months"
+            android:summary="@string/pref_summary_reference_time_months"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory

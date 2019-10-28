@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
 
     <include layout="@layout/card_permission_not_granted" />
 
@@ -46,30 +46,6 @@
         android:layout_weight="1"
         />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
-        <TextView
-            android:id="@+id/textview_mean_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text=""
-            android:layout_alignParentStart="true"
-            android:textSize="20sp"
-            android:textColor="@color/textColor"
-            android:textStyle="normal" />
-        <TextView
-            android:id="@+id/textview_saldo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text=""
-            android:layout_alignParentEnd="true"
-            android:textSize="20sp"
-            android:textColor="@color/textColor"
-            android:textStyle="normal" />
-    </RelativeLayout>
+    <include layout="@layout/statistics_layout"/>
 </LinearLayout>
 

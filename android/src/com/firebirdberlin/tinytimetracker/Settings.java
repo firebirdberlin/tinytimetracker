@@ -100,4 +100,13 @@ public class Settings extends BillingHelperActivity {
         }
         return AppCompatDelegate.MODE_NIGHT_YES;
     }
+
+    public static int getReferenceMonths(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        String value = settings.getString("pref_key_reference_time_months", "");
+        if (value.isEmpty()) {
+            return 3;
+        }
+        return Integer.valueOf(value);
+    }
 }

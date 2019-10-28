@@ -19,17 +19,18 @@ allprojects {
 apply plugin: 'com.android.application'
 
 dependencies {
-    implementation 'org.greenrobot:eventbus:3.0.0'
-    implementation project(':externals:android-preferences')
-    implementation project(':android-page-indicator')
-    implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'com.android.billingclient:billing:2.0.3'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android:flexbox:1.1.1'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation fileTree(include: '*.jar', dir: 'libs')
+    implementation project(':android-page-indicator')
+    implementation project(':externals:android-preferences')
 }
 
 android {

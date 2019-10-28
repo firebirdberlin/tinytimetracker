@@ -45,18 +45,4 @@ public class TrackerEntry {
         if (!verbose_name.equals(other.verbose_name)) return false;
         return true;
     }
-
-    public long getOvertimeMillis(long duration_millis, long distinct_date_count) {
-
-        long target_working_time_in_millis = (long) (this.working_hours * 3600L * 1000L *
-                                                     distinct_date_count);
-        return duration_millis - target_working_time_in_millis;
-    }
-
-    public long getMeanDurationMillis(long duration_millis, long distinct_date_count) {
-        if ( distinct_date_count > 0 ) {
-            return duration_millis / distinct_date_count;
-        }
-        return 0L;
-    }
 }
