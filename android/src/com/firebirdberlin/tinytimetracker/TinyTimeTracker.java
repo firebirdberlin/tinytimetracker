@@ -142,10 +142,11 @@ public class TinyTimeTracker extends BillingHelperActivity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
 
         AppCompatDelegate.setDefaultNightMode(Settings.getDayNightTheme(this));
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
 
         createNotificationChannels();
 
@@ -195,8 +196,7 @@ public class TinyTimeTracker extends BillingHelperActivity
         super.onConfigurationChanged(newConfig);
 
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        }
-        else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
         }
     }
 
