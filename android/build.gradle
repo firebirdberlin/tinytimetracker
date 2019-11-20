@@ -60,6 +60,11 @@ android {
     }
     buildTypes {
         release {
+            lintOptions {
+                checkReleaseBuilds false
+                disable 'MissingTranslation'
+                abortOnError false
+            }
             minifyEnabled true
             shrinkResources true
             proguardFile '/home/stefan/android/projects/tinytimetracker/android/proguard-project.txt'
