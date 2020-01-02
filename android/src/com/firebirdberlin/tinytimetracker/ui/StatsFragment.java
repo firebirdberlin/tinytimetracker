@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.firebirdberlin.tinytimetracker.CSVExport;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.LogEntryListAdapter;
+import com.firebirdberlin.tinytimetracker.MonthYearPickerDialog;
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.Utility;
@@ -44,25 +45,41 @@ import java.util.Calendar;
 import java.util.List;
 
 
-public class StatsFragment extends ListFragment implements View.OnClickListener {
+public class StatsFragment extends ListFragment implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
     final List<LogEntry> log_entries = new ArrayList<>();
     LogEntryListAdapter log_entry_adapter = null;
     RadioGroup radio_group_aggregation = null;
     Button btnCSVExport = null;
+    Button monthSelectionButton = null;
     Context mContext = null;
     EventBus bus = EventBus.getDefault();
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mContext = getActivity();
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
         radio_group_aggregation = v.findViewById(R.id.radio_group_aggregation);
         btnCSVExport = v.findViewById(R.id.button_csv_export);
+        monthSelectionButton = v.findViewById(R.id.monthSelectionButton);
+        final StatsFragment self = this;
+        monthSelectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MonthYearPickerDialog pd = new MonthYearPickerDialog();
+                pd.setListener(self);
+                pd.show(getFragmentManager(), "MonthYearPickerDialog");
+            }
+        });
         return v;
     }
+
+    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                          int dayOfMonth) {
+        Log.d(TAG, "Date changed.");
+    }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
