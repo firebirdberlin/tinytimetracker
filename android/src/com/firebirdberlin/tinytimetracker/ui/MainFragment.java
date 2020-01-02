@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +37,7 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
+import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
@@ -71,6 +71,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
+    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -151,6 +153,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.notifyDataSetChanged();
+
+        loadAccessPoints(TinyTimeTracker.currentTracker);
+        setWifiIndicator(TinyTimeTracker.currentTracker);
+
         updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
 
@@ -312,7 +318,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setWifiIndicator(TrackerEntry tracker) {
-        boolean visible = true;
+        boolean visible = accessPoints.size() != 0;
+
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
@@ -398,6 +405,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         setSelection(event.tracker.id);
     }
 
+    private void loadAccessPoints(TrackerEntry tracker) {
+        LogDataSource datasource = new LogDataSource(getContext());
+        accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
+        datasource.close();
+    }
+
     @Subscribe
     public void onEvent(OnTrackerChanged event) {
         Log.i(TAG, "OnTrackerChanged");
@@ -416,6 +429,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if ( event == null || event.newTracker == null) return;
         trackerToolbar.setVisibility(View.VISIBLE);
 
+        loadAccessPoints(event.newTracker);
         setWifiIndicator(event.newTracker);
         setClockinStateIndicator(event.newTracker);
         updateStatisticalValues(event.newTracker);

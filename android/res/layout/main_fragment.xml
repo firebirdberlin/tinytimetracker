@@ -17,34 +17,35 @@
         android:id="@+id/tracker_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <Button
             android:id="@+id/button_toggle_clockin_state"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:drawableLeft="@drawable/ic_play_blue_24dp"
-            android:text="@string/label_toggle_clockin_state_start"
             android:layout_alignParentStart="true"
-            android:drawableStart="@drawable/ic_play_blue_24dp" />
+            android:layout_alignParentLeft="true"
+            android:drawableStart="@drawable/ic_play_blue_24dp"
+            android:drawableLeft="@drawable/ic_play_blue_24dp"
+            android:text="@string/label_toggle_clockin_state_start" />
+
         <Button
             android:id="@+id/button_toggle_wifi"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:drawableLeft="@drawable/ic_wifi_blue_24dp"
-            android:text="@string/label_auto_detection_on"
             android:layout_alignParentEnd="true"
-            android:drawableStart="@drawable/ic_wifi_blue_24dp" />
+            android:layout_alignParentRight="true"
+            android:drawableStart="@drawable/ic_wifi_blue_24dp"
+            android:drawableLeft="@drawable/ic_wifi_blue_24dp"
+            android:text="@string/label_auto_detection_on" />
     </RelativeLayout>
 
     <com.firebirdberlin.tinytimetracker.ui.MainView
         android:id="@+id/main_time_view"
         android:layout_width="wrap_content"
         android:layout_height="0px"
-        android:layout_weight="1"
-        />
+        android:layout_weight="1" />
 
     <include layout="@layout/statistics_layout"/>
 </LinearLayout>
