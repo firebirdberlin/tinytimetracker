@@ -168,7 +168,7 @@ public class MainView extends View {
         paint.setColor(textColor);
         paint.setAlpha(255);
         paint.setTextSize(dpToPx(60));
-        paint.setStrokeWidth(1);
+        paint.setStrokeWidth(2);
 
         String text = duration.durationAsHours();
         Rect bounds = new Rect();

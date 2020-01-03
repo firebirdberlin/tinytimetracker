@@ -4,7 +4,6 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.fragment.app.ListFragment;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -16,9 +15,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.RadioGroup;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import androidx.fragment.app.ListFragment;
 
 import com.firebirdberlin.tinytimetracker.CSVExport;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
@@ -47,37 +47,67 @@ import java.util.List;
 
 public class StatsFragment extends ListFragment implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     private static String TAG = TinyTimeTracker.TAG + ".StatsFragment";
-    final List<LogEntry> log_entries = new ArrayList<>();
-    LogEntryListAdapter log_entry_adapter = null;
-    RadioGroup radio_group_aggregation = null;
-    Button btnCSVExport = null;
-    Button monthSelectionButton = null;
-    Context mContext = null;
-    EventBus bus = EventBus.getDefault();
+    private final List<LogEntry> log_entries = new ArrayList<>();
+    private LogEntryListAdapter log_entry_adapter = null;
+    private Button btnCSVExport = null;
+    private Button btnMonthSelection = null;
+    private Button btnAddEntry = null;
+    private Context mContext = null;
+    private EventBus bus = EventBus.getDefault();
+
+    private long startTime = 0L;
+    private long endTime = 0L;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         mContext = getActivity();
+        startTime = UnixTimestamp.startOfMonth().getTimestamp();
+        endTime = UnixTimestamp.startOfNextMonth().getTimestamp();
         View v = inflater.inflate(R.layout.stats_fragment, container, false);
-        radio_group_aggregation = v.findViewById(R.id.radio_group_aggregation);
         btnCSVExport = v.findViewById(R.id.button_csv_export);
-        monthSelectionButton = v.findViewById(R.id.monthSelectionButton);
+        btnMonthSelection = v.findViewById(R.id.monthSelectionButton);
+        btnAddEntry = v.findViewById(android.R.id.empty);
         final StatsFragment self = this;
-        monthSelectionButton.setOnClickListener(new View.OnClickListener() {
+        btnMonthSelection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MonthYearPickerDialog pd = new MonthYearPickerDialog();
-                pd.setListener(self);
-                pd.show(getFragmentManager(), "MonthYearPickerDialog");
+                MonthYearPickerDialog monthPicker = new MonthYearPickerDialog();
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(startTime);
+                monthPicker.setCurrentMonth(cal.get(Calendar.MONTH));
+                monthPicker.setCurrentYear(cal.get(Calendar.YEAR));
+                monthPicker.setListener(self);
+                monthPicker.show(getFragmentManager(), "MonthYearPickerDialog");
+            }
+        });
+
+        btnAddEntry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (TinyTimeTracker.currentTracker == null) return;
+                onClickAddEntry(TinyTimeTracker.currentTracker.id);
             }
         });
         return v;
     }
 
-    public void onDateSet(DatePicker view, int year, int monthOfYear,
-                          int dayOfMonth) {
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         Log.d(TAG, "Date changed.");
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, monthOfYear);
+        cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        Log.i(TAG, cal.toString());
+        startTime = cal.getTimeInMillis();
+        cal.add(Calendar.MONTH, 1);
+        endTime = cal.getTimeInMillis();
+        refresh();
     }
 
 
@@ -87,16 +117,8 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
 
         registerForContextMenu(getListView());
 
-        radio_group_aggregation.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                refresh();
-            }
-        });
-
         btnCSVExport.setOnClickListener(this);
 
-        radio_group_aggregation.check(R.id.radio_detail_this_month);
         log_entry_adapter = new LogEntryListAdapter(mContext, R.layout.list_2_columns, log_entries);
         setListAdapter(log_entry_adapter);
         refresh_detail();
@@ -127,7 +149,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
 
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         int position = info.position;
-        if ( position == log_entry_adapter.getCount() - 1 ) {
+        if (position == log_entry_adapter.getCount() - 1) {
             MenuItem itemActionJoin = menu.findItem(R.id.action_join);
             itemActionJoin.setVisible(false);
         }
@@ -141,78 +163,81 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
 
         final LogDataSource datasource = new LogDataSource(mContext);
         switch (item.getItemId()) {
-        case R.id.action_delete:
-            datasource.delete(entry);
-            log_entry_adapter.remove(entry);
-            datasource.close();
-            return true;
-        case R.id.action_edit:
-            EditLogEntryDialogFragment dialogFragment = new EditLogEntryDialogFragment();
-            dialogFragment.entry = entry;
-            dialogFragment.mContext = mContext;
-            if ( info.position > 0 ) {
-                dialogFragment.prevEntry = log_entry_adapter.getItem(info.position - 1);
-            }
-            dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
-            datasource.close();
-            return true;
-        case R.id.action_join:
-            if ( info.position < log_entry_adapter.getCount() ) {
-                long new_end = entry.getTimestampEnd();
-                LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
-                nextEntry.setTimestampEnd(new_end);
-                datasource.save(nextEntry);
+            case R.id.action_delete:
                 datasource.delete(entry);
                 log_entry_adapter.remove(entry);
-            }
-            datasource.close();
-            return true;
-        case R.id.action_add:
-
-            final DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    final Calendar now = Calendar.getInstance();
-                    now.set(Calendar.YEAR, year);
-                    now.set(Calendar.MONTH, monthOfYear);
-                    now.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
-                        @Override
-                        public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                            Log.d(TAG, "onTimeSet");
-                            now.set(Calendar.HOUR_OF_DAY, hour);
-                            now.set(Calendar.MINUTE, minute);
-                            Toast.makeText(mContext, String.valueOf(now.getTimeInMillis()), Toast.LENGTH_LONG);
-                            final LogDataSource datasource = new LogDataSource(mContext);
-                            LogEntry e = new LogEntry(LogEntry.NOT_SAVED, entry.tracker_id, now.getTimeInMillis(), now.getTimeInMillis());
-                            datasource.save(e);
-                            datasource.close();
-
-                        }
-                    };
-                    new TimePickerDialog(getContext(), onTimeSetListener, 9, 0, true).show();
+                datasource.close();
+                return true;
+            case R.id.action_edit:
+                EditLogEntryDialogFragment dialogFragment = new EditLogEntryDialogFragment();
+                dialogFragment.entry = entry;
+                dialogFragment.mContext = mContext;
+                if (info.position > 0) {
+                    dialogFragment.prevEntry = log_entry_adapter.getItem(info.position - 1);
                 }
-
-            };
-
-            Calendar now = Calendar.getInstance();
-            new DatePickerDialog(getContext(), onDateSetListener,
-                                 now.get(Calendar.YEAR), now.get(Calendar.MONTH),
-                                 now.get(Calendar.DAY_OF_MONTH))
-                    .show();
-
-            return true;
-        default:
-            datasource.close();
-            return super.onContextItemSelected(item);
+                dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
+                datasource.close();
+                return true;
+            case R.id.action_join:
+                if (info.position < log_entry_adapter.getCount()) {
+                    long new_end = entry.getTimestampEnd();
+                    LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
+                    nextEntry.setTimestampEnd(new_end);
+                    datasource.save(nextEntry);
+                    datasource.delete(entry);
+                    log_entry_adapter.remove(entry);
+                }
+                datasource.close();
+                return true;
+            case R.id.action_add:
+                onClickAddEntry(entry.tracker_id);
+                datasource.close();
+                return true;
+            default:
+                datasource.close();
+                return super.onContextItemSelected(item);
         }
+    }
+    private void onClickAddEntry(final long tracker_id) {
+        final DatePickerDialog.OnDateSetListener onDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                final Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.YEAR, year);
+                cal.set(Calendar.MONTH, monthOfYear);
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                        Log.d(TAG, "onTimeSet");
+                        cal.set(Calendar.HOUR_OF_DAY, hour);
+                        cal.set(Calendar.MINUTE, minute);
+                        Toast.makeText(mContext, String.valueOf(cal.getTimeInMillis()), Toast.LENGTH_LONG);
+                        final LogDataSource datasource = new LogDataSource(mContext);
+                        LogEntry e = new LogEntry(LogEntry.NOT_SAVED, tracker_id, cal.getTimeInMillis(), cal.getTimeInMillis());
+                        datasource.save(e);
+                        datasource.close();
+
+                    }
+                };
+                new TimePickerDialog(getContext(), onTimeSetListener, 9, 0, true).show();
+            }
+
+        };
+
+        Calendar now = Calendar.getInstance();
+        now.setTimeInMillis(startTime);
+        new DatePickerDialog(
+                getContext(), onDateSetListener,
+                now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)
+        ).show();
     }
 
     @Override
     public void onClick(View v) {
-        if ( v.equals(btnCSVExport) ) {
+        if (v.equals(btnCSVExport)) {
             TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
-            if ( mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)) {
+            if (mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)) {
                 exportCSV();
             } else {
                 mainActivity.launchBillingFlow(TinyTimeTracker.ITEM_PRO);
@@ -233,7 +258,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
 
         String data = "";
         SimpleDateFormat timeFormat = Utility.getTimeFormat(mContext);
-        for (int i = log_entry_adapter.getCount() - 1 ; i  >= 0 ; i-- ) {
+        for (int i = log_entry_adapter.getCount() - 1; i >= 0; i--) {
             LogEntry entry = log_entry_adapter.getItem(i);
             data += entry.toCSVString(timeFormat);
         }
@@ -243,10 +268,10 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         csv.share(title);
     }
 
-    public void refresh(LogEntry logEntry) {
-        for (int i = 0; i < log_entry_adapter.getCount() ; i++ ) {
+    private void refresh(LogEntry logEntry) {
+        for (int i = 0; i < log_entry_adapter.getCount(); i++) {
             LogEntry entry = log_entry_adapter.getItem(i);
-            if ( entry.id == logEntry.id ) {
+            if (entry.id == logEntry.id) {
                 entry.timestamp_start = logEntry.timestamp_start;
                 entry.timestamp_end = logEntry.timestamp_end;
                 log_entry_adapter.notifyDataSetChanged();
@@ -254,18 +279,15 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
             }
         }
         // no match yet, insert entry at the top
-        int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
-        if (checkedId == R.id.radio_detail_this_month) {
+        UnixTimestamp startOfThisMonth = UnixTimestamp.startOfMonth();
+        if (startTime == startOfThisMonth.getTimestamp()) {
+            Log.i(TAG, "this month");
             log_entry_adapter.insert(logEntry, 0);
             log_entry_adapter.notifyDataSetChanged();
         }
     }
 
-    public void refresh() {
-        if (radio_group_aggregation == null) {
-            return;
-        }
-
+    private void refresh() {
         try {
             unregisterForContextMenu(getListView());
         } catch (IllegalStateException e) {
@@ -276,32 +298,20 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         refresh_detail();
     }
 
-    public void refresh_detail() {
+    private void refresh_detail() {
         if (mContext == null || log_entry_adapter == null) {
             return;
         }
-
         log_entry_adapter.clear();
 
-        if (TinyTimeTracker.currentTracker != null) {
-            int checkedId = radio_group_aggregation.getCheckedRadioButtonId();
-            long start = 0L;
-            long end = 0L;
-            switch(checkedId) {
-            case R.id.radio_detail_this_month:
-            default:
-                start = UnixTimestamp.startOfMonth().getTimestamp();
-                end = System.currentTimeMillis();
-                break;
-            case R.id.radio_detail_last_month:
-                start = UnixTimestamp.startOfLastMonth().getTimestamp();
-                end = UnixTimestamp.startOfMonth().getTimestamp();
-                break;
-            }
+        String currentMonthString = new UnixTimestamp(startTime).toMonthYearString();
+        btnMonthSelection.setText(currentMonthString);
 
+        if (TinyTimeTracker.currentTracker != null) {
             LogDataSource datasource = new LogDataSource(mContext);
-            List<LogEntry> values = datasource.getAllEntries(TinyTimeTracker.currentTracker.id,
-                                                             start, end);
+            List<LogEntry> values = datasource.getAllEntries(
+                    TinyTimeTracker.currentTracker.id, startTime, endTime
+            );
             datasource.close();
             log_entry_adapter.addAll(values);
         }
@@ -309,13 +319,12 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         log_entry_adapter.notifyDataSetChanged();
     }
 
-
     @Subscribe
     public void onEvent(OnWifiUpdateCompleted event) {
-        if ( TinyTimeTracker.currentTracker == null ) return;
+        if (TinyTimeTracker.currentTracker == null) return;
         if (event.success &&
                 TinyTimeTracker.currentTracker.equals(event.tracker)
-                && event.logentry != null ) {
+                && event.logentry != null) {
             refresh(event.logentry);
         }
     }
@@ -333,15 +342,15 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
 
     @Subscribe
     public void onEvent(OnLogEntryChanged event) {
-        if ( TinyTimeTracker.currentTracker != null &&
-                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
+        if (TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id) {
             refresh(event.entry);
         }
     }
 
     @Subscribe
     public void onEvent(OnLogEntryDeleted event) {
-        if ( TinyTimeTracker.currentTracker != null ) {
+        if (TinyTimeTracker.currentTracker != null) {
             refresh();
         }
     }

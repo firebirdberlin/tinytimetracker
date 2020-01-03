@@ -47,10 +47,10 @@ public class CardFragment extends Fragment {
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         Log.i(TAG, "onCreateView()");
-        mContext = (Context) getActivity();
+        mContext = getActivity();
 
         View v = inflater.inflate(R.layout.recycler_view, container, false);
-        recyclerView = (RecyclerView) v.findViewById(R.id.cardList);
+        recyclerView = v.findViewById(R.id.cardList);
         ViewTreeObserver vto = recyclerView.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -119,10 +119,11 @@ public class CardFragment extends Fragment {
         if (TinyTimeTracker.currentTracker != null) {
             UnixTimestamp start = UnixTimestamp.startOfToday();
             start.set(Calendar.DAY_OF_YEAR, 1);
-            start.add(Calendar.YEAR, -1);
+            start.add(Calendar.YEAR, -2);
             List< Pair<Long, Long> > values = fetchData(start);
 
             long workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
+            int year = -1;
             int weekOfYear = -1;
             LogSummary summary = null;
             for (Pair<Long, Long> e : values) {
@@ -132,8 +133,11 @@ public class CardFragment extends Fragment {
                 LogDailySummary logEntry = new LogDailySummary(e.first.longValue(), e.second.longValue());
                 logEntry.calculateSaldo(workingHoursInSeconds);
 
-                int currentWeek = timestamp.getWeekOfYear();
-                if ( currentWeek != weekOfYear ) {
+                Calendar cal = timestamp.toCalendar();
+                int currentWeek = cal.get(Calendar.WEEK_OF_YEAR);
+                int currentYear = cal.get(Calendar.YEAR);
+                if ( currentYear != year || currentWeek != weekOfYear ) {
+                    year = currentYear;
                     weekOfYear = currentWeek;
                     if (summary != null) {
                         Collections.reverse(summary.dailySummaries);
@@ -158,7 +162,8 @@ public class CardFragment extends Fragment {
         LogDataSource datasource = new LogDataSource(mContext);
         List< Pair<Long, Long> > values = datasource.getTotalDurationAggregated(
                 TinyTimeTracker.currentTracker.id, LogDataSource.AGGRETATION_DAY,
-                start_timestamp.getTimestamp());
+                start_timestamp.getTimestamp()
+        );
         datasource.close();
         return values;
     }

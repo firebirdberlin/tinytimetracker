@@ -11,7 +11,7 @@
     <string name="action_donate">Spenden</string>
     <string name="action_edit">Konto editieren</string>
     <string name="action_edit_log_entry">Eintrag ändern</string>
-    <string name="action_join_log_entry">Einträge zusammenführen</string>
+    <string name="action_join_log_entry">mit nächstem Eintrag zusammenführen</string>
     <string name="action_open_github">Beitragen</string>
     <string name="action_pebble_app_store">Öffne Pebble App Store</string>
     <string name="action_recommend">Weiterempfehlen</string>
@@ -29,8 +29,6 @@
     <string name="confirm_delete">Lösche</string>
     <string name="confirm_delete_question">Soll dieses Konto mit allen Daten wirklich gelöscht werden ?</string>
     <string name="csv_export">CSV Export</string>
-    <string name="detail_last_month">letzter Monat</string>
-    <string name="detail_this_month">dieser Monat</string>
     <string name="dialog_message_thank_you">Vielen Dank für Ihre Spende.</string>
     <string name="dialog_message_already_owned">Sie besitzen dieses Produkt bereits.</string>
     <string name="dialog_message_pending_purchase">Vielen Dank. Ihre Bestellung wurde von Google Play noch nicht bestätigt.</string>
@@ -46,10 +44,7 @@
     <string name="edit_tracker_working_hours_hint">tägliche Arbeitsstunden</string>
     <string name="label_auto_detection_off">WLAN-Erkennung: aus</string>
     <string name="label_auto_detection_on">WLAN-Erkennung: an</string>
-    <string name="label_toggle_clockin_state_end">Stop</string>
-    <string name="label_toggle_clockin_state_start">Start</string>
     <string name="manage_permissions">Berechtigungen</string>
-    <string name="message_no_data">Keine Daten</string>
     <string name="new_access_point_action_add">Hinzufügen</string>
     <string name="new_access_point_action_ignore">Ignorieren</string>
     <string name="new_access_point_message">Es wurde ein neuer Access Point für das Konto %1$s gefunden: %2$s (%3$s).</string>

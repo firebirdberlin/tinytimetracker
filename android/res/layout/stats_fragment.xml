@@ -3,37 +3,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="5dip">
+    android:padding="5dp">
 
     <Button
         android:id="@+id/monthSelectionButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="11/2019" />
-
-    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/radio_group_aggregation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingBottom="5dip"
-        android:paddingTop="5dip">
-        <RadioButton android:id="@+id/radio_detail_this_month"
-            android:checked="true"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/detail_this_month"/>
-        <RadioButton android:id="@+id/radio_detail_last_month"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/detail_last_month"/>
-    </RadioGroup>
-
-    <include layout="@layout/divider"/>
+        android:foreground="?android:attr/selectableItemBackground"
+        android:background="@drawable/btn_background"
+        />
 
     <LinearLayout
         android:orientation="vertical"
@@ -48,25 +26,37 @@
             android:layout_weight="1"
             android:drawSelectorOnTop="false"/>
 
+        <Button
+            android:id="@android:id/empty"
+            android:layout_gravity="center"
+            android:layout_margin="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_add_log_entry"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:background="@drawable/btn_background"/>
+
+<!--
         <TextView
             android:id="@android:id/empty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/message_no_data"/>
+-->
 
     </LinearLayout>
-        <!--buttons -->
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        android:layout_height="wrap_content">
         <Button
             android:id="@+id/button_csv_export"
             android:layout_alignParentRight="true"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:text="@string/csv_export"/>
+            android:text="@string/csv_export"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
 </LinearLayout>

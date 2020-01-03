@@ -5,6 +5,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -42,6 +43,7 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 import com.firebirdberlin.tinytimetracker.models.WorkTimeStatistics;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -59,7 +61,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = "MainFragment";
     EventBus bus = EventBus.getDefault();
     private Button button_toggle_wifi = null;
-    private Button button_toggle_clockin_state = null;
     private Spinner spinner = null;
     private TextView textviewCummulatedTime = null;
     private TextView textviewMeanDuration = null;
@@ -72,12 +73,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private List<TrackerEntry> trackers = new ArrayList<>();
     private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+    private FloatingActionButton actionButtonStart;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
+        actionButtonStart = v.findViewById(R.id.action_button_start);
+        actionButtonStart.setOnClickListener(this);
         spinner = v.findViewById(R.id.spinner_trackers);
         textviewMeanDuration = v.findViewById(R.id.textview_mean_value);
         textviewSaldo = v.findViewById(R.id.textview_saldo);
@@ -87,9 +91,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         cardviewLocationPermission = v.findViewById(R.id.cardview_warn_location_permission_not_granted);
         trackerToolbar = v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = v.findViewById(R.id.button_toggle_wifi);
-        button_toggle_clockin_state = v.findViewById(R.id.button_toggle_clockin_state);
         button_toggle_wifi.setOnClickListener(this);
-        button_toggle_clockin_state.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
 
         loadTrackers();
@@ -269,7 +271,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             setupWarnings();
             Log.i(TAG, "button_toggle_wifi click done ...");
         } else
-        if ( v.equals(button_toggle_clockin_state) ) {
+        if (v.equals(actionButtonStart)) {
             handleClockinStateChange();
         }
     }
@@ -277,7 +279,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private void handleClockinStateChange() {
         TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
         if (tracker == null) return;
-        Log.i(TAG, "button_toggle_clockin_state clicked");
         LogDataSource datasource = new LogDataSource(getActivity());
         long now = System.currentTimeMillis();
         switch (tracker.operation_state) {
@@ -314,7 +315,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         setClockinStateIndicator(tracker);
         setWifiIndicator(tracker);
-        Log.i(TAG, "button_toggle_clockin_state click done ...");
     }
 
     private void setWifiIndicator(TrackerEntry tracker) {
@@ -370,22 +370,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
-                View parent = (View) button_toggle_clockin_state.getParent();
-                int parent_width = parent.getWidth();
-                int new_x = (parent_width - button_toggle_clockin_state.getWidth()) / 2;
-                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stop_blue_24dp, 0, 0, 0);
-                button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_end);
-                button_toggle_clockin_state.animate().setStartDelay(600).setDuration(300).x(new_x);
                 timeView.setActivated();
+                int colorActive = getResources().getColor(R.color.highlightActive);
+                actionButtonStart.setBackgroundTintList(ColorStateList.valueOf(colorActive));
+                actionButtonStart.setImageResource(R.drawable.ic_stop_blue_24dp);
                 break;
             default:
-                button_toggle_clockin_state.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_play_blue_24dp, 0, 0, 0);
-                button_toggle_clockin_state.setText(R.string.label_toggle_clockin_state_start);
-                button_toggle_clockin_state.animate().setStartDelay(0).setDuration(300).x(0);
                 timeView.setDeactivated();
+                int color = getResources().getColor(R.color.highlight);
+                actionButtonStart.setBackgroundTintList(ColorStateList.valueOf(color));
+                actionButtonStart.setImageResource(R.drawable.ic_play_blue_24dp);
                 break;
         }
-        button_toggle_clockin_state.invalidate();
     }
 
     // UI updates must run on MainThread

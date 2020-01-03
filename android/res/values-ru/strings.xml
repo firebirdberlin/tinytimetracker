@@ -29,8 +29,6 @@
     <string name="confirm_delete">Удалить</string>
     <string name="confirm_delete_question">Вы действительно хотите удалить этот профиль и все данные?</string>
     <string name="csv_export">Экспорт в CSV</string>
-    <string name="detail_last_month">прошлый месяц</string>
-    <string name="detail_this_month">текущий месяц</string>
     <string name="dialog_message_thank_you">Спасибо за поддержку!</string>
     <string name="dialog_message_pending_purchase">Ваша покупка пока не подтверждена Google Play.</string>
     <string name="dialog_msg_wifi_networks_progress">Поиск WiFi сетей</string>
@@ -45,10 +43,7 @@
     <string name="edit_tracker_working_hours_hint">Рабочих часов в день</string>
     <string name="label_auto_detection_off">Определение WiFi: отключено</string>
     <string name="label_auto_detection_on">Определение WiFi: включено</string>
-    <string name="label_toggle_clockin_state_end">Стоп</string>
-    <string name="label_toggle_clockin_state_start">Старт</string>
     <string name="manage_permissions">Управление разрешениями</string>
-    <string name="message_no_data">Нет данных</string>
     <string name="new_access_point_action_add">Добавить</string>
     <string name="new_access_point_action_ignore">Игнорировать</string>
     <string name="new_access_point_message">Найдено новое подключение</string>

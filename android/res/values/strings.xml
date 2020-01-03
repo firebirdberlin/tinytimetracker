@@ -12,7 +12,7 @@
     <string name="action_donate">Donate</string>
     <string name="action_edit">Edit account</string>
     <string name="action_edit_log_entry">edit</string>
-    <string name="action_join_log_entry">join</string>
+    <string name="action_join_log_entry">join with next entry</string>
     <string name="action_open_github">Contribute</string>
     <string name="action_pebble_app_store">Open Pebble App Store</string>
     <string name="action_recommend">Recommend</string>
@@ -30,8 +30,6 @@
     <string name="confirm_delete">Delete</string>
     <string name="confirm_delete_question">Do you really want to delete this tracker and all data ?</string>
     <string name="csv_export">CSV export</string>
-    <string name="detail_last_month">last month</string>
-    <string name="detail_this_month">this month</string>
     <string name="dialog_message_thank_you">Thank you very much for your donation.</string>
     <string name="dialog_message_pending_purchase">Your purchase was not yet confirmed by Google Play.</string>
     <string name="dialog_message_already_owned">This item was already bought.</string>
@@ -47,10 +45,7 @@
     <string name="edit_tracker_working_hours_hint">Daily working hours</string>
     <string name="label_auto_detection_off">WiFi detection: OFF</string>
     <string name="label_auto_detection_on">WiFi detection: ON</string>
-    <string name="label_toggle_clockin_state_end">Stop</string>
-    <string name="label_toggle_clockin_state_start">Start</string>
     <string name="manage_permissions">Manage permissions</string>
-    <string name="message_no_data">No data</string>
     <string name="new_access_point_action_add">Add</string>
     <string name="new_access_point_action_ignore">Ignore</string>
     <string name="new_access_point_message">A new access point was found for the account %1$s: %2$s (%3$s).</string>

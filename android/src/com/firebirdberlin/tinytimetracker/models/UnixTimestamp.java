@@ -36,7 +36,7 @@ public class UnixTimestamp {
     public String toLongerDateString() {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("EEE");
-        return sdf.format(date) +", " + toDateString();
+        return sdf.format(date) + ", " + toDateString();
     }
 
     public String toWeekString() {
@@ -49,6 +49,12 @@ public class UnixTimestamp {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("ww '(' yyyy ')'");
         return sdf.format(date);
+    }
+
+    public String toMonthYearString() {
+        Date date = new Date(timestamp);
+        SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
+        return df.format(date);
     }
 
     public String toYearString() {
@@ -104,10 +110,10 @@ public class UnixTimestamp {
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 
-    public static UnixTimestamp startOfLastMonth() {
+    public static UnixTimestamp startOfNextMonth() {
         Calendar cal = startOfTodayAsCalendar();
         cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.add(Calendar.MONTH, -1);
+        cal.add(Calendar.MONTH, 1);
         return new UnixTimestamp(cal.getTimeInMillis());
     }
 
