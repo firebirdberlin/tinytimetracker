@@ -123,8 +123,7 @@ public class CardFragment extends Fragment {
             List< Pair<Long, Long> > values = fetchData(start);
 
             long workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
-            int year = -1;
-            int weekOfYear = -1;
+            String weekString = "";
             LogSummary summary = null;
             for (Pair<Long, Long> e : values) {
                 UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
@@ -134,11 +133,11 @@ public class CardFragment extends Fragment {
                 logEntry.calculateSaldo(workingHoursInSeconds);
 
                 Calendar cal = timestamp.toCalendar();
+                String currentWeekString = timestamp.toWeekString();
                 int currentWeek = cal.get(Calendar.WEEK_OF_YEAR);
                 int currentYear = cal.get(Calendar.YEAR);
-                if ( currentYear != year || currentWeek != weekOfYear ) {
-                    year = currentYear;
-                    weekOfYear = currentWeek;
+                if (weekString != currentWeekString) {
+                    weekString = currentWeekString;
                     if (summary != null) {
                         Collections.reverse(summary.dailySummaries);
                         result.add(summary);
@@ -175,9 +174,9 @@ public class CardFragment extends Fragment {
         long workingHoursInSeconds = (int) (TinyTimeTracker.currentTracker.working_hours * 3600.f);
         LogSummary summary = new LogSummary(TinyTimeTracker.currentTracker);
         for (Pair<Long, Long> e : values) {
-            UnixTimestamp timestamp = new UnixTimestamp(e.first.longValue());
-            UnixTimestamp duration = new UnixTimestamp(e.second.longValue());
-            LogDailySummary logEntry = new LogDailySummary(e.first.longValue(), e.second.longValue());
+            UnixTimestamp timestamp = new UnixTimestamp(e.first);
+            UnixTimestamp duration = new UnixTimestamp(e.second);
+            LogDailySummary logEntry = new LogDailySummary(e.first, e.second);
             logEntry.calculateSaldo(workingHoursInSeconds);
             summary.dailySummaries.add(logEntry);
         }

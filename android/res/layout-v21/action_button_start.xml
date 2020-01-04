@@ -2,9 +2,12 @@
 <com.google.android.material.floatingactionbutton.FloatingActionButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:background="@drawable/ripple"
+    app:backgroundTint="@color/highlight"
+    app:rippleColor="#FFFFFF"
     android:id="@+id/action_button_start"
     android:layout_alignParentBottom="true"
-    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
@@ -12,7 +15,4 @@
     android:clickable="true"
     android:src="@drawable/ic_stop_blue_24dp"
     android:background="@drawable/ripple"
-    app:backgroundTint="@color/highlight"
-    app:rippleColor="#FFFFFF"
-    android:layout_alignParentEnd="true"
     android:focusable="true" />
