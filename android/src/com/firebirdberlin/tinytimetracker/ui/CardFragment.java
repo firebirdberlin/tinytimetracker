@@ -134,9 +134,7 @@ public class CardFragment extends Fragment {
 
                 Calendar cal = timestamp.toCalendar();
                 String currentWeekString = timestamp.toWeekString();
-                int currentWeek = cal.get(Calendar.WEEK_OF_YEAR);
-                int currentYear = cal.get(Calendar.YEAR);
-                if (weekString != currentWeekString) {
+                if (!weekString.equals(currentWeekString)) {
                     weekString = currentWeekString;
                     if (summary != null) {
                         Collections.reverse(summary.dailySummaries);
