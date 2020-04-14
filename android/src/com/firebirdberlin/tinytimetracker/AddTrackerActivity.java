@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -272,14 +273,23 @@ public class AddTrackerActivity extends AppCompatActivity {
     private void determineActiveNetworks() {
         if (!TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) return;
 
-        accessPointAdapter.clearActiveNetworks();
         List<ScanResult> networkList = wifiManager.getScanResults();
+
+        accessPointAdapter.clearActiveNetworks();
         if (networkList != null) {
             for (ScanResult network : networkList) {
                 accessPointAdapter.setActive(network.SSID, network.BSSID);
             }
-            accessPointAdapter.notifyDataSetChanged();
         }
+
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        if (wifiInfo != null) {
+            String bssid = wifiInfo.getBSSID();
+            String ssid = wifiInfo.getSSID();
+            if (ssid != null) ssid = ssid.replace("\"", "");
+            accessPointAdapter.setActive(bssid, ssid);
+        }
+        accessPointAdapter.notifyDataSetChanged();
     }
 
     private void showAddWifiDialog() {
@@ -293,19 +303,31 @@ public class AddTrackerActivity extends AppCompatActivity {
             for (ScanResult network : networkList) {
                 if (accessPointAdapter.indexOfBSSID(network.SSID, network.BSSID) == -1) {
                     AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
-                    adapter.add(accessPoint);
+                    adapter.addUnique(accessPoint);
                     adapter.addUnique(new AccessPoint(network.SSID, ""));
                 }
             }
         }
 
-        sort(activeAccessPoints);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        if (wifiInfo != null) {
+            String bssid = wifiInfo.getBSSID();
+            String ssid = wifiInfo.getSSID();
+            if (ssid != null) ssid = ssid.replace("\"", "");
+            if (accessPointAdapter.indexOfBSSID(ssid, bssid) == -1) {
+                AccessPoint accessPoint = new AccessPoint(ssid, bssid);
+                adapter.addUnique(accessPoint);
+                adapter.addUnique(new AccessPoint(ssid, ""));
+            }
+        }
 
+        sort(activeAccessPoints);
         determineActiveNetworks();
 
-        if (networkList == null) {
+        if (adapter.getCount() == 0) {
             return;
         }
+
         new AlertDialog.Builder(this)
         .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
         .setIcon(R.drawable.ic_wifi_blue_24dp)
@@ -471,5 +493,4 @@ public class AddTrackerActivity extends AppCompatActivity {
             }
         });
     }
-
 }
