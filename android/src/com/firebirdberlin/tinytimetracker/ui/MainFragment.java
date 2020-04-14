@@ -136,7 +136,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             public void onClick(View v) {
                 TinyTimeTracker.checkAndRequestPermission(
                         (AppCompatActivity) getActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
                         1
                 );
             }
@@ -181,7 +181,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
 
             if (shallShowWifiCard
-                    && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
                 cardviewLocationPermission.setVisibility(View.VISIBLE);
             } else {
                 cardviewLocationPermission.setVisibility(View.GONE);
@@ -264,7 +264,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             if (shallCheckPerms) {
                 TinyTimeTracker.checkAndRequestPermission(
                         (AppCompatActivity) getActivity(),
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
                         1
                 );
             }

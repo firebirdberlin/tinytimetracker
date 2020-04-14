@@ -98,7 +98,10 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         useAutoDetection = Settings.useAutoDetection(mContext);
 
-        if (TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK)) {
+        if (
+                TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK)
+                        && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+        ) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
             if (!wifiLock.isHeld()) {
@@ -110,7 +113,7 @@ public class WiFiService extends Service {
         updateTrackersInManualMode();
 
         if (TinyTimeTracker.isAirplaneModeOn(mContext) ||
-                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)) {
             Log.i(TAG, "Airplane mode enabled or permission not granted.");
 
             long now = System.currentTimeMillis();
@@ -123,12 +126,14 @@ public class WiFiService extends Service {
         Log.i(TAG, "WIFI SERVICE starts ...");
         if (!wifiManager.isWifiEnabled()) {
             Log.i(TAG, "WIFI is currently disabled");
-            wifiWasEnabled = wifiManager.setWifiEnabled(true);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                wifiWasEnabled = wifiManager.setWifiEnabled(true);
+            }
         }
 
         final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(wifiReceiver, filter);
-        Log.i(TAG, "Receiver registerd.");
+        Log.i(TAG, "Receiver registered.");
 
         boolean success = wifiManager.startScan();
         if (!success) {
@@ -174,8 +179,10 @@ public class WiFiService extends Service {
         handler.removeCallbacks(stopOnTimeout);
         unregister(wifiReceiver);
 
-        if (shallDisableWifi()) {
-            wifiManager.setWifiEnabled(false);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (shallDisableWifi()) {
+                wifiManager.setWifiEnabled(false);
+            }
         }
 
         updateNotifications();
@@ -194,10 +201,7 @@ public class WiFiService extends Service {
 
         if (autoDisableWifi && !tracked_wifi_network_found) {
             return true;
-        } else if (!autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled()) {
-            return true;
-        }
-        return false;
+        } else return !autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled();
     }
 
     private boolean isAutoDiscoverActive(long tracker_id) {

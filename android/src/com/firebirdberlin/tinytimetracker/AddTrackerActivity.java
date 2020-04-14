@@ -53,7 +53,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     private ProgressDialog progress = null;
 
     private final int RED = Color.parseColor("#f44336");
-    private final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
+    private final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +63,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         this.getApplicationContext();
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.action_edit));
 
         setSupportActionBar(toolbar);
@@ -216,14 +216,14 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_COARSE_LOCATION) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_FINE_LOCATION) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "permission ACCESS_COARSE_LOCATION granted");
+                Log.d(TAG, "permission ACCESS_FINE_LOCATION granted");
                 onChooseWifi(null);
             } else {
-                Log.e(TAG, "permission ACCESS_COARSE_LOCATION denied");
+                Log.e(TAG, "permission ACCESS_FINE_LOCATION denied");
             }
         }
     }
@@ -237,15 +237,17 @@ public class AddTrackerActivity extends AppCompatActivity {
             }
         }
 
-        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION,
-                                                  PERMISSIONS_REQUEST_COARSE_LOCATION);
-        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
+        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                PERMISSIONS_REQUEST_FINE_LOCATION);
+        if (!TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) return;
 
         final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerWifiReceiver(filter);
 
-        boolean res = wifiManager.setWifiEnabled(true);
-        Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            boolean res = wifiManager.setWifiEnabled(true);
+            Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
+        }
         wifiManager.startScan();
         String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
         String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
@@ -268,7 +270,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     };
 
     private void determineActiveNetworks() {
-        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
+        if (!TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) return;
 
         accessPointAdapter.clearActiveNetworks();
         List<ScanResult> networkList = wifiManager.getScanResults();

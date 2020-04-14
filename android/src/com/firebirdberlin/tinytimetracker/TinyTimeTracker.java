@@ -94,7 +94,11 @@ public class TinyTimeTracker extends BillingHelperActivity
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, 120000, sender);
+        if (am != null) {
+            long ONE_MINUTE = 60000;
+            long TWO_MINUTES = 2 * ONE_MINUTE;
+            am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, TWO_MINUTES, sender);
+        }
     }
 
     @SuppressLint("NewApi")
