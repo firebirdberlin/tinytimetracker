@@ -46,7 +46,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = "AddTrackerActivity";
     private TrackerEntry tracker = null;
     private AccessPointAdapter accessPointAdapter = null;
-    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+    private ArrayList<AccessPoint> accessPoints = new ArrayList<>();
     private EditText edit_tracker_verbose_name = null;
     private EditText edit_tracker_working_hours = null;
     private ListView listView = null;
@@ -71,7 +71,9 @@ public class AddTrackerActivity extends AppCompatActivity {
 
         // Enable the Up button
         ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
 
         Intent intent = getIntent();
         long tracker_id = intent.getLongExtra("tracker_id", -1L);
@@ -238,22 +240,33 @@ public class AddTrackerActivity extends AppCompatActivity {
             }
         }
 
-        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION,
-                PERMISSIONS_REQUEST_FINE_LOCATION);
-        if (!TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) return;
-
-        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerWifiReceiver(filter);
+        boolean hasPermission = TinyTimeTracker.checkAndRequestPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION,
+                PERMISSIONS_REQUEST_FINE_LOCATION
+        );
+        if (!hasPermission) return;
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+            registerWifiReceiver(filter);
+
             boolean res = wifiManager.setWifiEnabled(true);
             Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
+            wifiManager.startScan();
+            String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
+            String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
+            progress = ProgressDialog.show(this, title, msg, true);
+            setWifiReceiverTimeout(60000);
+        } else {
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            if (wifiInfo != null) {
+                AccessPoint accessPoint = new AccessPoint(wifiInfo);
+                accessPointAdapter.addUnique(accessPoint);
+                accessPointAdapter.addUnique(new AccessPoint(accessPoint.ssid, ""));
+                sort(accessPoints);
+                accessPointAdapter.notifyDataSetChanged();
+            }
         }
-        wifiManager.startScan();
-        String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
-        String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
-        progress = ProgressDialog.show(this,title, msg, true);
-        setWifiReceiverTimeout(60000);
     }
 
     public void setWifiReceiverTimeout(long time) {

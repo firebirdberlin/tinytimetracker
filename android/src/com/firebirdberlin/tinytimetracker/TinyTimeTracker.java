@@ -78,11 +78,14 @@ public class TinyTimeTracker extends BillingHelperActivity
         return true;
     }
 
-    public static void checkAndRequestPermission(AppCompatActivity activity, String permission,
-                                                 int requestCode) {
+    public static boolean checkAndRequestPermission(
+            AppCompatActivity activity, String permission, int requestCode
+    ) {
         if (!hasPermission(activity, permission)) {
             ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
+            return false;
         }
+        return true;
     }
 
     public static boolean hasPermission(Context context, String permission) {
