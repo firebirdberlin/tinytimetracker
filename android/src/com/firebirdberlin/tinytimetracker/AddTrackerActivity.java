@@ -42,6 +42,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.firebirdberlin.tinytimetracker.Utility.equal;
+
 public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = "AddTrackerActivity";
     private TrackerEntry tracker = null;
@@ -205,7 +207,7 @@ public class AddTrackerActivity extends AppCompatActivity {
             String ssid = accessPoint.ssid;
             while (position < accessPoints.size()) {
                 AccessPoint ap = accessPoints.get(position);
-                if (!ap.ssid.equals(ssid)) break;
+                if (!equal(ap.ssid, ssid)) break;
                 accessPoints.remove(position);
                 toDelete.add(ap);
             }
@@ -306,7 +308,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     private void showAddWifiDialog() {
-        final LinkedList<AccessPoint> activeAccessPoints = new LinkedList<AccessPoint>();
+        final LinkedList<AccessPoint> activeAccessPoints = new LinkedList<>();
         final AccessPointAdapter adapter = new AccessPointAdapter(
                 this, R.layout.list_2_lines, activeAccessPoints
         );
@@ -498,9 +500,14 @@ public class AddTrackerActivity extends AppCompatActivity {
         Collections.sort(accessPoints, new Comparator<AccessPoint>() {
             @Override
             public int compare(AccessPoint item1, AccessPoint item2) {
-                int comp1 = item1.ssid.compareTo(item2.ssid);
+                String ssid1 = (item1.ssid == null) ? "" : item1.ssid;
+                String ssid2 = (item2.ssid == null) ? "" : item2.ssid;
+                int comp1 = ssid1.compareTo(ssid2);
                 if (comp1 == 0) {
-                    return item1.bssid.compareTo(item2.bssid);
+                    String bssid1 = (item1.bssid == null) ? "" : item1.bssid;
+                    String bssid2 = (item2.bssid == null) ? "" : item2.bssid;
+
+                    return bssid1.compareTo(bssid2);
                 }
                 return comp1;
             }

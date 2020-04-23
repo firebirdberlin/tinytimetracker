@@ -13,6 +13,8 @@ import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.firebirdberlin.tinytimetracker.Utility.equal;
+
 public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
     private Context mContext;
     private int viewid;
@@ -69,13 +71,14 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         for (int i = 0; i < getCount() ; i++ ) {
             AccessPoint ap = getItem(i);
 
-            if (ap.bssid.equals(bssid) && ap.ssid.equals(ssid)) {
+            if (equal(ap.bssid, bssid) && equal(ap.ssid, ssid)) {
                 return i;
             }
         }
 
         return -1;
     }
+
 
     void clearActiveNetworks() {
         activeBSSIDs.clear();
@@ -92,7 +95,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
 
         for (String item : activeBSSIDs) {
             String[] parts = item.split("\\|");
-            if (parts.length > 1 && parts[1].equals(ssid)) {
+            if (parts.length > 1 && equal(parts[1], ssid)) {
                 return;
             }
         }
@@ -117,7 +120,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         HashSet<String> bssids = new HashSet<>();
         for (int i = 0; i < getCount(); i++) {
             AccessPoint ap = getItem(i);
-            if (ap.ssid.equals(ssid) && !ap.bssid.isEmpty()) {
+            if (equal(ap.ssid, ssid) && !ap.bssid.isEmpty()) {
                 bssids.add(ap.bssid);
             }
         }
@@ -130,7 +133,7 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         HashSet<String> bssids = new HashSet<>();
         for (int i = 0; i < getCount(); i++) {
             AccessPoint ap = getItem(i);
-            if (ap.ssid.equals(ssid) && !ap.bssid.isEmpty()) {
+            if (equal(ap.ssid, ssid) && !ap.bssid.isEmpty()) {
                 bssids.add(ap.bssid);
             }
         }

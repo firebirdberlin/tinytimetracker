@@ -71,6 +71,13 @@ public class Utility {
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
                 || "google_sdk".equals(Build.PRODUCT);
     }
+
+    public static boolean equal(String string, String other) {
+        if (string == null) return false;
+        if (other == null) return false;
+
+        return string.equals(other);
+    }
 }
 
 
