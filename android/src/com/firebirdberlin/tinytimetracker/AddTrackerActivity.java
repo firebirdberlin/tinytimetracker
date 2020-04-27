@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,11 +42,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.firebirdberlin.tinytimetracker.Utility.equal;
+
 public class AddTrackerActivity extends AppCompatActivity {
     private static String TAG = "AddTrackerActivity";
     private TrackerEntry tracker = null;
     private AccessPointAdapter accessPointAdapter = null;
-    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
+    private ArrayList<AccessPoint> accessPoints = new ArrayList<>();
     private EditText edit_tracker_verbose_name = null;
     private EditText edit_tracker_working_hours = null;
     private ListView listView = null;
@@ -53,7 +56,7 @@ public class AddTrackerActivity extends AppCompatActivity {
     private ProgressDialog progress = null;
 
     private final int RED = Color.parseColor("#f44336");
-    private final int PERMISSIONS_REQUEST_COARSE_LOCATION = 1;
+    private final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +66,16 @@ public class AddTrackerActivity extends AppCompatActivity {
         this.getApplicationContext();
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getResources().getString(R.string.action_edit));
 
         setSupportActionBar(toolbar);
 
         // Enable the Up button
         ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
 
         Intent intent = getIntent();
         long tracker_id = intent.getLongExtra("tracker_id", -1L);
@@ -202,7 +207,7 @@ public class AddTrackerActivity extends AppCompatActivity {
             String ssid = accessPoint.ssid;
             while (position < accessPoints.size()) {
                 AccessPoint ap = accessPoints.get(position);
-                if (!ap.ssid.equals(ssid)) break;
+                if (!equal(ap.ssid, ssid)) break;
                 accessPoints.remove(position);
                 toDelete.add(ap);
             }
@@ -216,14 +221,14 @@ public class AddTrackerActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_COARSE_LOCATION) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_FINE_LOCATION) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "permission ACCESS_COARSE_LOCATION granted");
+                Log.d(TAG, "permission ACCESS_FINE_LOCATION granted");
                 onChooseWifi(null);
             } else {
-                Log.e(TAG, "permission ACCESS_COARSE_LOCATION denied");
+                Log.e(TAG, "permission ACCESS_FINE_LOCATION denied");
             }
         }
     }
@@ -237,20 +242,33 @@ public class AddTrackerActivity extends AppCompatActivity {
             }
         }
 
-        TinyTimeTracker.checkAndRequestPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION,
-                                                  PERMISSIONS_REQUEST_COARSE_LOCATION);
-        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
+        boolean hasPermission = TinyTimeTracker.checkAndRequestPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION,
+                PERMISSIONS_REQUEST_FINE_LOCATION
+        );
+        if (!hasPermission) return;
 
-        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerWifiReceiver(filter);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+            registerWifiReceiver(filter);
 
-        boolean res = wifiManager.setWifiEnabled(true);
-        Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
-        wifiManager.startScan();
-        String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
-        String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
-        progress = ProgressDialog.show(this,title, msg, true);
-        setWifiReceiverTimeout(60000);
+            boolean res = wifiManager.setWifiEnabled(true);
+            Log.i(TAG, "Wifi was " + ((res) ? "" : "not") + " enabled ");
+            wifiManager.startScan();
+            String title = getResources().getString(R.string.dialog_title_wifi_networks_progress);
+            String msg = getResources().getString(R.string.dialog_msg_wifi_networks_progress);
+            progress = ProgressDialog.show(this, title, msg, true);
+            setWifiReceiverTimeout(60000);
+        } else {
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            if (wifiInfo != null) {
+                AccessPoint accessPoint = new AccessPoint(wifiInfo);
+                accessPointAdapter.addUnique(accessPoint);
+                accessPointAdapter.addUnique(new AccessPoint(accessPoint.ssid, ""));
+                sort(accessPoints);
+                accessPointAdapter.notifyDataSetChanged();
+            }
+        }
     }
 
     public void setWifiReceiverTimeout(long time) {
@@ -268,20 +286,29 @@ public class AddTrackerActivity extends AppCompatActivity {
     };
 
     private void determineActiveNetworks() {
-        if (! TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) return;
+        if (!TinyTimeTracker.hasPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) return;
+
+        List<ScanResult> networkList = wifiManager.getScanResults();
 
         accessPointAdapter.clearActiveNetworks();
-        List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
                 accessPointAdapter.setActive(network.SSID, network.BSSID);
             }
-            accessPointAdapter.notifyDataSetChanged();
         }
+
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        if (wifiInfo != null) {
+            String bssid = wifiInfo.getBSSID();
+            String ssid = wifiInfo.getSSID();
+            if (ssid != null) ssid = ssid.replace("\"", "");
+            accessPointAdapter.setActive(bssid, ssid);
+        }
+        accessPointAdapter.notifyDataSetChanged();
     }
 
     private void showAddWifiDialog() {
-        final LinkedList<AccessPoint> activeAccessPoints = new LinkedList<AccessPoint>();
+        final LinkedList<AccessPoint> activeAccessPoints = new LinkedList<>();
         final AccessPointAdapter adapter = new AccessPointAdapter(
                 this, R.layout.list_2_lines, activeAccessPoints
         );
@@ -291,19 +318,31 @@ public class AddTrackerActivity extends AppCompatActivity {
             for (ScanResult network : networkList) {
                 if (accessPointAdapter.indexOfBSSID(network.SSID, network.BSSID) == -1) {
                     AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
-                    adapter.add(accessPoint);
+                    adapter.addUnique(accessPoint);
                     adapter.addUnique(new AccessPoint(network.SSID, ""));
                 }
             }
         }
 
-        sort(activeAccessPoints);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        if (wifiInfo != null) {
+            String bssid = wifiInfo.getBSSID();
+            String ssid = wifiInfo.getSSID();
+            if (ssid != null) ssid = ssid.replace("\"", "");
+            if (accessPointAdapter.indexOfBSSID(ssid, bssid) == -1) {
+                AccessPoint accessPoint = new AccessPoint(ssid, bssid);
+                adapter.addUnique(accessPoint);
+                adapter.addUnique(new AccessPoint(ssid, ""));
+            }
+        }
 
+        sort(activeAccessPoints);
         determineActiveNetworks();
 
-        if (networkList == null) {
+        if (adapter.getCount() == 0) {
             return;
         }
+
         new AlertDialog.Builder(this)
         .setTitle(getResources().getString(R.string.dialog_title_wifi_networks))
         .setIcon(R.drawable.ic_wifi_blue_24dp)
@@ -461,13 +500,17 @@ public class AddTrackerActivity extends AppCompatActivity {
         Collections.sort(accessPoints, new Comparator<AccessPoint>() {
             @Override
             public int compare(AccessPoint item1, AccessPoint item2) {
-                int comp1 = item1.ssid.compareTo(item2.ssid);
+                String ssid1 = (item1.ssid == null) ? "" : item1.ssid;
+                String ssid2 = (item2.ssid == null) ? "" : item2.ssid;
+                int comp1 = ssid1.compareTo(ssid2);
                 if (comp1 == 0) {
-                    return item1.bssid.compareTo(item2.bssid);
+                    String bssid1 = (item1.bssid == null) ? "" : item1.bssid;
+                    String bssid2 = (item2.bssid == null) ? "" : item2.bssid;
+
+                    return bssid1.compareTo(bssid2);
                 }
                 return comp1;
             }
         });
     }
-
 }

@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.BatteryManager;
@@ -60,6 +61,7 @@ public class WiFiService extends Service {
     private boolean wifiWasEnabled = false;
     private boolean service_is_running = false;
     private TrackerEntry active_tracker = null;
+    private List<AccessPoint> activeAccessPoints = new ArrayList<>();
     private Runnable stopOnTimeout = new Runnable() {
         @Override
         public void run() {
@@ -67,13 +69,23 @@ public class WiFiService extends Service {
             stopSelf();
         }
     };
+
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
             Log.i(TAG, "WiFi Scan successfully completed");
             handler.removeCallbacks(stopOnTimeout);
+            getActiveAccessPoints();
             getWiFiNetworks();
         }
     };
+
+    private void getActiveAccessPoints() {
+        List<ScanResult> networkList = wifiManager.getScanResults();
+        activeAccessPoints.clear();
+        for (ScanResult network : networkList) {
+            activeAccessPoints.add(new AccessPoint(network.SSID, network.BSSID));
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -98,7 +110,10 @@ public class WiFiService extends Service {
         showNotifications = Settings.showNotifications(mContext);
         useAutoDetection = Settings.useAutoDetection(mContext);
 
-        if (TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK)) {
+        if (
+                TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK)
+                        && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+        ) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
             if (!wifiLock.isHeld()) {
@@ -106,11 +121,11 @@ public class WiFiService extends Service {
             }
         }
 
-        // manually tracked accounts can be updated even if the device is complety in flight mode
+        // manually tracked accounts can be updated even if the device is completely in flight mode
         updateTrackersInManualMode();
 
         if (TinyTimeTracker.isAirplaneModeOn(mContext) ||
-                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                !TinyTimeTracker.hasPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)) {
             Log.i(TAG, "Airplane mode enabled or permission not granted.");
 
             long now = System.currentTimeMillis();
@@ -121,26 +136,43 @@ public class WiFiService extends Service {
         }
 
         Log.i(TAG, "WIFI SERVICE starts ...");
-        if (!wifiManager.isWifiEnabled()) {
-            Log.i(TAG, "WIFI is currently disabled");
-            wifiWasEnabled = wifiManager.setWifiEnabled(true);
-        }
-
-        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(wifiReceiver, filter);
-        Log.i(TAG, "Receiver registerd.");
-
-        boolean success = wifiManager.startScan();
-        if (!success) {
-            if (isPebbleConnected()) {
-                sendDataToPebble("");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (!wifiManager.isWifiEnabled()) {
+                Log.i(TAG, "WIFI is currently disabled");
+                wifiWasEnabled = wifiManager.setWifiEnabled(true);
             }
 
-            stopUnsuccessfulStartAttempt();
-            return Service.START_NOT_STICKY;
-        }
+            final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+            registerReceiver(wifiReceiver, filter);
+            Log.i(TAG, "Receiver registered.");
 
-        handler.postDelayed(stopOnTimeout, 30000);
+            boolean success = wifiManager.startScan();
+            if (!success) {
+                if (isPebbleConnected()) {
+                    sendDataToPebble("");
+                }
+
+                stopUnsuccessfulStartAttempt();
+                return Service.START_NOT_STICKY;
+            }
+
+            handler.postDelayed(stopOnTimeout, 30000);
+        } else { // android 10 and above
+
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            if (!wifiManager.isWifiEnabled() || wifiInfo == null) {
+                Log.i(TAG, "WIFI is currently disabled");
+                if (isPebbleConnected()) {
+                    sendDataToPebble("");
+                }
+
+                stopUnsuccessfulStartAttempt();
+                return Service.START_NOT_STICKY;
+            }
+            activeAccessPoints.clear();
+            activeAccessPoints.add(new AccessPoint(wifiInfo));
+            getWiFiNetworks();
+        }
         return Service.START_NOT_STICKY;
     }
 
@@ -174,8 +206,10 @@ public class WiFiService extends Service {
         handler.removeCallbacks(stopOnTimeout);
         unregister(wifiReceiver);
 
-        if (shallDisableWifi()) {
-            wifiManager.setWifiEnabled(false);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (shallDisableWifi()) {
+                wifiManager.setWifiEnabled(false);
+            }
         }
 
         updateNotifications();
@@ -194,10 +228,7 @@ public class WiFiService extends Service {
 
         if (autoDisableWifi && !tracked_wifi_network_found) {
             return true;
-        } else if (!autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled()) {
-            return true;
-        }
-        return false;
+        } else return !autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled();
     }
 
     private boolean isAutoDiscoverActive(long tracker_id) {
@@ -336,32 +367,13 @@ public class WiFiService extends Service {
 
     private Set<TrackerEntry> getTrackersToUpdate(LogDataSource datasource) {
         Set<TrackerEntry> trackersToUpdate = new HashSet<>();
-        List<ScanResult> networkList = wifiManager.getScanResults();
         Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
 
-        for (ScanResult network : networkList) {
-            if (trackedBSSIDs.contains(network.BSSID)) {
-                Log.d(TAG, network.BSSID);
-                Set<TrackerEntry> trackers = datasource.getTrackersByBSSID(network.BSSID);
+        for (AccessPoint accessPoint : activeAccessPoints) {
+            if (trackedBSSIDs.contains(accessPoint.bssid)) {
+                Log.d(TAG, accessPoint.bssid);
+                Set<TrackerEntry> trackers = datasource.getTrackersByBSSID(accessPoint.bssid);
                 trackersToUpdate.addAll(trackers);
-            }
-        }
-
-        /* Legacy code; support the old database format which does not consider BSSIDs
-         * (< version 3)
-         * Newer database versions still have the attribute 'name' but it contains the value
-         * '_deprecated_'
-         */
-        Set<String> trackedSSIDs = datasource.getTrackedSSIDs("WLAN");
-
-        for (ScanResult network : networkList) {
-            if (trackedSSIDs.contains(network.SSID)) {
-                Log.d(TAG, network.SSID);
-                TrackerEntry tracker = datasource.getTrackerBySSID(network.SSID);
-
-                if (tracker != null) {
-                    trackersToUpdate.add(tracker);
-                }
             }
         }
 
@@ -400,8 +412,6 @@ public class WiFiService extends Service {
         ArrayList<AccessPoint> knownAccessPoints =
                 (ArrayList<AccessPoint>) datasource.getAllAccessPoints();
 
-        List<ScanResult> networkList = wifiManager.getScanResults();
-
         HashMap<Long, HashSet<AccessPoint>> knownAccessPointsByTrackerId = new HashMap<>();
         for (AccessPoint ap : knownAccessPoints) {
             long tracker_id = ap.getTrackerID();
@@ -416,9 +426,9 @@ public class WiFiService extends Service {
         }
 
         HashMap<Long, ArrayList<AccessPoint>> unknownAccessPointsByTrackerId = new HashMap<>();
-        for (ScanResult network : networkList) {
-            String ssid = network.SSID;
-            String bssid = network.BSSID;
+        for (AccessPoint accessPoint : activeAccessPoints) {
+            String ssid = accessPoint.ssid;
+            String bssid = accessPoint.bssid;
             Log.i(TAG, "? " + ssid + " " + bssid);
 
             for (long tracker_id : knownAccessPointsByTrackerId.keySet()) {

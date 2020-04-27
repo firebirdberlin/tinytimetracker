@@ -1,5 +1,7 @@
 package com.firebirdberlin.tinytimetracker.models;
 
+import android.net.wifi.WifiInfo;
+
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 
 public class AccessPoint {
@@ -13,6 +15,16 @@ public class AccessPoint {
 
 
     public AccessPoint(String ssid, String bssid){
+        this.id = -1L;
+        this.tracker_id = -1L;
+        this.ssid = ssid;
+        this.bssid = bssid;
+    }
+
+    public AccessPoint(WifiInfo wifiInfo) {
+        String bssid = wifiInfo.getBSSID();
+        String ssid = wifiInfo.getSSID();
+        if (ssid != null) ssid = ssid.replace("\"", "");
         this.id = -1L;
         this.tracker_id = -1L;
         this.ssid = ssid;
