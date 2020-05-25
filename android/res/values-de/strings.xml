@@ -19,6 +19,7 @@
     <string name="activate_wifi_auto_discover">Auto-Scan (1h)</string>
     <string name="aggregation_week">Woche</string>
     <string name="app_name">Zeiterfassung</string>
+    <string name="buy">Kaufen</string>
     <string name="change">Ändern</string>
     <string name="channel_description_new_access_points">Zeigt Benachrichtigungen für neue Access Points.</string>
     <string name="channel_description_service">Zeigt an, dass der Hintergrundservice aktiv ist.</string>
@@ -65,7 +66,7 @@
     <string name="pref_title_theme">Darstellung</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
     <string name="pref_wifi_settings">WLAN</string>
-    <string name="purchase_pro_version">Pro-Version kaufen</string>
+    <string name="purchase_pro_version">Jetzt auf die Pro-Version upgraden !</string>
     <string name="recommend_app_desc">Wählen Sie eine App aus, mit der Sie Ihre Empfehlung posten möchten.</string>
     <string name="recommend_app_subject">Ich möchte dir diese App zur Zeiterfassung empfehlen.</string>
     <string name="service_in_progress">Der Hintergrundservice ist aktiv.</string>

@@ -20,6 +20,7 @@
     <string name="activate_wifi_auto_discover">Discover (1h)</string>
     <string name="aggregation_week">Week</string>
     <string name="app_name">TinyTimeTracker</string>
+    <string name="buy">Buy</string>
     <string name="change">Change</string>
     <string name="channel_description_new_access_points">Shows notifications for new access points for your current tracker.</string>
     <string name="channel_description_service">Indicates when the background service is in progress.</string>
@@ -68,7 +69,7 @@
     <string name="pref_title_theme">Theme</string>
     <string name="pref_unit_notification_interval_minutes">min</string>
     <string name="pref_wifi_settings">Wifi</string>
-    <string name="purchase_pro_version">Buy the professional version</string>
+    <string name="purchase_pro_version">Upgrade to the professional version now !</string>
     <string name="recommend_app_desc">Choose an app to share your recommendation.</string>
     <string name="recommend_app_subject">I would like to recommend this time tracking app to you.</string>
     <string name="service_in_progress">Background service is active.</string>

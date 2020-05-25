@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.text.format.DateFormat;
 
@@ -11,6 +12,8 @@ import androidx.core.content.res.ResourcesCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class Utility {
 
@@ -49,6 +52,13 @@ public class Utility {
         }
     }
 
+    public static long getDaysSinceFirstInstall(Context context) {
+        long firstInstall = getFirstInstallTime(context);
+        if (firstInstall == -1L) return -1L;
+        long msDiff = Calendar.getInstance().getTimeInMillis() - firstInstall;
+        return TimeUnit.MILLISECONDS.toDays(msDiff);
+    }
+
     public static long getDateAsLong(int year, int month, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, day);
@@ -77,6 +87,16 @@ public class Utility {
         if (other == null) return false;
 
         return string.equals(other);
+    }
+
+    public static int getRandomMaterialColor(Context context) {
+        int[] colors = context.getResources().getIntArray(R.array.materialColors);
+        return colors[new Random().nextInt(colors.length)];
+    }
+
+    public static int getContrastColor(int color) {
+        double y = (299 * Color.red(color) + 587 * Color.green(color) + 114 * Color.blue(color)) / 1000;
+        return y >= 128 ? Color.BLACK : Color.WHITE;
     }
 }
 

@@ -109,7 +109,7 @@
             android:title="Translations wanted !"
             android:summary="Please add or update the translation for your language.">
             <intent android:action="android.intent.action.VIEW"
-                android:data="https://nightclock.duckdns.org/apps/TinyTimeTracker/translation"/>
+                android:data="https://firebirdberlin.github.io/tinytimetracker/translation.html"/>
         </Preference>
 
         <Preference

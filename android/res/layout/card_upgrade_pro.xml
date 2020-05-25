@@ -2,15 +2,14 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardview_warn_gps_off"
+    android:id="@+id/cardview_upgrade_pro"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:visibility="gone"
-    card_view:cardBackgroundColor="@color/colorBackgroundAlert"
-    card_view:cardCornerRadius="4dp"
+    card_view:cardCornerRadius="10dp"
     card_view:cardElevation="10dp"
-    card_view:cardUseCompatPadding="true">
+    card_view:cardUseCompatPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,25 +17,29 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/textview_upgrade_pro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"
-            android:text="@string/warning_location_services_off"
-            android:textSize="16sp"
-            android:textStyle="normal"/>
+            android:text="@string/purchase_pro_version"
+            android:textSize="20sp"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:gravity="center_horizontal" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <Button
-                android:id="@+id/button_location_providers"
+                android:id="@+id/button_update_pro_version"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:text="@string/change" />
+                android:textSize="18sp"
+                android:text="@string/buy" />
 
         </RelativeLayout>
     </LinearLayout>

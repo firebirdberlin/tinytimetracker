@@ -8,13 +8,13 @@
         android:layout_width="0px"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
         <include layout="@layout/card_permission_not_granted" />
 
         <include layout="@layout/card_gps_off"/>
 
+        <include layout="@layout/card_upgrade_pro"/>
 
         <com.firebirdberlin.tinytimetracker.ui.MainView
             android:id="@+id/main_time_view"

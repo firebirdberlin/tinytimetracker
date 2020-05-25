@@ -29,6 +29,7 @@ import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.Settings;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.Utility;
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
 import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
@@ -61,13 +62,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = "MainFragment";
     EventBus bus = EventBus.getDefault();
     private Button button_toggle_wifi = null;
+    private Button button_buy = null;
     private Spinner spinner = null;
     private TextView textviewCummulatedTime = null;
     private TextView textviewMeanDuration = null;
     private TextView textviewSaldo = null;
     private TextView textviewWhen = null;
+    private TextView textviewUpgradePro = null;
     private CardView cardviewLocationProviderOff = null;
     private CardView cardviewLocationPermission = null;
+    private CardView cardviewProVersion = null;
     private View trackerToolbar = null;
     private MainView timeView = null;
     private List<TrackerEntry> trackers = new ArrayList<>();
@@ -89,9 +93,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         textviewCummulatedTime = v.findViewById(R.id.textview_cummulated_time);
         cardviewLocationProviderOff = v.findViewById(R.id.cardview_warn_gps_off);
         cardviewLocationPermission = v.findViewById(R.id.cardview_warn_location_permission_not_granted);
+        cardviewProVersion = v.findViewById(R.id.cardview_upgrade_pro);
+        textviewUpgradePro = v.findViewById(R.id.textview_upgrade_pro);
         trackerToolbar = v.findViewById(R.id.tracker_toolbar);
         button_toggle_wifi = v.findViewById(R.id.button_toggle_wifi);
         button_toggle_wifi.setOnClickListener(this);
+        button_buy = v.findViewById(R.id.button_update_pro_version);
+        button_buy.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
 
         loadTrackers();
@@ -186,6 +194,24 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             } else {
                 cardviewLocationPermission.setVisibility(View.GONE);
             }
+
+            TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
+            if (cardviewLocationPermission.getVisibility() != View.GONE
+                    && cardviewLocationProviderOff.getVisibility() != View.GONE) {
+                cardviewProVersion.setVisibility(View.GONE);
+            } else if (
+                    mainActivity != null
+                    && !mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)
+                    && Utility.getDaysSinceFirstInstall(getContext()) > 30
+            ) {
+                int backgroundColor = Utility.getRandomMaterialColor(getContext());
+                int textColor = Utility.getContrastColor(backgroundColor);
+                cardviewProVersion.setBackgroundColor(backgroundColor);
+                textviewUpgradePro.setTextColor(textColor);
+                button_buy.setTextColor(textColor);
+                cardviewProVersion.setVisibility(View.VISIBLE);
+            }
+
         }
     }
 
@@ -273,6 +299,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         } else
         if (v.equals(actionButtonStart)) {
             handleClockinStateChange();
+        } else
+        if (v.equals(button_buy)) {
+            TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
+            if (!mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)) {
+                mainActivity.launchBillingFlow(TinyTimeTracker.ITEM_PRO);
+            }
         }
     }
 
