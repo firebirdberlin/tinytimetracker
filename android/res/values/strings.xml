@@ -20,8 +20,9 @@
     <string name="activate_wifi_auto_discover">Discover (1h)</string>
     <string name="aggregation_week">Week</string>
     <string name="app_name">TinyTimeTracker</string>
-    <string name="buy">Buy</string>
-    <string name="change">Change</string>
+    <string name="buy">buy</string>
+    <string name="later">later</string>
+    <string name="change">change</string>
     <string name="channel_description_new_access_points">Shows notifications for new access points for your current tracker.</string>
     <string name="channel_description_service">Indicates when the background service is in progress.</string>
     <string name="channel_description_status">Shows notifications about the status of your current tracker.</string>

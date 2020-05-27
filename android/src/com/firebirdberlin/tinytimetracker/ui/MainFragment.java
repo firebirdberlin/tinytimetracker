@@ -63,6 +63,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     EventBus bus = EventBus.getDefault();
     private Button button_toggle_wifi = null;
     private Button button_buy = null;
+    private Button button_later = null;
     private Spinner spinner = null;
     private TextView textviewCummulatedTime = null;
     private TextView textviewMeanDuration = null;
@@ -100,6 +101,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         button_toggle_wifi.setOnClickListener(this);
         button_buy = v.findViewById(R.id.button_update_pro_version);
         button_buy.setOnClickListener(this);
+        button_later = v.findViewById(R.id.button_update_later);
+        button_later.setOnClickListener(this);
         trackerToolbar.setVisibility(View.GONE);
 
         loadTrackers();
@@ -201,17 +204,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 cardviewProVersion.setVisibility(View.GONE);
             } else if (
                     mainActivity != null
-                    && !mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)
-                    && Utility.getDaysSinceFirstInstall(getContext()) > 30
+                    && !(mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)
+                            || mainActivity.isPurchased(TinyTimeTracker.ITEM_DONATION))
+                    && Settings.shallAskForUpgrade(getContext())
             ) {
                 int backgroundColor = Utility.getRandomMaterialColor(getContext());
                 int textColor = Utility.getContrastColor(backgroundColor);
                 cardviewProVersion.setBackgroundColor(backgroundColor);
                 textviewUpgradePro.setTextColor(textColor);
                 button_buy.setTextColor(textColor);
+                button_later.setTextColor(textColor);
                 cardviewProVersion.setVisibility(View.VISIBLE);
             }
-
         }
     }
 
@@ -302,9 +306,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         } else
         if (v.equals(button_buy)) {
             TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
-            if (!mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)) {
-                mainActivity.launchBillingFlow(TinyTimeTracker.ITEM_PRO);
-            }
+            mainActivity.launchBillingFlow(TinyTimeTracker.ITEM_PRO);
+            cardviewProVersion.setVisibility(View.GONE);
+        } else
+        if (v.equals(button_later)) {
+            Settings.setNextUpgradeRequestTime(getContext());
+            cardviewProVersion.setVisibility(View.GONE);
         }
     }
 

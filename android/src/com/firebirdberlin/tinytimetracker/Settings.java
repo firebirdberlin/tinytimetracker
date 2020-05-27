@@ -6,8 +6,11 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
+
+import java.util.Calendar;
 
 public class Settings extends BillingHelperActivity {
     public static final String PREF_KEY_AUTO_DISABLE_WIFI = "pref_key_auto_disable_wifi";
@@ -108,5 +111,30 @@ public class Settings extends BillingHelperActivity {
             return 3;
         }
         return Integer.valueOf(value);
+    }
+
+    public static void setNextUpgradeRequestTime(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor edit = settings.edit();
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.DAY_OF_MONTH, 15);
+        edit.putLong("nextUpgradeRequestTime", now.getTimeInMillis());
+        edit.apply();
+    }
+
+    public static boolean shallAskForUpgrade(Context context) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!settings.contains("nextUpgradeRequestTime")) {
+            setNextUpgradeRequestTime(context);
+        }
+
+        Calendar now = Calendar.getInstance();
+        long nowMillis = now.getTimeInMillis();
+
+        now.add(Calendar.DAY_OF_MONTH, 15);
+        long thenMillis = settings.getLong("nextUpgradeRequestTime", now.getTimeInMillis());
+
+        Log.i(TAG, nowMillis + " > " + thenMillis);
+        return nowMillis > thenMillis;
     }
 }

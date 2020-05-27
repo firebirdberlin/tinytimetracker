@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -144,7 +145,6 @@ public class TinyTimeTracker extends BillingHelperActivity
     protected void onItemPurchased(String sku) {
         super.onItemPurchased(sku);
         invalidateOptionsMenu();
-
     }
 
     @Override
@@ -417,12 +417,13 @@ public class TinyTimeTracker extends BillingHelperActivity
 
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
+    private static class MyPagerAdapter extends FragmentPagerAdapter {
 
-        public MyPagerAdapter(FragmentManager fm) {
+        MyPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        @NonNull
         @Override
         public Fragment getItem(int pos) {
             switch (pos) {
