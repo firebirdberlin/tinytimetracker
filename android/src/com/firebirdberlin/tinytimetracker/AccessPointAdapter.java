@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 
 import java.util.HashSet;
@@ -27,8 +29,9 @@ public class AccessPointAdapter extends ArrayAdapter<AccessPoint> {
         this.viewid = viewid;
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent ) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent ) {
         super.getView(position, convertView, parent);
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
         View v = inflater.inflate(viewid, parent, false);

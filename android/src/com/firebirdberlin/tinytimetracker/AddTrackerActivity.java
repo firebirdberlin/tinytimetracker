@@ -261,7 +261,7 @@ public class AddTrackerActivity extends AppCompatActivity {
             setWifiReceiverTimeout(60000);
         } else {
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            if (wifiInfo != null) {
+            if (wifiInfo != null && wifiInfo.getBSSID() != null) {
                 AccessPoint accessPoint = new AccessPoint(wifiInfo);
                 accessPointAdapter.addUnique(accessPoint);
                 accessPointAdapter.addUnique(new AccessPoint(accessPoint.ssid, ""));
@@ -316,6 +316,7 @@ public class AddTrackerActivity extends AppCompatActivity {
         List<ScanResult> networkList = wifiManager.getScanResults();
         if (networkList != null) {
             for (ScanResult network : networkList) {
+                if (network.BSSID == null) continue;
                 if (accessPointAdapter.indexOfBSSID(network.SSID, network.BSSID) == -1) {
                     AccessPoint accessPoint = new AccessPoint(network.SSID, network.BSSID);
                     adapter.addUnique(accessPoint);
@@ -329,7 +330,7 @@ public class AddTrackerActivity extends AppCompatActivity {
             String bssid = wifiInfo.getBSSID();
             String ssid = wifiInfo.getSSID();
             if (ssid != null) ssid = ssid.replace("\"", "");
-            if (accessPointAdapter.indexOfBSSID(ssid, bssid) == -1) {
+            if (bssid != null && accessPointAdapter.indexOfBSSID(ssid, bssid) == -1) {
                 AccessPoint accessPoint = new AccessPoint(ssid, bssid);
                 adapter.addUnique(accessPoint);
                 adapter.addUnique(new AccessPoint(ssid, ""));
@@ -380,6 +381,7 @@ public class AddTrackerActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         for (int i = 0; i < adapter.getCount() ; i++ ) {
                             AccessPoint accessPoint = adapter.getItem(i);
+                            if (accessPoint == null || accessPoint.bssid == null) continue;
                             if ( adapter.isActive(accessPoint.ssid, accessPoint.bssid) ) {
                                 accessPointAdapter.addUnique(new AccessPoint(accessPoint.ssid, ""));
                                 accessPointAdapter.addUnique(accessPoint);
