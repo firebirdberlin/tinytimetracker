@@ -1,5 +1,7 @@
 package com.firebirdberlin.tinytimetracker;
 
+import static android.content.Context.ALARM_SERVICE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -96,7 +98,7 @@ public class TinyTimeTracker extends BillingHelperActivity
 
     public static void scheduleWiFiService(Context context) {
         Intent intent = new Intent(context, AlarmReceiver.class);
-        PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
+        PendingIntent sender = Utility.getImmutableBroadcast(context, 0, intent);
         AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         if (am != null) {
             long ONE_MINUTE = 60000;

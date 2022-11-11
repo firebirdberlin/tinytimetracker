@@ -1,12 +1,15 @@
 package com.firebirdberlin.tinytimetracker;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.text.format.DateFormat;
+import android.util.Log;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -79,7 +82,10 @@ public class Utility {
                 || Build.MODEL.contains("Android SDK built for x86")
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || "google_sdk".equals(Build.PRODUCT);
+                || "google_sdk".equals(Build.PRODUCT)
+                || "sdk_gphone_x86".equals(Build.PRODUCT)
+                || "sdk_gphone_x86_64".equals(Build.MODEL)
+                || "sdk_gphone64_x86_64".equals(Build.MODEL);
     }
 
     public static boolean equal(String string, String other) {
@@ -97,6 +103,59 @@ public class Utility {
     public static int getContrastColor(int color) {
         double y = (299 * Color.red(color) + 587 * Color.green(color) + 114 * Color.blue(color)) / 1000;
         return y >= 128 ? Color.BLACK : Color.WHITE;
+    }
+    static public PendingIntent getImmutableBroadcast(Context context, int requestCode, Intent intent, int flags) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        return PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                flags
+        );
+    }
+
+    static public PendingIntent getImmutableService(Context context, int requestCode, Intent intent, int flags) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        return PendingIntent.getService(
+                context,
+                requestCode,
+                intent,
+                flags
+        );
+    }
+
+    static public PendingIntent getImmutableBroadcast(Context context, int requestCode, Intent intent) {
+        //https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
+        int flag = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flag = PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        return PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                flag
+        );
+    }
+
+    static public PendingIntent getImmutableActivity(Context context, int requestCode, Intent intent) {
+        //https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
+        int flag = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flag = PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        return PendingIntent.getActivity(
+                context,
+                requestCode,
+                intent,
+                flag
+        );
     }
 }
 

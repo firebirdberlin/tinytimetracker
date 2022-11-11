@@ -2,31 +2,34 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:7.3.1'
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 
 apply plugin: 'com.android.application'
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'com.android.billingclient:billing:2.2.0'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation 'com.google.android:flexbox:1.1.1'
+    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation 'com.android.billingclient:billing:4.0.0'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation fileTree(include: '*.jar', dir: 'libs')
     implementation project(':android-page-indicator')
@@ -34,7 +37,7 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 33
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -72,6 +75,6 @@ android {
     }
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 29
+        targetSdkVersion 33
     }
 }

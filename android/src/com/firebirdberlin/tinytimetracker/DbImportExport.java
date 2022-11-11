@@ -27,7 +27,10 @@ public class DbImportExport {
 
     /** Directory that files are to be read from and written to **/
     protected static final File DATABASE_DIRECTORY =
-        new File(Environment.getExternalStorageDirectory(), "TinyTimeTracker");
+        new File(
+                Environment.getExternalStorageDirectory(),
+                "TinyTimeTracker"
+        );
 
     /** File path of Db to be imported **/
     protected static final File IMPORT_FILE = new File(DATABASE_DIRECTORY, "trackers.db");
@@ -41,10 +44,12 @@ public class DbImportExport {
 
     /** Contains: /data/data/com.example.app/databases/example.db **/
     private static final File DATA_DIRECTORY_DATABASE =
-            new File(Environment.getDataDirectory() +
-            "/data/" + PACKAGE_NAME +
-            "/databases/" + DATABASE_NAME +
-            DATABASE_NAME_EXT );
+            new File(
+                    Environment.getDataDirectory() +
+                            "/data/" + PACKAGE_NAME +
+                            "/databases/" + DATABASE_NAME +
+                            DATABASE_NAME_EXT
+            );
 
     /** Saves the application database to the
      * export directory under MyDb.db **/

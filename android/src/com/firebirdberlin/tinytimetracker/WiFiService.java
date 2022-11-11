@@ -263,7 +263,9 @@ public class WiFiService extends Service {
     private Notification buildNotification(String title, String text) {
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
-        PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+        PendingIntent pIntent = Utility.getImmutableActivity(
+                mContext, 0, intent
+        );
 
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
@@ -289,7 +291,9 @@ public class WiFiService extends Service {
 
         Intent intent = new Intent(mContext, TinyTimeTracker.class);
 
-        PendingIntent pIntent = PendingIntent.getActivity(mContext, 1, intent, 0);
+        PendingIntent pIntent = Utility.getImmutableActivity(
+                mContext, 1, intent
+        );
         int highlightColor = Utility.getColor(this, R.color.highlight);
 
         NotificationCompat.Builder note =
@@ -301,8 +305,9 @@ public class WiFiService extends Service {
                         .setContentIntent(pIntent);
 
         Intent addIntent = AddAccessPointService.addIntent(this, tracker.id, ssid, bssid);
-        PendingIntent pAddIntent = PendingIntent.getService(this, 2, addIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pAddIntent = Utility.getImmutableService(
+                this, 2, addIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
 
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender().setHintHideIcon(true);
@@ -311,14 +316,15 @@ public class WiFiService extends Service {
                 new NotificationCompat.Action.Builder(R.drawable.ic_add, string_action_add, pAddIntent).build();
 
         Intent ignoreIntent = AddAccessPointService.ignoreIntent(this, tracker.id, ssid, bssid);
-        PendingIntent pIgnoreIntent = PendingIntent.getService(this, 3, ignoreIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pIgnoreIntent = Utility.getImmutableService(
+                this, 3, ignoreIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
         NotificationCompat.Action ignoreAction =
                 new NotificationCompat.Action.Builder(R.drawable.ic_dismiss, string_action_ignore, pIgnoreIntent)
                         .build();
 
         Intent autoDiscoverIntent = AddAccessPointService.autoDiscoverIntent(this, tracker.id);
-        PendingIntent pAutoDiscoverIntent = PendingIntent.getService(
+        PendingIntent pAutoDiscoverIntent = Utility.getImmutableService(
                 this, 4, autoDiscoverIntent, PendingIntent.FLAG_UPDATE_CURRENT
         );
         NotificationCompat.Action autoDiscoverAction =
