@@ -1,5 +1,7 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
+import static com.firebirdberlin.tinytimetracker.TinyTimeTrackerApp.getContext;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;

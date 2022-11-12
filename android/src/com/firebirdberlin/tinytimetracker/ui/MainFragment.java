@@ -1,5 +1,7 @@
 package com.firebirdberlin.tinytimetracker.ui;
 
+import static com.firebirdberlin.tinytimetracker.TinyTimeTrackerApp.getContext;
+
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

@@ -1,5 +1,7 @@
 package com.firebirdberlin.tinytimetracker;
 
+import static com.firebirdberlin.tinytimetracker.TinyTimeTrackerApp.getContext;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -28,7 +30,7 @@ public class DbImportExport {
     /** Directory that files are to be read from and written to **/
     protected static final File DATABASE_DIRECTORY =
         new File(
-                Environment.getExternalStorageDirectory(),
+                getContext().getExternalFilesDir(null),
                 "TinyTimeTracker"
         );
 
@@ -53,7 +55,7 @@ public class DbImportExport {
 
     /** Saves the application database to the
      * export directory under MyDb.db **/
-    protected static  boolean exportDb() {
+    protected static boolean exportDb() {
         Log.d(TAG, "exportDb()");
 
         if( ! SdIsPresent() ) {
@@ -84,6 +86,7 @@ public class DbImportExport {
 
     private static void createDatabaseDirectory() {
         if (!DATABASE_DIRECTORY.exists()) {
+            Log.i(TAG, "trying to create " + DATABASE_DIRECTORY.getName());
             DATABASE_DIRECTORY.mkdirs();
         }
     }
