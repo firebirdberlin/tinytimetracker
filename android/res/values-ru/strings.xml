@@ -52,7 +52,6 @@
     <string name="pref_summary_notification_new_access_points">Автоматически определять новый доступ к подключению и вывести уведомление</string>
     <string name="pref_summary_seconds_connection_lost">Короткие времена отсутствия не считаются перерывом</string>
     <string name="pref_summary_show_notifications">Показывать уведомления в шторке</string>
-    <string name="pref_title_auto_disable_wifi">Автоматически отключать WiFi</string>
     <string name="pref_title_export">Экспорт</string>
     <string name="pref_title_import">Импорт</string>
     <string name="pref_title_notification_new_access_points">Определять автоматически</string>

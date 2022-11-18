@@ -55,7 +55,6 @@
     <string name="pref_summary_notification_new_access_points">Neue Access Points automatisch erkennen und Benachrichtigungen schicken.</string>
     <string name="pref_summary_seconds_connection_lost">Kurze Pausen, in denen das WLAN-Netzwerk verlassen wird, überbrücken.</string>
     <string name="pref_summary_show_notifications">Zeige Benachrichtigungen an.</string>
-    <string name="pref_title_auto_disable_wifi">WLAN automatisch ausschalten</string>
     <string name="pref_title_export">Datenbankexport</string>
     <string name="pref_title_import">Datenbankimport</string>
     <string name="pref_title_notification_new_access_points">Auto-Scan</string>

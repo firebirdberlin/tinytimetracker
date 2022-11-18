@@ -58,7 +58,6 @@
     <string name="pref_summary_reference_time_months">Months in the past which are used to calculate statistical values.</string>
     <string name="pref_summary_seconds_connection_lost">Short times of absence are not counted as a break.</string>
     <string name="pref_summary_show_notifications">Show notifications in the notification area.</string>
-    <string name="pref_title_auto_disable_wifi">Automatically disable WiFi</string>
     <string name="pref_title_export">Data export</string>
     <string name="pref_title_import">Data import</string>
     <string name="pref_title_notification_new_access_points">Automatic discovery</string>

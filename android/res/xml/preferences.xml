@@ -41,12 +41,6 @@
             android:key="pref_key_show_notifications"
             android:disableDependentsState="false" />
 
-        <SwitchPreference
-            android:iconSpaceReserved="false"
-            android:key="pref_key_auto_disable_wifi"
-            android:title="@string/pref_title_auto_disable_wifi"
-            android:defaultValue="false" />
-
     </PreferenceCategory>
 
     <Preference

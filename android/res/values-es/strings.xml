@@ -39,7 +39,6 @@
     <string name="pref_summary_notification_new_access_points">Detectar automáticamente nuevos puntos de acceso y mostrar una notificación</string>
     <string name="pref_summary_seconds_connection_lost">Los períodos cortos de ausencia no cuentan como ausencias</string>
     <string name="pref_summary_show_notifications">Mostrar notificaciones en el área de notificaciones</string>
-    <string name="pref_title_auto_disable_wifi">Deshabilitar WIFI automaticamente</string>
     <string name="pref_title_export">Exportar datos</string>
     <string name="pref_title_import">Importar datos</string>
     <string name="pref_title_notification_new_access_points">Detectar automaticamente</string>

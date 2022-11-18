@@ -196,11 +196,7 @@ public class WiFiService extends Service {
     }
 
     private boolean shallDisableWifi() {
-        boolean autoDisableWifi = Settings.autoDisableWifi(mContext);
-
-        if (autoDisableWifi && !tracked_wifi_network_found) {
-            return true;
-        } else return !autoDisableWifi && wifiWasEnabled && wifiManager.isWifiEnabled();
+        return wifiWasEnabled && wifiManager.isWifiEnabled();
     }
 
     private boolean isAutoDiscoverActive(long tracker_id) {
