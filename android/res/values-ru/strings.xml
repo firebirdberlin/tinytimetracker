@@ -14,7 +14,6 @@
     <string name="action_edit_log_entry">Редактировать</string>
     <string name="action_join_log_entry">Слияние</string>
     <string name="action_open_github">Исходный код</string>
-    <string name="action_pebble_app_store">Магазин приложений</string>
     <string name="action_recommend">Поделиться</string>
     <string name="action_settings">Настройки</string>
     <string name="aggregation_week">Неделя</string>

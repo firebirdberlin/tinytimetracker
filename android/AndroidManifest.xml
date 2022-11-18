@@ -57,15 +57,6 @@
         <receiver android:name=".AlarmReceiver" android:enabled="true">
         </receiver>
 
-        <receiver android:name=".pebble.PebbleMessageReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:priority="1000">
-            <intent-filter android:priority="1000">
-                 <action android:name="com.getpebble.action.app.RECEIVE"/>
-            </intent-filter>
-        </receiver>
-
         <receiver android:name=".BootReceiver"
             android:exported="true"
             android:enabled="true">

@@ -10,7 +10,6 @@
     <string name="action_edit_log_entry">Editar</string>
     <string name="action_join_log_entry">Unirse</string>
     <string name="action_open_github">Contribuir</string>
-    <string name="action_pebble_app_store">Abrir tienda Pebble</string>
     <string name="action_recommend">Recomendar</string>
     <string name="action_settings">Configuración</string>
     <string name="aggregation_week">Semana</string>

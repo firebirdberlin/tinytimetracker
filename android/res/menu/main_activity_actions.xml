@@ -21,9 +21,6 @@
         android:icon="@drawable/ic_settings"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom|collapseActionView" />
-    <item android:id="@+id/action_pebble_app_store"
-        android:title="@string/action_pebble_app_store"
-        app:showAsAction="never" />
    <item android:id="@+id/action_recommend"
         android:title="@string/action_recommend"
         app:showAsAction="never" />

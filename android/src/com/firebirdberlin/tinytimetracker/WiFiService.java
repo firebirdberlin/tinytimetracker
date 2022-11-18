@@ -31,8 +31,6 @@ import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 import com.firebirdberlin.tinytimetracker.services.AddAccessPointService;
-import com.getpebble.android.kit.PebbleKit;
-import com.getpebble.android.kit.util.PebbleDictionary;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -44,12 +42,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class WiFiService extends Service {
-    private final static UUID PEBBLE_APP_UUID = UUID.fromString("7100dca9-2d97-4ea9-a1a9-f27aae08d144");
     public static int NOTIFICATION_ID_AP = 1340;
     private static String TAG = "WiFiService";
-    private static int NOTIFICATION_ID = 1337;
-    private static int NOTIFICATION_ID_WIFI = 1338;
-    private static int NOTIFICATION_ID_ERROR = 1339;
+    private static final int NOTIFICATION_ID_WIFI = 1338;
+    private static final int NOTIFICATION_ID_ERROR = 1339;
     private final Handler handler = new Handler();
     boolean tracked_wifi_network_found = false;
     private NotificationManager notificationManager = null;
@@ -62,12 +58,9 @@ public class WiFiService extends Service {
     private boolean service_is_running = false;
     private TrackerEntry active_tracker = null;
     private List<AccessPoint> activeAccessPoints = new ArrayList<>();
-    private Runnable stopOnTimeout = new Runnable() {
-        @Override
-        public void run() {
-            Log.i(TAG, "WIFI timeout");
-            stopSelf();
-        }
+    private Runnable stopOnTimeout = () -> {
+        Log.i(TAG, "WIFI timeout");
+        stopSelf();
     };
 
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
@@ -91,6 +84,7 @@ public class WiFiService extends Service {
     public void onCreate() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             Notification note = buildServiceNotification();
+            int NOTIFICATION_ID = 1337;
             startForeground(NOTIFICATION_ID, note);
         }
 
@@ -148,10 +142,6 @@ public class WiFiService extends Service {
 
             boolean success = wifiManager.startScan();
             if (!success) {
-                if (isPebbleConnected()) {
-                    sendDataToPebble("");
-                }
-
                 stopUnsuccessfulStartAttempt();
                 return Service.START_NOT_STICKY;
             }
@@ -162,10 +152,6 @@ public class WiFiService extends Service {
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             if (!wifiManager.isWifiEnabled() || wifiInfo == null) {
                 Log.i(TAG, "WIFI is currently disabled");
-                if (isPebbleConnected()) {
-                    sendDataToPebble("");
-                }
-
                 stopUnsuccessfulStartAttempt();
                 return Service.START_NOT_STICKY;
             }
@@ -546,10 +532,6 @@ public class WiFiService extends Service {
         }
 
         updateNotification(formattedWorkTime, trackerVerboseName);
-
-        if (isPebbleConnected()) {
-            sendDataToPebble(formattedWorkTime);
-        }
     }
 
     private UnixTimestamp evaluateDurationToday(TrackerEntry tracker) {
@@ -596,33 +578,5 @@ public class WiFiService extends Service {
         Log.d(TAG, "Notification: " + title + " : " + text);
         Notification note = buildNotification(title, text);
         notificationManager.notify(NOTIFICATION_ID_WIFI, note);
-    }
-
-    private boolean isPebbleConnected() {
-        boolean connected = PebbleKit.isWatchConnected(mContext);
-        Log.i(TAG, "Pebble is " + (connected ? "connected" : "not connected"));
-        return connected;
-    }
-
-    private void sendDataToPebble(String formattedWorktime) {
-        PebbleDictionary data = new PebbleDictionary();
-        data.addString(2, formattedWorktime);
-        data.addInt32(3, getBatteryLevel());
-        PebbleKit.sendDataToPebble(mContext, PEBBLE_APP_UUID, data);
-    }
-
-    public int getBatteryLevel() {
-        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        if (batteryIntent != null) {
-            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-            if (level == -1 || scale == -1) {
-                return 50;
-            }
-
-            return (int) ((float) level / (float) scale * 100.0f);
-        }
-        return 50;
     }
 }

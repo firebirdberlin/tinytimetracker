@@ -217,16 +217,10 @@ public class TinyTimeTracker extends BillingHelperActivity
         MenuItem item_delete = menu.findItem(R.id.action_delete);
         MenuItem item_add_time_balance = menu.findItem(R.id.action_add_time_balance);
         MenuItem item_donate = menu.findItem(R.id.action_donate);
-        MenuItem item_pebble_app_store = menu.findItem(R.id.action_pebble_app_store);
         item_edit.setVisible(currentTracker != null);
         item_delete.setVisible(currentTracker != null);
         item_add_time_balance.setVisible(currentTracker != null);
         item_donate.setVisible(!isPurchased(ITEM_DONATION));
-
-        boolean pebbleAppStoreIsInstalled =
-            Utility.isPackageInstalled(this, "com.getpebble.android") ||
-            Utility.isPackageInstalled(this, "com.getpebble.android.basalt");
-        item_pebble_app_store.setVisible(pebbleAppStoreIsInstalled);
 
         pagerLayout.setVisibility(View.VISIBLE);
         pager.setPagingEnabled(true);
@@ -254,9 +248,6 @@ public class TinyTimeTracker extends BillingHelperActivity
             return true;
         case R.id.action_settings:
             Settings.openSettings(this);
-            return true;
-        case R.id.action_pebble_app_store:
-            openPebbleAppStore();
             return true;
         case R.id.action_recommend:
             recommendApp();
@@ -317,15 +308,6 @@ public class TinyTimeTracker extends BillingHelperActivity
 
     }
 
-
-    private void openPebbleAppStore() {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("pebble://appstore/55a573a4ba679a9523000071"));
-            startActivity(intent);
-        }
-        catch ( ActivityNotFoundException e) {
-        }
-    }
 
     private void recommendApp() {
      String body = "https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker";
