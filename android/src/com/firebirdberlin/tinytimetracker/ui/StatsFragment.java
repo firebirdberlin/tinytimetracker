@@ -40,6 +40,7 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -321,7 +322,7 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         log_entry_adapter.notifyDataSetChanged();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnWifiUpdateCompleted event) {
         if (TinyTimeTracker.currentTracker == null) return;
         if (event.success &&
@@ -331,18 +332,18 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         refresh();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerDeleted event) {
         refresh();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryChanged event) {
         if (TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.entry.tracker_id) {
@@ -350,14 +351,14 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryDeleted event) {
         if (TinyTimeTracker.currentTracker != null) {
             refresh();
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryAdded event) {
         refresh();
     }

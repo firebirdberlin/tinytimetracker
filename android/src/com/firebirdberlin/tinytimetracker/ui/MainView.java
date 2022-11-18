@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.R;
@@ -71,12 +72,12 @@ public class MainView extends View {
         textColor = ContextCompat.getColor(mContext, R.color.textColor);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerSelected event) {
         invalidate();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerChanged event) {
         if (TinyTimeTracker.currentTracker == null || event == null || event.tracker == null) {
             return;
@@ -87,17 +88,17 @@ public class MainView extends View {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerDeleted event) {
         invalidate();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryDeleted event) {
         invalidate();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {

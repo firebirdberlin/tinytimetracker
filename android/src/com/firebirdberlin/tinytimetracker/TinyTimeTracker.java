@@ -20,6 +20,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
@@ -70,16 +71,50 @@ public class TinyTimeTracker extends BillingHelperActivity
     private CustomViewPager pager = null;
     private PageIndicator pageIndicator = null;
 
+    private Handler handler = new Handler();
+
+    private final Runnable update = new Runnable() {
+        public void run() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                handler.removeCallbacks(update);
+                startService(getApplicationContext());
+                handler.postDelayed(update, 60000);
+            } else {
+                startService(getApplicationContext());
+            }
+        }
+    };
+
     public static boolean startService(Context context) {
-        Intent intent = new Intent(context, WiFiService.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            UpdateTrackersJob.start(context);
         } else {
-            context.startService(intent);
+            Intent intent = new Intent(context, WiFiService.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent);
+            } else {
+                context.startService(intent);
+            }
         }
         return true;
     }
+
+    public static void scheduleWiFiService(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            UpdateTrackersJob.schedule(context);
+        } else {
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            PendingIntent sender = Utility.getImmutableBroadcast(context, 0, intent);
+            AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+            if (am != null) {
+                long ONE_MINUTE = 60000;
+                long TWO_MINUTES = 2 * ONE_MINUTE;
+                am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, TWO_MINUTES, sender);
+            }
+        }
+    }
+
 
     public static boolean checkAndRequestPermission(
             AppCompatActivity activity, String permission, int requestCode
@@ -94,17 +129,6 @@ public class TinyTimeTracker extends BillingHelperActivity
     public static boolean hasPermission(Context context, String permission) {
         return (ContextCompat.checkSelfPermission(context, permission)
                 == PackageManager.PERMISSION_GRANTED);
-    }
-
-    public static void scheduleWiFiService(Context context) {
-        Intent intent = new Intent(context, AlarmReceiver.class);
-        PendingIntent sender = Utility.getImmutableBroadcast(context, 0, intent);
-        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        if (am != null) {
-            long ONE_MINUTE = 60000;
-            long TWO_MINUTES = 2 * ONE_MINUTE;
-            am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, TWO_MINUTES, sender);
-        }
     }
 
     @SuppressLint("NewApi")
@@ -181,13 +205,12 @@ public class TinyTimeTracker extends BillingHelperActivity
         bus.register(this);
         enableBootReceiver(this);
         scheduleWiFiService(this);
-        startService(this);
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        handler.post(update);
 
         OnTrackerAdded event = bus.getStickyEvent(OnTrackerAdded.class);
         if(event != null) {
@@ -198,6 +221,7 @@ public class TinyTimeTracker extends BillingHelperActivity
     @Override
     public void onPause() {
         super.onPause();
+        handler.removeCallbacks(update);
     }
 
     @Override

@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
@@ -191,13 +192,13 @@ public class CardFragment extends Fragment {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         refresh();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( TinyTimeTracker.currentTracker == null ) return;
         if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
@@ -205,12 +206,12 @@ public class CardFragment extends Fragment {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerDeleted event) {
         refresh();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null &&
                 TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
@@ -218,7 +219,7 @@ public class CardFragment extends Fragment {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryDeleted event) {
         if ( TinyTimeTracker.currentTracker != null ) {
             refresh();

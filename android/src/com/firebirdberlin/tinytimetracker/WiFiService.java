@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+
+// maximum API LEVEL 28
 public class WiFiService extends Service {
     public static int NOTIFICATION_ID_AP = 1340;
     private static String TAG = "WiFiService";
@@ -106,7 +108,6 @@ public class WiFiService extends Service {
 
         if (
                 TinyTimeTracker.hasPermission(mContext, Manifest.permission.WAKE_LOCK)
-                        && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
         ) {
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_SCAN_ONLY, "WIFI_MODE_SCAN_ONLY");
 
@@ -130,35 +131,22 @@ public class WiFiService extends Service {
         }
 
         Log.i(TAG, "WIFI SERVICE starts ...");
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (!wifiManager.isWifiEnabled()) {
-                Log.i(TAG, "WIFI is currently disabled");
-                wifiWasEnabled = wifiManager.setWifiEnabled(true);
-            }
-
-            final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-            registerReceiver(wifiReceiver, filter);
-            Log.i(TAG, "Receiver registered.");
-
-            boolean success = wifiManager.startScan();
-            if (!success) {
-                stopUnsuccessfulStartAttempt();
-                return Service.START_NOT_STICKY;
-            }
-
-            handler.postDelayed(stopOnTimeout, 30000);
-        } else { // android 10 and above
-
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            if (!wifiManager.isWifiEnabled() || wifiInfo == null) {
-                Log.i(TAG, "WIFI is currently disabled");
-                stopUnsuccessfulStartAttempt();
-                return Service.START_NOT_STICKY;
-            }
-            activeAccessPoints.clear();
-            activeAccessPoints.add(new AccessPoint(wifiInfo));
-            getWiFiNetworks();
+        if (!wifiManager.isWifiEnabled()) {
+            Log.i(TAG, "WIFI is currently disabled");
+            wifiWasEnabled = wifiManager.setWifiEnabled(true);
         }
+
+        final IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(wifiReceiver, filter);
+        Log.i(TAG, "Receiver registered.");
+
+        boolean success = wifiManager.startScan();
+        if (!success) {
+            stopUnsuccessfulStartAttempt();
+            return Service.START_NOT_STICKY;
+        }
+
+        handler.postDelayed(stopOnTimeout, 30000);
         return Service.START_NOT_STICKY;
     }
 
@@ -192,10 +180,8 @@ public class WiFiService extends Service {
         handler.removeCallbacks(stopOnTimeout);
         unregister(wifiReceiver);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (shallDisableWifi()) {
-                wifiManager.setWifiEnabled(false);
-            }
+        if (shallDisableWifi()) {
+            wifiManager.setWifiEnabled(false);
         }
 
         updateNotifications();

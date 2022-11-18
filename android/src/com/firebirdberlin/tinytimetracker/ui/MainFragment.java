@@ -501,21 +501,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         adapter.notifyDataSetChanged();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryDeleted event) {
         if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.tracker_id ) {
             updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnLogEntryChanged event) {
         if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
             updateStatisticalValues(TinyTimeTracker.currentTracker);
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnDatabaseImported event) {
         Log.i(TAG, "OnDatabaseImported");
         loadTrackers();
