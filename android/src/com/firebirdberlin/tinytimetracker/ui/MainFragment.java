@@ -448,7 +448,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         datasource.close();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerChanged event) {
         Log.i(TAG, "OnTrackerChanged");
         loadTrackers();
@@ -460,7 +460,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         if ( event == null || event.newTracker == null) return;
@@ -472,7 +472,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         updateStatisticalValues(event.newTracker);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnWifiUpdateCompleted event) {
         if ( TinyTimeTracker.currentTracker == null ) return;
         if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
@@ -481,7 +481,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     @SuppressWarnings("unchecked")
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerDeleted event) {
         Log.i(TAG, "OnTrackerDeleted");
         textviewCummulatedTime.setText("");

@@ -390,13 +390,15 @@ public class TinyTimeTracker extends BillingHelperActivity
                     NotificationManager.IMPORTANCE_LOW);
             mNotificationManager.createNotificationChannel(mChannel);
 
-            mChannel = prepareNotificationChannel(
-                    NOTIFICATIONCHANNEL_SERVICE_STATUS,
-                    getString(R.string.channel_name_service),
-                    getString(R.string.channel_description_service),
-                    NotificationManager.IMPORTANCE_MIN);
-            mChannel.setShowBadge(false);
-            mNotificationManager.createNotificationChannel(mChannel);
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+                mChannel = prepareNotificationChannel(
+                        NOTIFICATIONCHANNEL_SERVICE_STATUS,
+                        getString(R.string.channel_name_service),
+                        getString(R.string.channel_description_service),
+                        NotificationManager.IMPORTANCE_MIN);
+                mChannel.setShowBadge(false);
+                mNotificationManager.createNotificationChannel(mChannel);
+            }
 
             mChannel = prepareNotificationChannel(
                     NOTIFICATIONCHANNEL_NEW_ACCESS_POINT,

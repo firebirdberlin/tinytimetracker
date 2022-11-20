@@ -120,6 +120,7 @@ public class UpdateTrackersJob extends Worker {
         activeAccessPoints.clear();
         activeAccessPoints.add(new AccessPoint(wifiInfo));
         getWiFiNetworks();
+        updateNotifications();
 
         return Result.success();
     }
@@ -151,6 +152,9 @@ public class UpdateTrackersJob extends Worker {
         if (tracked_wifi_network_found && active_tracker == null) {
             // use the first result for notifications
             active_tracker = trackersToUpdate.iterator().next();
+            if (active_tracker != null) {
+                Log.i(TAG, "Network found for " + active_tracker.verbose_name);
+            }
         } else {
             Log.i(TAG, "No network found.");
         }
@@ -310,13 +314,6 @@ public class UpdateTrackersJob extends Worker {
         return Result.success();
     }
 
-    private void saveTimestampLastRun(long now) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putLong("last_wifi_detection_timestamp", now);
-        editor.apply();
-    }
-
     private Notification buildNotification(String title, String text) {
 
         Intent intent = new Intent(context, TinyTimeTracker.class);
@@ -405,6 +402,72 @@ public class UpdateTrackersJob extends Worker {
         return note.build();
     }
 
+    private void updateNotifications() {
+        long now = System.currentTimeMillis();
+        String formattedWorkTime = "";
+        String trackerVerboseName = "";
+        if (active_tracker != null) {
+            Log.d(TAG, "Updating notification for tracker " + active_tracker.verbose_name);
+            saveTimestampLastSeen(active_tracker, now);
+            UnixTimestamp duration_today = evaluateDurationToday(active_tracker);
+            formattedWorkTime = duration_today.durationAsHours();
+            trackerVerboseName = active_tracker.verbose_name;
+        } else {
+            // user has left the office for less than 90 mins
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            long last_tracker_id = settings.getLong("last_tracker_id", -1L);
+            if (last_tracker_id != -1L) {
+                TrackerEntry tracker = fetchTrackerByID(last_tracker_id);
+                if (tracker != null) {
+                    long last_seen = settings.getLong("last_seen", 0L);
+                    long delta = (now - last_seen) / 1000L;
+                    long seconds_today = evaluateDurationToday(tracker).toSeconds();
+                    long workingSeconds = (long) (3600 * tracker.working_hours);
+
+                    if (seconds_today > 0 && delta < 90 * 60 && seconds_today < workingSeconds) {
+                        formattedWorkTime = new UnixTimestamp(delta * 1000L).durationAsMinutes();
+                    }
+                }
+            }
+        }
+
+        updateNotification(formattedWorkTime, trackerVerboseName);
+    }
+
+    private void saveTimestampLastSeen(TrackerEntry tracker, long now) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong("last_seen", now);
+        if (tracker != null) {
+            editor.putLong("last_tracker_id", tracker.id);
+        }
+        editor.apply();
+    }
+
+    private void saveTimestampLastRun(long now) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong("last_wifi_detection_timestamp", now);
+        editor.apply();
+    }
+
+    private UnixTimestamp evaluateDurationToday(TrackerEntry tracker) {
+        LogDataSource datasource = new LogDataSource(context);
+        datasource.open();
+
+        UnixTimestamp today = UnixTimestamp.startOfToday();
+        UnixTimestamp duration_today = datasource.getTotalDurationSince(today.getTimestamp(), tracker.id);
+        datasource.close();
+        return duration_today;
+    }
+
+    private TrackerEntry fetchTrackerByID(long tracker_id) {
+        LogDataSource datasource = new LogDataSource(context);
+        datasource.open();
+        TrackerEntry tracker = datasource.getTracker(tracker_id);
+        datasource.close();
+        return tracker;
+    }
 
     public void updateNotification(String title, String text) {
         if (!showNotifications || title.isEmpty()) {
