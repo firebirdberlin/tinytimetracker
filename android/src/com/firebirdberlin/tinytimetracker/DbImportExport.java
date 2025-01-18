@@ -1,7 +1,5 @@
 package com.firebirdberlin.tinytimetracker;
 
-import static com.firebirdberlin.tinytimetracker.TinyTimeTrackerApp.getContext;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -28,21 +26,16 @@ public class DbImportExport {
     public static final String TAG = DbImportExport.class.getName();
 
     /** Directory that files are to be read from and written to **/
-    protected static final File DATABASE_DIRECTORY =
-        new File(
-                getContext().getExternalFilesDir(null),
-                "TinyTimeTracker"
-        );
+    protected final File DATABASE_DIRECTORY;
 
     /** File path of Db to be imported **/
-    protected static final File IMPORT_FILE = new File(DATABASE_DIRECTORY, "trackers.db");
+    protected final File IMPORT_FILE;
 
     protected static final String PACKAGE_NAME = "com.firebirdberlin.tinytimetracker";
     protected static final String DATABASE_NAME = "trackers";
     protected static final String DATABASE_NAME_EXT = ".db";
 
     private static final int MIN_NUMBER_OF_BACKUPS_TO_KEEP = 10;
-
 
     /** Contains: /data/data/com.example.app/databases/example.db **/
     private static final File DATA_DIRECTORY_DATABASE =
@@ -53,9 +46,17 @@ public class DbImportExport {
                             DATABASE_NAME_EXT
             );
 
+    public DbImportExport(Context context) {
+        DATABASE_DIRECTORY = new File(
+                context.getExternalFilesDir(null),
+                "TinyTimeTracker"
+        );
+        IMPORT_FILE = new File(DATABASE_DIRECTORY, "trackers.db");
+    }
+
     /** Saves the application database to the
      * export directory under MyDb.db **/
-    protected static boolean exportDb() {
+    protected boolean exportDb() {
         Log.d(TAG, "exportDb()");
 
         if( ! SdIsPresent() ) {
@@ -84,21 +85,21 @@ public class DbImportExport {
         return true;
     }
 
-    private static void createDatabaseDirectory() {
+    private void createDatabaseDirectory() {
         if (!DATABASE_DIRECTORY.exists()) {
             Log.i(TAG, "trying to create " + DATABASE_DIRECTORY.getName());
             DATABASE_DIRECTORY.mkdirs();
         }
     }
 
-    protected static void shareFile(Context context, String filename) {
+    protected void shareFile(Context context, String filename) {
         File file = new File(filename);
         String chooserTitle = context.getResources().getString(R.string.dialog_title_share_database);
         final Uri uri = FileProvider.getUriForFile(
                 context, "com.firebirdberlin.tinytimetracker.fileprovider", file
         );
         final Intent intent = ShareCompat.IntentBuilder.from((AppCompatActivity) context)
-            .setType("text/csv")
+            .setType("application/octet-stream")
             .setSubject(file.getName())
             .setStream(uri)
             .setChooserTitle(chooserTitle)
@@ -110,7 +111,7 @@ public class DbImportExport {
 
     /** Replaces current database with the IMPORT_FILE if
      * import database is valid and of the correct type **/
-    protected static boolean restoreDb(String filename) {
+    protected boolean restoreDb(String filename) {
         Log.d(TAG, "restoreDb()");
 
         if( ! SdIsPresent() ) {
@@ -139,7 +140,7 @@ public class DbImportExport {
         }
     }
 
-    private static void copyFile(File src, File dst) throws IOException {
+    private void copyFile(File src, File dst) throws IOException {
         FileChannel inChannel = new FileInputStream(src).getChannel();
         FileChannel outChannel = new FileOutputStream(dst).getChannel();
 
@@ -157,7 +158,7 @@ public class DbImportExport {
         }
     }
 
-    private static void deleteOldBackupFiles() {
+    private void deleteOldBackupFiles() {
         File[] files = listFiles();
 
         if (files.length < MIN_NUMBER_OF_BACKUPS_TO_KEEP) {
@@ -172,25 +173,18 @@ public class DbImportExport {
         }
     }
 
-    public static File[] listFiles() {
-        FilenameFilter filter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                File sel = new File(dir, filename);
-                return (filename.startsWith("trackers") &&
-                        filename.endsWith(".db")) || sel.isDirectory();
-            }
+    public File[] listFiles() {
+        FilenameFilter filter = (dir, filename) -> {
+            File sel = new File(dir, filename);
+            return (filename.startsWith("trackers") &&
+                    filename.endsWith(".db")) || sel.isDirectory();
         };
         createDatabaseDirectory();
 
-        File[] files = DbImportExport.DATABASE_DIRECTORY.listFiles(filter);
+        File[] files = DATABASE_DIRECTORY.listFiles(filter);
         // sort by descending modified time
         if (files != null) {
-            Arrays.sort(files, new Comparator<File>() {
-                public int compare(File f1, File f2) {
-                    return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
-                }
-            });
+            Arrays.sort(files, (f1, f2) -> Long.valueOf(f2.lastModified()).compareTo(f1.lastModified()));
         }
         return files;
     }

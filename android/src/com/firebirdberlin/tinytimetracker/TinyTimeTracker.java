@@ -1,20 +1,16 @@
 package com.firebirdberlin.tinytimetracker;
 
-import static android.content.Context.ALARM_SERVICE;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -24,7 +20,6 @@ import android.os.Handler;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
-import android.provider.Settings.System;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,9 +36,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
@@ -68,10 +63,10 @@ public class TinyTimeTracker extends BillingHelperActivity
     public static TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
     private LinearLayout pagerLayout = null;
-    private CustomViewPager pager = null;
+    private ViewPager2 pager = null;
     private PageIndicator pageIndicator = null;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
     private final Runnable update = new Runnable() {
         public void run() {
@@ -85,7 +80,7 @@ public class TinyTimeTracker extends BillingHelperActivity
         }
     };
 
-    public static boolean startService(Context context) {
+    public static void startService(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             UpdateTrackersJob.start(context);
         } else {
@@ -97,7 +92,6 @@ public class TinyTimeTracker extends BillingHelperActivity
                 context.startService(intent);
             }
         }
-        return true;
     }
 
     public static void scheduleWiFiService(Context context) {
@@ -133,31 +127,21 @@ public class TinyTimeTracker extends BillingHelperActivity
 
     @SuppressLint("NewApi")
     public static boolean isAirplaneModeOn(Context context) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
-            return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
-        } else {
-            return System.getInt(context.getContentResolver(), System.AIRPLANE_MODE_ON, 0) != 0;
-        }
+        return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
     }
 
     public static boolean isLocationEnabled(Context context) {
         int locationMode = 0;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            try {
-                locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
+        try {
+            locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
 
-            } catch (SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return locationMode != Secure.LOCATION_MODE_OFF;
-
-        } else {
-            String locationProviders = Secure.getString(context.getContentResolver(),
-                    Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !locationProviders.isEmpty();
+        } catch (SettingNotFoundException e) {
+            e.printStackTrace();
         }
+
+        return locationMode != Secure.LOCATION_MODE_OFF;
+
     }
 
 
@@ -193,12 +177,11 @@ public class TinyTimeTracker extends BillingHelperActivity
         pager = findViewById(R.id.pager);
         pageIndicator = findViewById(R.id.page_indicator);
         pageIndicator.setPageCount(3);
-        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
-        pager.setOnPageChangeListener(new OnPageChangeListener() {
-            public void onPageScrollStateChanged(int state) {}
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
-
+        pager.setAdapter(new MyPagerAdapter(this));
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
             public void onPageSelected(int position) {
+                super.onPageSelected(position);
                 pageIndicator.setCurrentPage(position);
             }
         });
@@ -225,15 +208,6 @@ public class TinyTimeTracker extends BillingHelperActivity
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_activity_actions, menu);
@@ -247,39 +221,37 @@ public class TinyTimeTracker extends BillingHelperActivity
         item_donate.setVisible(!isPurchased(ITEM_DONATION));
 
         pagerLayout.setVisibility(View.VISIBLE);
-        pager.setPagingEnabled(true);
+        pager.setUserInputEnabled(true);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.action_edit:
-
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_edit) {
             if (currentTracker != null) {
                 AddTrackerActivity.open(this, currentTracker.id);
             }
-
             return true;
-        case R.id.action_add:
+        } else if (itemId == R.id.action_add) {
             onClickAddTracker();
             return true;
-        case R.id.action_delete:
+        } else if (itemId == R.id.action_delete) {
             confirmDeletion();
             return true;
-        case R.id.action_add_time_balance:
+        } else if (itemId == R.id.action_add_time_balance) {
             addTimeBalance();
             return true;
-        case R.id.action_settings:
+        } else if (itemId == R.id.action_settings) {
             Settings.openSettings(this);
             return true;
-        case R.id.action_recommend:
+        } else if (itemId == R.id.action_recommend) {
             recommendApp();
             return true;
-        case R.id.action_donate:
+        } else if (itemId == R.id.action_donate) {
             launchBillingFlow(ITEM_DONATION);
             return true;
-        default:
+        } else {
             return super.onOptionsItemSelected(item);
         }
     }
@@ -306,13 +278,11 @@ public class TinyTimeTracker extends BillingHelperActivity
                 .setMessage(this.getResources().getString(R.string.confirm_delete_question))
                 .setIcon(R.drawable.ic_delete)
                 .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        LogDataSource datasource = new LogDataSource(mContext);
-                        datasource.delete(currentTracker);
+                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+                    LogDataSource datasource = new LogDataSource(mContext);
+                    datasource.delete(currentTracker);
 
-                        datasource.close();
-                    }
+                    datasource.close();
                 }).show();
     }
 
@@ -345,6 +315,10 @@ public class TinyTimeTracker extends BillingHelperActivity
     }
 
     private void requestServicePermissions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            checkAndRequestPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, 1);
+            checkAndRequestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, 1);
+        }
         checkAndRequestPermission(this, Manifest.permission.WAKE_LOCK, 1);
         checkAndRequestPermission(this, Manifest.permission.RECEIVE_BOOT_COMPLETED, 1);
     }
@@ -427,28 +401,28 @@ public class TinyTimeTracker extends BillingHelperActivity
 
     }
 
-    private static class MyPagerAdapter extends FragmentPagerAdapter {
+    private static class MyPagerAdapter extends FragmentStateAdapter {
 
-        MyPagerAdapter(FragmentManager fm) {
-            super(fm);
+        public MyPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
+            super(fragmentActivity);
         }
 
         @NonNull
         @Override
-        public Fragment getItem(int pos) {
-            switch (pos) {
-                case 0:
-                default:
-                    return new MainFragment();
+        public Fragment createFragment(int position) {
+            switch (position) {
                 case 1:
                     return new CardFragment();
                 case 2:
                     return new StatsFragment();
+                case 0:
+                default:
+                    return new MainFragment();
             }
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             return 3;
         }
     }

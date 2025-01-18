@@ -22,10 +22,11 @@ public class Settings extends BillingHelperActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.settings_activity);
         fragment = new SettingsFragment();
         getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, fragment)
-        .commit();
+                .replace(R.id.settings_container, fragment)
+                .commit();
     }
 
 

@@ -2,26 +2,25 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
 
@@ -35,61 +34,54 @@ import de.firebirdberlin.preference.SeekBarPreferenceDialogFragment;
 
 // The callback interface
 interface FileChooserListener {
-    public void onClick(String absoluteFilePath);
+    void onClick(String absoluteFilePath);
 }
 
-public class SettingsFragment extends PreferenceFragmentCompat {
+public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "SettingsFragment";
     private String result = null;
-    private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 2;
+    private DbImportExport dbImportExport;
+    private static final int PERMISSIONS_REQUEST_POST_NOTIFICATIONS = 3;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        dbImportExport = new DbImportExport(requireActivity());
         addPreferencesFromResource(R.xml.preferences);
         toggleEnabledState();
         setOnPreferenceClickListener("pref_key_data_export", new Preference.OnPreferenceClickListener() {
             @SuppressLint("NewApi")
-            public boolean onPreferenceClick(Preference preference) {
-                if ( ! hasPermissionWriteExternalStorage() ) {
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                } else {
-                    DbImportExport.exportDb();
-                    toggleEnabledState();
-                }
-
+            public boolean onPreferenceClick(@NonNull Preference preference) {
+                dbImportExport.exportDb();
+                toggleEnabledState();
                 return true;
             }
         });
-        setSummary("pref_key_data_import", DbImportExport.DATABASE_DIRECTORY.getAbsolutePath());
+        setSummary("pref_key_data_import", dbImportExport.DATABASE_DIRECTORY.getAbsolutePath());
         setOnPreferenceClickListener("pref_key_data_import", new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                chooseFile(new FileChooserListener() {
-                    public void onClick(String absoluteFilePath) {
-                        DbImportExport.restoreDb(absoluteFilePath);
-                        EventBus bus = EventBus.getDefault();
-                        bus.post(new OnDatabaseImported());
-                    }
-                } );
+            public boolean onPreferenceClick(@NonNull Preference preference) {
+                chooseFile(absoluteFilePath -> {
+                    dbImportExport.restoreDb(absoluteFilePath);
+                    EventBus bus = EventBus.getDefault();
+                    bus.post(new OnDatabaseImported());
+                });
                 return true;
             }
         });
 
         setOnPreferenceClickListener("pref_key_data_share",
-                new Preference.OnPreferenceClickListener() {
-                    public boolean onPreferenceClick(Preference preference) {
-                        chooseFile(new FileChooserListener() {
-                            public void onClick(String absoluteFilePath) {
-                                DbImportExport.shareFile(getActivity(), absoluteFilePath);
-                            }
-                        } );
-                        return true;
-                    }
+                preference -> {
+                    chooseFile(absoluteFilePath -> {
+                        Activity activity = getActivity();
+                        if (activity != null) {
+                            dbImportExport.shareFile(activity, absoluteFilePath);
+                        }
+                    });
+                    return true;
                 }
         );
 
         setOnPreferenceClickListener("pref_key_recommendation", new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
+            public boolean onPreferenceClick(@NonNull Preference preference) {
                 String body = "https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker";
                 String subject = getResources().getString(R.string.recommend_app_subject);
                 String description = getResources().getString(R.string.recommend_app_desc);
@@ -97,22 +89,29 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 sharingIntent.setType("text/plain");
                 sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, body);
-                getActivity().startActivity(Intent.createChooser(sharingIntent, description));
+                Activity activity = getActivity();
+                if (activity != null) {
+                    activity.startActivity(Intent.createChooser(sharingIntent, description));
+                }
                 return true;
             }
         });
 
         setOnPreferenceClickListener("pref_key_buy", new Preference.OnPreferenceClickListener() {
             @Override
-            public boolean onPreferenceClick(Preference preference) {
-                ((Settings) getActivity()).launchBillingFlow(BillingHelperActivity.ITEM_PRO);
+            public boolean onPreferenceClick(@NonNull Preference preference) {
+                Activity activity = getActivity();
+                if (activity == null) {
+                    return false;
+                }
+                ((Settings) activity).launchBillingFlow(BillingHelperActivity.ITEM_PRO);
                 return true;
             }
         });
 
         setOnPreferenceChangeListener("pref_key_theme", new Preference.OnPreferenceChangeListener() {
             @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
+            public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
                 String theme = (String) newValue;
                 int mode = Settings.getDayNightTheme(theme);
                 AppCompatDelegate.setDefaultNightMode(mode);
@@ -120,14 +119,31 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             }
         });
         EditTextPreference referenceTimePreference = findPreference("pref_key_reference_time_months");
-        referenceTimePreference.setOnBindEditTextListener(new EditTextPreference.OnBindEditTextListener() {
-            @Override
-            public void onBindEditText(@NonNull final EditText editText) {
+        if (referenceTimePreference != null) {
+            referenceTimePreference.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 editText.setHint("3");
                 editText.setSelection(editText.getText().length());
-            }
-        });
+            });
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences settings = getPreferenceScreen().getSharedPreferences();
+        if (settings != null) {
+            settings.registerOnSharedPreferenceChangeListener(this);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences settings = getPreferenceScreen().getSharedPreferences();
+        if (settings != null) {
+            settings.unregisterOnSharedPreferenceChangeListener(this);
+        }
     }
 
     private void setOnPreferenceClickListener(String key, Preference.OnPreferenceClickListener listener) {
@@ -151,29 +167,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         }
     }
 
-
-    @SuppressWarnings("deprecation")
-    private boolean hasPermissionWriteExternalStorage() {
-        if (Build.VERSION.SDK_INT >= 23 ) {
-            return ( getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED );
-        }
-        return true;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "permission WRITE_EXTERNAL_STORAGE granted");
-                DbImportExport.exportDb();
-                toggleEnabledState();
-            } else {
-                Log.e(TAG, "permission WRITE_EXTERNAL_STORAGE denied");
-            }
-        }
-    }
-
     void toggleEnabledState() {
         if (!isAdded()) {
             return;
@@ -181,20 +174,20 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         setVisible("pref_key_buy", !isPurchased());
         setEnabled("pref_key_data_backup", isPurchased());
         setEnabled("pref_key_notification_new_access_points", isPurchased());
-        boolean enabled = false;
-        Preference pref_data_import = findPreference("pref_key_data_import");
-        Preference pref_data_share = findPreference("pref_key_data_share");
-        if (hasPermissionWriteExternalStorage() ) {
-            File[] files = DbImportExport.listFiles();
-            enabled = (files != null && files.length > 0);
-        }
 
-        pref_data_share.setEnabled(enabled);
-        pref_data_import.setEnabled(enabled);
+        File[] files = dbImportExport.listFiles();
+        boolean enabled = (files != null && files.length > 0);
+
+        setEnabled("pref_key_data_share", enabled);
+        setEnabled("pref_key_data_import", enabled);
     }
 
     boolean isPurchased() {
-        return ((Settings) getActivity()).isPurchased(BillingHelperActivity.ITEM_PRO);
+        Activity activity = getActivity();
+        if (activity instanceof Settings) {
+            return ((Settings) activity).isPurchased(BillingHelperActivity.ITEM_PRO);
+        }
+        return false;
     }
 
     void setVisible(String key, boolean on) {
@@ -212,38 +205,40 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     }
 
     private void chooseFile(final FileChooserListener fileChooserListener) {
-        final File file_list[] = DbImportExport.listFiles();
+        final File file_list[] = dbImportExport.listFiles();
 
         if (file_list == null || file_list.length == 0) {
             return;
         }
 
-        ArrayList<String> files = new ArrayList<String>();
+        ArrayList<String> files = new ArrayList<>();
 
         for (File file : file_list) {
             files.add(file.getName());
         }
 
-        final CharSequence[] files_seq = files.toArray(new CharSequence[files.size()]);
-        new AlertDialog.Builder(getActivity())
-        .setTitle(getActivity().getResources().getString(R.string.dialog_title_database_backup))
-        .setSingleChoiceItems(files_seq, 0, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                result = file_list[item].getAbsolutePath();
-                Log.i(TAG, result);
+        final CharSequence[] files_seq = files.toArray(new CharSequence[0]);
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        new AlertDialog.Builder(activity)
+        .setTitle(activity.getResources().getString(R.string.dialog_title_database_backup))
+        .setSingleChoiceItems(files_seq, 0, (dialog, item) -> {
+            result = file_list[item].getAbsolutePath();
+            Log.i(TAG, result);
 
-                if (fileChooserListener != null) {
-                    fileChooserListener.onClick(result);
-                }
-
-                dialog.dismiss();
+            if (fileChooserListener != null) {
+                fileChooserListener.onClick(result);
             }
+
+            dialog.dismiss();
         })
         .setNegativeButton(android.R.string.no, null).show();
     }
 
     @Override
-    public void onDisplayPreferenceDialog(Preference preference) {
+    public void onDisplayPreferenceDialog(@NonNull Preference preference) {
         Log.i(TAG, preference.getKey());
         if (preference instanceof SeekBarPreference) {
             DialogFragment dialogFragment = SeekBarPreferenceDialogFragment.newInstance(
@@ -252,5 +247,36 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             dialogFragment.setTargetFragment(this, 0);
             dialogFragment.show(getFragmentManager(), null);
         } else super.onDisplayPreferenceDialog(preference);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_key_show_notifications")) {
+            boolean showNotifications = sharedPreferences.getBoolean(key, false);
+            if (showNotifications) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.POST_NOTIFICATIONS}, PERMISSIONS_REQUEST_POST_NOTIFICATIONS);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_POST_NOTIFICATIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "POST_NOTIFICATIONS permission granted");
+            } else {
+                Log.d(TAG, "POST_NOTIFICATIONS permission denied");
+                // Optionally, disable the preference if permission is denied
+                SwitchPreferenceCompat switchPreference = findPreference("pref_key_show_notifications");
+                if (switchPreference != null) {
+                    switchPreference.setChecked(false);
+                }
+            }
+        }
     }
 }
