@@ -86,7 +86,7 @@
             android:key="version"
             android:icon="@drawable/ic_hourglass"
             android:title="TinyTimeTracker"
-            android:summary="2022 - Dr. Stefan Fruhner (stefan.fruhner@googlemail.com)">
+            android:summary="2025 - Dr. Stefan Fruhner (stefan.fruhner@googlemail.com)">
 
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"/>
@@ -100,10 +100,16 @@
 
         <Preference
             android:icon="@drawable/ic_globe"
+            android:title="Privacy policy">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://firebirdberlin.github.io/tinytimetracker/privacy_policy.md"/>
+        </Preference>
+        <Preference
+            android:icon="@drawable/ic_globe"
             android:title="Translations wanted !"
             android:summary="Please add or update the translation for your language.">
             <intent android:action="android.intent.action.VIEW"
-                android:data="https://firebirdberlin.github.io/tinytimetracker/translation.html"/>
+                android:data="https://firebirdberlin.github.io/tinytimetracker/"/>
         </Preference>
 
         <Preference
