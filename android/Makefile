@@ -1,28 +1,39 @@
+ifeq ($(origin ANDROID_HOME),undefined)
+    $(error ANDROID_HOME is not set. Please set this environment variable to your Android SDK path.)
+endif
+
+ADB = ${ANDROID_HOME}/platform-tools/adb
 PACKAGE_NAME=com.firebirdberlin.tinytimetracker
 
 debug:
-	ant debug
+	gradle assembleDebug
 
 release:
-	ant release
+	gradle assembleRelease
 
 installdebug:
-	adb $(OPT) install -r ./build/outputs/apk/debug/android-debug.apk
+	${ADB} $(OPT) install -r ./build/outputs/apk/debug/app-debug.apk
 
 install:
-	adb $(OPT) install -r release/android-release.apk
+	${ADB} $(OPT) install -r ./build/outputs/apk/release/app-release.apk
 
 uninstall:
-	adb $(OPT) uninstall ${PACKAGE_NAME}
+	${ADB} $(OPT) uninstall ${PACKAGE_NAME}
 
 clean:
-	ant clean
+	gradle clean
 
 start:
-	adb $(OPT) shell am start -n ${PACKAGE_NAME}/${PACKAGE_NAME}.TinyTimeTracker
+	${ADB} $(OPT) shell am start -n ${PACKAGE_NAME}/${PACKAGE_NAME}.TinyTimeTracker
 
 on:
-	adb shell input keyevent KEYCODE_POWER
+	${ADB} shell input keyevent KEYCODE_POWER
 
 clear-data:
-	adb shell pm clear ${PACKAGE_NAME}
+	${ADB} shell pm clear ${PACKAGE_NAME}
+
+doze-on:
+	${ADB} $(OPT) shell dumpsys deviceidle force-idle
+
+doze-off:
+	${ADB} $(OPT) shell dumpsys deviceidle unforce

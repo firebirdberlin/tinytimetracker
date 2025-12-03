@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.13.1'
     }
 }
 
@@ -20,27 +20,27 @@ allprojects {
 apply plugin: 'com.android.application'
 
 dependencies {
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.guava:guava:33.5.0-android'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0"
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.work:work-multiprocess:2.7.1'
-    implementation 'androidx.work:work-runtime-ktx:2.7.1'
-    implementation 'androidx.work:work-runtime:2.7.1'
-    implementation 'com.android.billingclient:billing:4.0.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.work:work-multiprocess:2.11.0'
+    implementation 'androidx.work:work-runtime-ktx:2.11.0'
+    implementation 'com.android.billingclient:billing:8.1.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
-    implementation 'com.google.android.material:material:1.7.0'
-    implementation 'org.greenrobot:eventbus:3.0.0'
-    implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation project(':android-page-indicator')
-    implementation project(':externals:android-preferences')
+    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'org.greenrobot:eventbus:3.3.1'
+    implementation 'com.github.firebirdberlin:android-page-indicator:36.0.2'
+    implementation 'com.github.firebirdberlin:android-preferences:36.0.5'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
 }
 
 android {
-    compileSdkVersion 33
+    compileSdk 36
+    namespace "com.firebirdberlin.tinytimetracker"
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -73,11 +73,15 @@ android {
             }
             minifyEnabled true
             shrinkResources true
-            proguardFile '/home/stefan/android/projects/tinytimetracker/android/proguard-project.txt'
+            proguardFile 'proguard-project.txt'
         }
     }
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 33
+        minSdk 23
+        targetSdk 36
+    }
+    buildFeatures {
+        renderScript true
+        aidl true
     }
 }

@@ -5,23 +5,18 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager.WifiLock;
 import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.OutOfQuotaPolicy;
 import androidx.work.PeriodicWorkRequest;
@@ -35,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import androidx.core.app.NotificationCompat;
 
@@ -47,6 +41,8 @@ import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 import com.firebirdberlin.tinytimetracker.services.AddAccessPointService;
 
 import org.greenrobot.eventbus.EventBus;
+import org.jetbrains.annotations.NotNull;
+
 public class UpdateTrackersJob extends Worker {
     private static final String TAG = "UpdateTrackersJob";
     private static final int NOTIFICATION_ID_WIFI = 1338;
@@ -61,7 +57,7 @@ public class UpdateTrackersJob extends Worker {
     private boolean tracked_wifi_network_found = false;
     private boolean useAutoDetection = true;
 
-    private List<AccessPoint> activeAccessPoints = new ArrayList<>();
+    private final List<AccessPoint> activeAccessPoints = new ArrayList<>();
 
     public UpdateTrackersJob(
             @NonNull Context context,
@@ -88,17 +84,27 @@ public class UpdateTrackersJob extends Worker {
         PeriodicWorkRequest request =
                 new PeriodicWorkRequest.Builder(
                         UpdateTrackersJob.class,
-                        2, TimeUnit.MINUTES,
-                        2, TimeUnit.MINUTES
+                        15, TimeUnit.MINUTES
+                ).setConstraints(
+                    new Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
                 ).addTag(TAG).build();
 
-        WorkManager.getInstance(context).enqueue(request);
-
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                "CheckWifi",
+                ExistingPeriodicWorkPolicy.KEEP,
+                request
+        );
     }
 
     @Override
-    public Result doWork() {
-
+    public @NotNull Result doWork() {
+        if (TinyTimeTracker.hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            Log.d(TAG, "DEBUG: ACCESS_FINE_LOCATION is reported as GRANTED right now.");
+        } else {
+            Log.e(TAG, "DEBUG: ACCESS_FINE_LOCATION is reported as DENIED right now, despite user claims.");
+        }
         // Do the work here--in this case, upload the images.
         updateTrackersInManualMode();
 
@@ -117,11 +123,15 @@ public class UpdateTrackersJob extends Worker {
             Log.i(TAG, "WIFI is currently disabled");
             return stopUnsuccessfulStartAttempt();
         }
+
+        Log.d(TAG, "Connected Wi-Fi BSSID: " + wifiInfo.getBSSID() + ", SSID: " + wifiInfo.getSSID());
+
         activeAccessPoints.clear();
         activeAccessPoints.add(new AccessPoint(wifiInfo));
         getWiFiNetworks();
         updateNotifications();
 
+        Log.d(TAG, "WIFI SERVICE ends ...");
         return Result.success();
     }
 
@@ -133,7 +143,7 @@ public class UpdateTrackersJob extends Worker {
             Log.i(TAG, "Updating tracker in manual mode: " + tracker.verbose_name);
             datasource.updateTrackerInManualMode(tracker);
         }
-        if (trackersToUpdate.size() > 0) {
+        if (!trackersToUpdate.isEmpty()) {
             active_tracker = trackersToUpdate.iterator().next();
         }
         datasource.close();
@@ -147,7 +157,7 @@ public class UpdateTrackersJob extends Worker {
         findNewAccessPointsBySSID(datasource);
         datasource.close();
 
-        tracked_wifi_network_found = (trackersToUpdate.size() > 0);
+        tracked_wifi_network_found = !trackersToUpdate.isEmpty();
 
         if (tracked_wifi_network_found && active_tracker == null) {
             // use the first result for notifications
@@ -166,10 +176,10 @@ public class UpdateTrackersJob extends Worker {
     private Set<TrackerEntry> getTrackersToUpdate(LogDataSource datasource) {
         Set<TrackerEntry> trackersToUpdate = new HashSet<>();
         Set<String> trackedBSSIDs = datasource.getTrackedBSSIDs();
-
         for (AccessPoint accessPoint : activeAccessPoints) {
+            Log.d(TAG, "Current active AccessPoint BSSID: " + accessPoint.bssid);
             if (trackedBSSIDs.contains(accessPoint.bssid)) {
-                Log.d(TAG, accessPoint.bssid);
+                Log.d(TAG, "Match found for BSSID: " + accessPoint.bssid);
                 Set<TrackerEntry> trackers = datasource.getTrackersByBSSID(accessPoint.bssid);
                 trackersToUpdate.addAll(trackers);
             }
@@ -219,7 +229,9 @@ public class UpdateTrackersJob extends Worker {
                 knownSet = new HashSet<>();
                 knownAccessPointsByTrackerId.put(tracker_id, knownSet);
             }
-            knownSet.add(ap);
+            if (knownSet != null) {
+                knownSet.add(ap);
+            }
         }
 
         HashMap<Long, ArrayList<AccessPoint>> unknownAccessPointsByTrackerId = new HashMap<>();
@@ -263,7 +275,7 @@ public class UpdateTrackersJob extends Worker {
         }
 
         // tracker_ids now only contains items which do not track this BSSID
-        if (unknownAccessPointsByTrackerId.size() > 0) {
+        if (!unknownAccessPointsByTrackerId.isEmpty()) {
             Notification note = null;
             for (long tracker_id : unknownAccessPointsByTrackerId.keySet()) {
 
@@ -483,7 +495,8 @@ public class UpdateTrackersJob extends Worker {
     private boolean isAutoDiscoverActive(long tracker_id) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         long now = System.currentTimeMillis();
-        return now < settings.getLong(String.format("wifi_auto_discover_%d", tracker_id), -1L);
+        String key = "wifi_auto_discover_%d" + tracker_id;
+        return now < settings.getLong(key, -1L);
     }
 
 }
