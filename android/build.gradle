@@ -81,6 +81,7 @@ android {
         targetSdk 36
     }
     buildFeatures {
+        buildConfig true
         renderScript true
         aidl true
     }

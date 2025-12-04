@@ -72,8 +72,9 @@
     <string name="theme_dark">dunkel</string>
     <string name="theme_light">hell</string>
     <string name="title_warning_location_services_off">Fehler</string>
-    <string name="warning_location_permission_not_granted">"Die Berechtigung, um auf den Standort zuzugreifen ist zur Zeit nicht erteilt. Damit die App nach WLAN Netzwerken scannen kann, ist sie erforderlich. "</string>
-    <string name="warning_location_services_off">Die Standortbestimmung ist zur Zeit deaktiviert. Damit TinyTimeTracker voll funktionsfähig ist, muss mindestens der Energiesparmodus aktiviert werden.</string>
+    <string name="warning_background_location_permission_not_granted">Um die automatische Zeiterfassung per WLAN zu ermöglichen, benötigt diese App die Standortberechtigung „Immer zulassen“. Diese können Sie in den Geräteeinstellungen unter „Apps > Zeiterfaasung > Berechtigungen > Standort“ ändern.</string>
+    <string name="warning_location_permission_not_granted">Um WLAN-Netzwerke zu erkennen und die automatische Zeiterfassung zu ermöglichen, benötigt die App Zugriff auf den präzisen Standort. Bitte erteilen Sie diese Berechtigung in den Geräteeinstellungen unter „Apps > Zeiterfaasung > Berechtigungen > Standort“.</string>
+    <string name="warning_location_services_off">Standortdienste sind derzeit deaktiviert. Die App benötigt diese, um WLAN-Netzwerke für die automatische Zeiterfassung zu erkennen. Bitte aktivieren Sie die Standortdienste in Ihren Geräteeinstellungen.</string>
     <string-array name="time_balance_type">
         <item>Zeitausgleich</item>
         <item>Überstunden</item>

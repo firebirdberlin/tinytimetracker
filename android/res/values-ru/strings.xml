@@ -70,10 +70,10 @@
     <string name="theme_dark">Темная</string>
     <string name="theme_light">Светлая</string>
     <string name="title_warning_location_services_off">Ошибка</string>
-    <string name="warning_location_permission_not_granted">Необходимо разрешить определение местоположения и поиск WiFi сетей.</string>
-    <string name="warning_location_services_off">Запрещен доступ к местоположению. Необходимо разрешить определение местоположения.</string>
+    <string name="warning_background_location_permission_not_granted">Для включения автоматического учета времени по Wi-Fi этому приложению требуется доступ к местоположению «Разрешить всегда». Вы можете изменить это в настройках устройства: «Приложения > TinyTimeTracker > Разрешения > Местоположение».</string>
+    <string name="warning_location_permission_not_granted">Для обнаружения сетей Wi-Fi и включения автоматического учета времени TinyTimeTracker требует доступа к точному местоположению. Предоставьте это разрешение в настройках устройства: «Приложения > TinyTimeTracker > Разрешения > Местоположение».</string>
+    <string name="warning_location_services_off">Службы определения местоположения в настоящее время отключены. TinyTimeTracker нуждается в них для обнаружения сетей Wi-Fi и автоматического учета времени. Включите службы определения местоположения в настройках устройства.</string>
 <string-array name="time_balance_type">
 <item>время выключено/ все время</item>
-<item></item>
 </string-array>
 </resources>

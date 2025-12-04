@@ -76,8 +76,9 @@
     <string name="theme_dark">dark</string>
     <string name="theme_light">light</string>
     <string name="title_warning_location_services_off">Error</string>
-    <string name="warning_location_permission_not_granted">The permission to access the location is currently not granted. You should grant this permission in order to allow scanning for WiFi networks.</string>
-    <string name="warning_location_services_off">Location services are currently disabled. You should enable location services in order to make TinyTimeTracker work.</string>
+    <string name="warning_background_location_permission_not_granted">To enable automatic time tracking via Wi-Fi, this app requires \'Allow all the time\' location access. You can change this in your device\'s Settings &gt; Apps &gt; TinyTimeTracker &gt; Permissions &gt; Location.</string>
+    <string name="warning_location_permission_not_granted">To detect Wi-Fi networks and enable automatic time tracking, TinyTimeTracker requires precise location access. Please grant this permission in your device\'s Settings &gt; Apps &gt; TinyTimeTracker &gt; Permissions &gt; Location.</string>
+    <string name="warning_location_services_off">Location services are currently off. TinyTimeTracker needs them to detect Wi-Fi networks for automatic time tracking. Please turn on Location Services in your device settings.</string>
     <string-array name="time_balance_type">
         <item>Time off</item>
         <item>Overtime</item>

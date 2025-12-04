@@ -235,11 +235,9 @@ public class AddTrackerActivity extends AppCompatActivity {
 
     public void onChooseWifi(View v) {
 
-        if (Build.VERSION.SDK_INT >= 23){
-            if ( ! TinyTimeTracker.isLocationEnabled(this) ) {
-                showLocationProviderDisabledWarning();
-                return;
-            }
+        if (!TinyTimeTracker.isLocationEnabled(this)) {
+            showLocationProviderDisabledWarning();
+            return;
         }
 
         boolean hasPermission = TinyTimeTracker.checkAndRequestPermission(

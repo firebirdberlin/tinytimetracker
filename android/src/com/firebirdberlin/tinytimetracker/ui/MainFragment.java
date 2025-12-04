@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
@@ -74,17 +75,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private TextView textviewUpgradePro = null;
     private CardView cardviewLocationProviderOff = null;
     private CardView cardviewLocationPermission = null;
+    private CardView cardviewBackgroundLocationPermission = null;
     private CardView cardviewProVersion = null;
     private View trackerToolbar = null;
     private MainView timeView = null;
-    private List<TrackerEntry> trackers = new ArrayList<>();
-    private Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<Long, Integer>();
+    private final List<TrackerEntry> trackers = new ArrayList<>();
+    private final Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<>();
     private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
     private FloatingActionButton actionButtonStart;
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.main_fragment, container, false);
         actionButtonStart = v.findViewById(R.id.action_button_start);
@@ -96,6 +98,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         textviewCummulatedTime = v.findViewById(R.id.textview_cummulated_time);
         cardviewLocationProviderOff = v.findViewById(R.id.cardview_warn_gps_off);
         cardviewLocationPermission = v.findViewById(R.id.cardview_warn_location_permission_not_granted);
+        cardviewBackgroundLocationPermission = v.findViewById(R.id.cardview_warn_background_location_permission_not_granted);
         cardviewProVersion = v.findViewById(R.id.cardview_upgrade_pro);
         textviewUpgradePro = v.findViewById(R.id.textview_upgrade_pro);
         trackerToolbar = v.findViewById(R.id.tracker_toolbar);
@@ -129,31 +132,34 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         });
 
         timeView = v.findViewById(R.id.main_time_view);
-        timeView.setOnLongClickListener(new View.OnLongClickListener() {
-            public boolean onLongClick(View v) {
-                handleClockinStateChange();
-                return true;
-            }
+        timeView.setOnLongClickListener(v1 -> {
+            handleClockinStateChange();
+            return true;
         });
 
         final Button buttonLocationProviders = v.findViewById(R.id.button_location_providers);
-        buttonLocationProviders.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent viewIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(viewIntent);
-            }
+        buttonLocationProviders.setOnClickListener(v2 -> {
+            Intent viewIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(viewIntent);
         });
 
         final Button buttonLocationPermission = v.findViewById(R.id.button_grant_location_permission);
-        buttonLocationPermission.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                TinyTimeTracker.checkAndRequestPermission(
+        buttonLocationPermission.setOnClickListener(
+            v3 -> TinyTimeTracker.checkAndRequestPermission(
+                (AppCompatActivity) getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                1
+            )
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            final Button buttonBackgroundLocationPermission = v.findViewById(R.id.button_grant_background_location_permission);
+                buttonBackgroundLocationPermission.setOnClickListener(
+                    v3 -> TinyTimeTracker.checkAndRequestPermission(
                         (AppCompatActivity) getActivity(),
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        1
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                        1)
                 );
-            }
-        });
+        }
         return v;
     }
 
@@ -176,48 +182,55 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void setupWarnings() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            boolean shallShowWifiCard = false;
-            for (TrackerEntry tracker : trackers) {
-                if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC
-                        || tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED) {
-                    shallShowWifiCard = true;
-                    break;
-                }
+        boolean shallShowWifiCard = false;
+        for (TrackerEntry tracker : trackers) {
+            if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC
+                    || tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED) {
+                shallShowWifiCard = true;
+                break;
             }
+        }
 
-            if (shallShowWifiCard && !TinyTimeTracker.isLocationEnabled(getActivity())) {
-                cardviewLocationProviderOff.setVisibility(View.VISIBLE);
-            } else {
-                cardviewLocationProviderOff.setVisibility(View.GONE);
-            }
+        if (shallShowWifiCard && !TinyTimeTracker.isLocationEnabled(getActivity())) {
+            cardviewLocationProviderOff.setVisibility(View.VISIBLE);
+        } else {
+            cardviewLocationProviderOff.setVisibility(View.GONE);
+        }
 
 
-            if (shallShowWifiCard
-                    && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                cardviewLocationPermission.setVisibility(View.VISIBLE);
-            } else {
-                cardviewLocationPermission.setVisibility(View.GONE);
-            }
+        if (shallShowWifiCard
+                && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+            cardviewLocationPermission.setVisibility(View.VISIBLE);
+        } else {
+            cardviewLocationPermission.setVisibility(View.GONE);
+        }
 
-            TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
-            if (cardviewLocationPermission.getVisibility() != View.GONE
-                    && cardviewLocationProviderOff.getVisibility() != View.GONE) {
-                cardviewProVersion.setVisibility(View.GONE);
-            } else if (
-                    mainActivity != null
-                    && !(mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)
-                            || mainActivity.isPurchased(TinyTimeTracker.ITEM_DONATION))
-                    && Settings.shallAskForUpgrade(getContext())
-            ) {
-                int backgroundColor = Utility.getRandomMaterialColor(getContext());
-                int textColor = Utility.getContrastColor(backgroundColor);
-                cardviewProVersion.setBackgroundColor(backgroundColor);
-                textviewUpgradePro.setTextColor(textColor);
-                button_buy.setTextColor(textColor);
-                button_later.setTextColor(textColor);
-                cardviewProVersion.setVisibility(View.VISIBLE);
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+            && shallShowWifiCard
+                && TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+            cardviewBackgroundLocationPermission.setVisibility(View.VISIBLE);
+        } else {
+            cardviewBackgroundLocationPermission.setVisibility(View.GONE);
+        }
+
+        TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
+        if (cardviewLocationPermission.getVisibility() != View.GONE
+                && cardviewLocationProviderOff.getVisibility() != View.GONE) {
+            cardviewProVersion.setVisibility(View.GONE);
+        } else if (
+                mainActivity != null
+                && !(mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)
+                        || mainActivity.isPurchased(TinyTimeTracker.ITEM_DONATION))
+                && Settings.shallAskForUpgrade(getContext())
+        ) {
+            int backgroundColor = Utility.getRandomMaterialColor(getContext());
+            int textColor = Utility.getContrastColor(backgroundColor);
+            cardviewProVersion.setBackgroundColor(backgroundColor);
+            textviewUpgradePro.setTextColor(textColor);
+            button_buy.setTextColor(textColor);
+            button_later.setTextColor(textColor);
+            cardviewProVersion.setVisibility(View.VISIBLE);
         }
     }
 
@@ -293,13 +306,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             datasource.close();
             setWifiIndicator(tracker);
 
-            if (shallCheckPerms) {
-                TinyTimeTracker.checkAndRequestPermission(
-                        (AppCompatActivity) getActivity(),
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        1
-                );
-            }
+//            if (shallCheckPerms) {
+//                TinyTimeTracker.checkAndRequestPermission(
+//                        (AppCompatActivity) getActivity(),
+//                        Manifest.permission.ACCESS_FINE_LOCATION,
+//                        1
+//                );
+//            }
             setupWarnings();
             Log.i(TAG, "button_toggle_wifi click done ...");
         } else

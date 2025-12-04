@@ -50,5 +50,7 @@
     <string name="recommend_app_desc">Seleccione una app para compartirla recomendación</string>
     <string name="recommend_app_subject">Me gustaría recomendarte esta aplicación de seguimiento de actividad</string>
     <string name="title_warning_location_services_off">Error</string>
-    <string name="warning_location_services_off">Los servicios de localización están desactivados. Debes activarlos si quieres que TinyTimeTracker funcione.</string>
+    <string name="warning_background_location_permission_not_granted">Para activar el seguimiento de tiempo automático por Wi-Fi, esta aplicación requiere el permiso de ubicación "Permitir siempre". Puede cambiarlo en los ajustes de su dispositivo, en "Aplicaciones > TinyTimeTracker > Permisos > Ubicación".</string>
+    <string name="warning_location_permission_not_granted">Para detectar redes Wi-Fi y activar el seguimiento de tiempo automático, TinyTimeTracker requiere acceso a la ubicación precisa. Conceda este permiso en los ajustes de su dispositivo, en "Aplicaciones > TinyTimeTracker > Permisos > Ubicación".</string>
+    <string name="warning_location_services_off">Los servicios de ubicación están actualmente desactivados. TinyTimeTracker los necesita para detectar redes Wi-Fi y permitir el seguimiento de tiempo automático. Active los servicios de ubicación en los ajustes de su dispositivo.</string>
 </resources>

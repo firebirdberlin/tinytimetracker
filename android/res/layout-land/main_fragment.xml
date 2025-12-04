@@ -11,6 +11,8 @@
         android:orientation="vertical"
         android:animateLayoutChanges="true">
 
+        <include layout="@layout/card_permission_background_location_not_granted" />
+
         <include layout="@layout/card_permission_not_granted" />
 
         <include layout="@layout/card_gps_off"/>
