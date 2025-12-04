@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="SeekBarDialogPreference">
+        <attr name="min" format="integer" />
+        <attr name="android:max" />
+        <attr name="android:text" />
+        <attr name="dialogLayout" format="reference" />
+    </declare-styleable>
+</resources>

@@ -20,50 +20,32 @@ allprojects {
 apply plugin: 'com.android.application'
 
 dependencies {
-    implementation 'com.google.guava:guava:33.5.0-android'
+    // AndroidX
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0"
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.work:work-multiprocess:2.11.0'
     implementation 'androidx.work:work-runtime-ktx:2.11.0'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
+    // Google
+    implementation 'com.google.guava:guava:33.5.0-android'
     implementation 'com.android.billingclient:billing:8.1.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'com.google.android.material:material:1.13.0'
+
+    // Third-party
     implementation 'org.greenrobot:eventbus:3.3.1'
     implementation 'com.github.firebirdberlin:android-page-indicator:36.0.2'
     implementation 'com.github.firebirdberlin:android-preferences:36.0.5'
-    implementation 'androidx.viewpager2:viewpager2:1.1.0'
 }
 
 android {
     compileSdk 36
     namespace "com.firebirdberlin.tinytimetracker"
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
-        }
 
-        // Move the tests to tests/java, tests/res, etc...
-        androidTest.setRoot('tests')
-
-        // Move the build types to build-types/<type>
-        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
-        // This moves them out of them default location under src/<type>/... which would
-        // conflict with src/ being used by the main source set.
-        // Adding new build types or product flavors should be accompanied
-        // by a similar customization.
-        debug.setRoot('build-types/debug')
-        release.setRoot('build-types/release')
-    }
     buildTypes {
         release {
             lintOptions {
@@ -79,6 +61,8 @@ android {
     defaultConfig {
         minSdk 23
         targetSdk 36
+        versionCode 81
+        versionName "1.8.0"
     }
     buildFeatures {
         buildConfig true

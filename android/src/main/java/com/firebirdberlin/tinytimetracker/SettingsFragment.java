@@ -19,10 +19,14 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
+import com.firebirdberlin.tinytimetracker.preference.SeekBarDialogPreference;
+// Removed the direct import for SeekBarPreferenceDialogFragmentCompat as it's now an inner class
+// import com.firebirdberlin.tinytimetracker.preference.SeekBarPreferenceDialogFragmentCompat;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -42,6 +46,21 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private String result = null;
     private DbImportExport dbImportExport;
     private static final int PERMISSIONS_REQUEST_POST_NOTIFICATIONS = 3;
+
+    @Override
+    public void onDisplayPreferenceDialog(@NonNull Preference preference) {
+        Log.i(TAG, preference.getKey());
+        // Check if the preference is an instance of our custom SeekBarDialogPreference
+        if (preference instanceof SeekBarDialogPreference) {
+            // Use the inner static class for the dialog fragment
+            final PreferenceDialogFragmentCompat dialogFragment = SeekBarDialogPreference.SeekBarPreferenceDialogFragmentCompat.newInstance(preference.getKey());
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(getParentFragmentManager(), "androidx.preference.PreferenceFragment.DIALOG");
+        } else {
+            // For all other preference types, use the default dialog handling
+            super.onDisplayPreferenceDialog(preference);
+        }
+    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -235,18 +254,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             dialog.dismiss();
         })
         .setNegativeButton(android.R.string.no, null).show();
-    }
-
-    @Override
-    public void onDisplayPreferenceDialog(@NonNull Preference preference) {
-        Log.i(TAG, preference.getKey());
-        if (preference instanceof SeekBarPreference) {
-            DialogFragment dialogFragment = SeekBarPreferenceDialogFragment.newInstance(
-                    (SeekBarPreference) preference
-            );
-            dialogFragment.setTargetFragment(this, 0);
-            dialogFragment.show(getFragmentManager(), null);
-        } else super.onDisplayPreferenceDialog(preference);
     }
 
     @Override

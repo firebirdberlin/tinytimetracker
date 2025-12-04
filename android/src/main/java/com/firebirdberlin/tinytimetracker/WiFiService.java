@@ -12,14 +12,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -39,7 +37,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 
 // maximum API LEVEL 28
@@ -467,7 +464,8 @@ public class WiFiService extends Service {
 
     private long getGraceTime(LogDataSource datasource, TrackerEntry tracker, long now) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        long millisConnectionLost = 1000L * 60L * settings.getInt("pref_key_absence_time", 20);
+        int absenceTimeInMinutes = settings.getInt("pref_key_absence_time", 20);
+        long millisConnectionLost = 1000L * 60L * Math.max(15, absenceTimeInMinutes);
         long lastRunTime = settings.getLong("last_wifi_detection_timestamp", -1L);
 
         LogEntry latestLogEntry = datasource.getLatestLogEntry(tracker.id);

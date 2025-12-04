@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import java.util.Calendar;
 
 public class Settings extends BillingHelperActivity {
+    private static final String TAG = "Settings";
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
     public static final String PREF_KEY_LAST_TRACKER_ID = "last_tracker_id";
     public static final String PREF_KEY_AUTO_DETECTION = "pref_key_notification_new_access_points";
@@ -70,11 +71,6 @@ public class Settings extends BillingHelperActivity {
     public static long getLastTrackerID(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getLong(Settings.PREF_KEY_LAST_TRACKER_ID, -1);
-    }
-
-    public static long getSecondsUntilConnectionLost(Context context) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        return 60L * settings.getInt("pref_key_absence_time", 20);
     }
 
     public static int getDayNightTheme(Context context) {

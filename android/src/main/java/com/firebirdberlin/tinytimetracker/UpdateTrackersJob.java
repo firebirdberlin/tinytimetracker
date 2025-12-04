@@ -1,7 +1,6 @@
 package com.firebirdberlin.tinytimetracker;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,10 +9,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
@@ -24,15 +24,6 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import androidx.core.app.NotificationCompat;
-
 import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
@@ -42,6 +33,13 @@ import com.firebirdberlin.tinytimetracker.services.AddAccessPointService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class UpdateTrackersJob extends Worker {
     private static final String TAG = "UpdateTrackersJob";
@@ -302,7 +300,8 @@ public class UpdateTrackersJob extends Worker {
 
     private long getGraceTime(LogDataSource datasource, TrackerEntry tracker, long now) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        long millisConnectionLost = 1000L * 60L * settings.getInt("pref_key_absence_time", 20);
+        int absenceTimeInMinutes = settings.getInt("pref_key_absence_time", 20);
+        long millisConnectionLost = 1000L * 60L * Math.max(15, absenceTimeInMinutes);
         long lastRunTime = settings.getLong("last_wifi_detection_timestamp", -1L);
 
         LogEntry latestLogEntry = datasource.getLatestLogEntry(tracker.id);
