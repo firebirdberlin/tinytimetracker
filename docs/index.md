@@ -1,5 +1,5 @@
 <div style="text-align: center;">
-[<img alt="Get it on Google Play" src="https://img.shields.io/badge/Google%20Play-414141?style=for-the-badge&logo=google-play&logoColor=white" height="30">](https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker)
+<a href="https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker"><img alt="Get it on Google Play" src="https://img.shields.io/badge/Google%20Play-414141?style=for-the-badge&logo=google-play&logoColor=white" height="30"></a>
 </div>
 
 # TinyTimeTracker Documentation
@@ -36,8 +36,8 @@ If you enjoy using TinyTimeTracker and would like to support its development, yo
 *   **In-app purchase:** You can support me directly by making an in-app purchase.
 
 <div style="text-align: center;">
-[<img alt="Buy Me A Coffee" src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-firebirdberlin-orange?style=for-the-badge&logo=buymeacoffee" height="30">](https://www.buymeacoffee.com/firebirdberlin)
-[<img alt="GitHub Sponsors" src="https://img.shields.io/badge/GitHub%20Sponsors-firebirdberlin-purple?style=for-the-badge&logo=github" height="30">](https://github.com/sponsors/firebirdberlin)
+<a href="https://www.buymeacoffee.com/firebirdberlin"><img alt="Buy Me A Coffee" src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-firebirdberlin-orange?style=for-the-badge&logo=buymeacoffee" height="30"></a>
+<a href="https://github.com/sponsors/firebirdberlin"><img alt="GitHub Sponsors" src="https://img.shields.io/badge/GitHub%20Sponsors-firebirdberlin-purple?style=for-the-badge&logo=github" height="30"></a>
 </div>
 
 ---
