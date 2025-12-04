@@ -48,7 +48,7 @@ Ich freue mich über Beiträge zur Übersetzung von TinyTimeTracker!
 
 Um eine Übersetzung beizusteuern:
 
-1.  Laden Sie die Datei `strings.xml` aus unserem GitHub-Repository herunter: [https://github.com/firebirdberlin/tinytimetracker/blob/master/android/res/values/strings.xml](https://github.com/firebirdberlin/tinytimetracker/blob/master/android/res/values/strings.xml).
+1.  Laden Sie die Datei [`strings.xml`](https://github.com/firebirdberlin/tinytimetracker/blob/master/android/res/values/strings.xml) aus dem GitHub-Repository herunter.
 2.  Ersetzen Sie die englischen Begriffe durch Ihre Übersetzungen, wobei die XML-Tag-Struktur intakt bleiben muss.
 3.  Senden Sie die übersetzte `strings.xml`-Datei an [stefan.fruhner+tinytimetracker@googlemail.com](mailto:stefan.fruhner+tinytimetracker@googlemail.com).
 
