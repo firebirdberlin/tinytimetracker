@@ -1,7 +1,13 @@
+<div style="text-align: center;">
+[<img alt="Get it on Google Play" src="https://img.shields.io/badge/Google%20Play-414141?style=for-the-badge&logo=google-play&logoColor=white" height="30">](https://play.google.com/store/apps/details?id=com.firebirdberlin.tinytimetracker)
+</div>
+
 # TinyTimeTracker Documentation
+[🇩🇪 Deutsch](index.de.md)
 
 ## Table of Contents
 - [How to Delete All User Data](#how-to-delete-all-user-data)
+- [Support TinyTimeTracker](#support-tinytimetracker)
 - [Translation Guidelines](#translation-guidelines)
 - [Getting Help](#getting-help)
 - [Privacy Policy](privacy_policy.md)
@@ -23,9 +29,22 @@ To delete all app data, you can simply uninstall the TinyTimeTracker app from yo
 
 ---
 
+## Support TinyTimeTracker
+
+If you enjoy using TinyTimeTracker and would like to support its development, you can do so through the following options:
+
+*   **In-app purchase:** You can support me directly by making an in-app purchase.
+
+<div style="text-align: center;">
+[<img alt="Buy Me A Coffee" src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-firebirdberlin-orange?style=for-the-badge&logo=buymeacoffee" height="30">](https://www.buymeacoffee.com/firebirdberlin)
+[<img alt="GitHub Sponsors" src="https://img.shields.io/badge/GitHub%20Sponsors-firebirdberlin-purple?style=for-the-badge&logo=github" height="30">](https://github.com/sponsors/firebirdberlin)
+</div>
+
+---
+
 ## Translation Guidelines
 
-We appreciate contributions to translate TinyTimeTracker!
+I appreciate contributions to translate TinyTimeTracker!
 
 To contribute a translation:
 
