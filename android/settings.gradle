@@ -1,3 +1,1 @@
-include ':android-page-indicator'
-include ':externals:android-preferences'
-project(':android-page-indicator').projectDir = new File('externals/android-page-indicator')
+rootProject.name = 'tinytimetracker'

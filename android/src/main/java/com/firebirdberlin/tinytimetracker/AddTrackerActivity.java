@@ -166,13 +166,12 @@ public class AddTrackerActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_ok:
-                onClickOk(null);
-                return true;
-        default:
-            return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        if (id == R.id.action_ok) {
+            onClickOk(null);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -186,16 +185,15 @@ public class AddTrackerActivity extends AppCompatActivity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 
-        switch (item.getItemId()) {
-        case R.id.action_add:
+        int id = item.getItemId();
+        if (id == R.id.action_add) {
             onChooseWifi(null);
             return true;
-        case R.id.action_delete:
+        } else if (id == R.id.action_delete) {
             removeAccessPoint(info.position);
             return true;
-        default:
-            return super.onContextItemSelected(item);
         }
+        return super.onContextItemSelected(item);
     }
 
     void removeAccessPoint(int position) {

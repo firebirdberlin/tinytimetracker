@@ -165,40 +165,40 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         final LogEntry entry = log_entry_adapter.getItem(info.position);
 
         final LogDataSource datasource = new LogDataSource(mContext);
-        switch (item.getItemId()) {
-            case R.id.action_delete:
+        int id = item.getItemId();
+        if (id == R.id.action_delete) {
+            datasource.delete(entry);
+            log_entry_adapter.remove(entry);
+            datasource.close();
+            return true;
+        } else if (id == R.id.action_edit) {
+            EditLogEntryDialogFragment dialogFragment = new EditLogEntryDialogFragment();
+            dialogFragment.entry = entry;
+            dialogFragment.mContext = mContext;
+            if (info.position > 0) {
+                dialogFragment.prevEntry = log_entry_adapter.getItem(info.position - 1);
+            }
+            dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
+            datasource.close();
+            return true;
+        } else if (id == R.id.action_join) {
+            if (info.position < log_entry_adapter.getCount()) {
+                long new_end = entry.getTimestampEnd();
+                LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
+                nextEntry.setTimestampEnd(new_end);
+                datasource.save(nextEntry);
                 datasource.delete(entry);
                 log_entry_adapter.remove(entry);
-                datasource.close();
-                return true;
-            case R.id.action_edit:
-                EditLogEntryDialogFragment dialogFragment = new EditLogEntryDialogFragment();
-                dialogFragment.entry = entry;
-                dialogFragment.mContext = mContext;
-                if (info.position > 0) {
-                    dialogFragment.prevEntry = log_entry_adapter.getItem(info.position - 1);
-                }
-                dialogFragment.show(getFragmentManager(), "edit_log_entry_dialog");
-                datasource.close();
-                return true;
-            case R.id.action_join:
-                if (info.position < log_entry_adapter.getCount()) {
-                    long new_end = entry.getTimestampEnd();
-                    LogEntry nextEntry = log_entry_adapter.getItem(info.position + 1);
-                    nextEntry.setTimestampEnd(new_end);
-                    datasource.save(nextEntry);
-                    datasource.delete(entry);
-                    log_entry_adapter.remove(entry);
-                }
-                datasource.close();
-                return true;
-            case R.id.action_add:
-                onClickAddEntry(entry.tracker_id);
-                datasource.close();
-                return true;
-            default:
-                datasource.close();
-                return super.onContextItemSelected(item);
+            }
+            datasource.close();
+            return true;
+        } else if (id == R.id.action_add) {
+            onClickAddEntry(entry.tracker_id);
+            datasource.close();
+            return true;
+        } else {
+            datasource.close();
+            return super.onContextItemSelected(item);
         }
     }
     private void onClickAddEntry(final long tracker_id) {
