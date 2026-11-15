@@ -34,7 +34,6 @@ import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
@@ -322,15 +321,6 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         log_entry_adapter.notifyDataSetChanged();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnWifiUpdateCompleted event) {
-        if (TinyTimeTracker.currentTracker == null) return;
-        if (event.success &&
-                TinyTimeTracker.currentTracker.equals(event.tracker)
-                && event.logentry != null) {
-            refresh(event.logentry);
-        }
-    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerSelected event) {

@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Location permissions -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <!-- Wi-Fi permissions -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <!-- General app functionality -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -49,15 +41,7 @@
 
         </activity>
 
-        <service
-            android:name=".WiFiService"
-            android:enabled="true"
-            android:exported="false" />
 
-        <service
-            android:name=".services.AddAccessPointService"
-            android:enabled="true"
-            android:exported="false" />
 
         <receiver android:name=".AlarmReceiver" android:enabled="true">
         </receiver>
@@ -70,13 +54,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.firebirdberlin.tinytimetracker.receivers.LocationModeReceiver"
-            android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-            </intent-filter>
-        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

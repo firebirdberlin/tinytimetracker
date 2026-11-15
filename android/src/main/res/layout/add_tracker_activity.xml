@@ -49,23 +49,6 @@
             android:padding="5dip"
             android:singleLine="true" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="15dip"
-            android:text="@string/edit_tracker_access_point_list"/>
-
-        <ListView
-            android:id="@+id/wifi_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dip"
-            android:longClickable="true"
-            android:drawSelectorOnTop="true"/>
-
     </LinearLayout>
 
-    <include layout="@layout/action_button_add_wifi"/>
-
 </RelativeLayout>
-

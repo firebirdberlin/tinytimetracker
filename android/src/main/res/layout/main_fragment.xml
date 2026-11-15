@@ -6,32 +6,11 @@
     android:orientation="vertical"
     android:animateLayoutChanges="true">
 
-    <include layout="@layout/card_permission_background_location_not_granted" />
-
-    <include layout="@layout/card_permission_not_granted" />
-
-    <include layout="@layout/card_gps_off"/>
-
     <include layout="@layout/card_upgrade_pro"/>
 
     <Spinner android:id="@+id/spinner_trackers"
         android:layout_width="match_parent"
         android:layout_height="80dip"/>
-
-    <RelativeLayout
-        android:id="@+id/tracker_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/button_toggle_wifi"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:drawableStart="@drawable/ic_wifi_blue_24dp"
-            android:drawableLeft="@drawable/ic_wifi_blue_24dp"
-            android:text="@string/label_auto_detection_on" />
-    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -53,4 +32,3 @@
         layout="@layout/statistics_layout"/>
 
 </LinearLayout>
-

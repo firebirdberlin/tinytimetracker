@@ -16,7 +16,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceDialogFragmentCompat;
@@ -25,16 +24,11 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
 import com.firebirdberlin.tinytimetracker.preference.SeekBarDialogPreference;
-// Removed the direct import for SeekBarPreferenceDialogFragmentCompat as it's now an inner class
-// import com.firebirdberlin.tinytimetracker.preference.SeekBarPreferenceDialogFragmentCompat;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import de.firebirdberlin.preference.SeekBarPreference;
-import de.firebirdberlin.preference.SeekBarPreferenceDialogFragment;
 
 // The callback interface
 interface FileChooserListener {
@@ -50,14 +44,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onDisplayPreferenceDialog(@NonNull Preference preference) {
         Log.i(TAG, preference.getKey());
-        // Check if the preference is an instance of our custom SeekBarDialogPreference
         if (preference instanceof SeekBarDialogPreference) {
-            // Use the inner static class for the dialog fragment
             final PreferenceDialogFragmentCompat dialogFragment = SeekBarDialogPreference.SeekBarPreferenceDialogFragmentCompat.newInstance(preference.getKey());
             dialogFragment.setTargetFragment(this, 0);
             dialogFragment.show(getParentFragmentManager(), "androidx.preference.PreferenceFragment.DIALOG");
         } else {
-            // For all other preference types, use the default dialog handling
             super.onDisplayPreferenceDialog(preference);
         }
     }
@@ -192,7 +183,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         }
         setVisible("pref_key_buy", !isPurchased());
         setEnabled("pref_key_data_backup", isPurchased());
-        setEnabled("pref_key_notification_new_access_points", isPurchased());
 
         File[] files = dbImportExport.listFiles();
         boolean enabled = (files != null && files.length > 0);
@@ -278,7 +268,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 Log.d(TAG, "POST_NOTIFICATIONS permission granted");
             } else {
                 Log.d(TAG, "POST_NOTIFICATIONS permission denied");
-                // Optionally, disable the preference if permission is denied
                 SwitchPreferenceCompat switchPreference = findPreference("pref_key_show_notifications");
                 if (switchPreference != null) {
                     switchPreference.setChecked(false);

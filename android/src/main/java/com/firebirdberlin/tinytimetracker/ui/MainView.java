@@ -28,7 +28,6 @@ import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
 
@@ -57,13 +56,6 @@ public class MainView extends View {
         init();
     }
 
-    @Subscribe
-    public void onEvent(OnWifiUpdateCompleted event) {
-        if ( TinyTimeTracker.currentTracker == null ) return;
-        if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
-            invalidate();
-        }
-    }
 
     private void init(){
         highlightColor = ContextCompat.getColor(mContext, R.color.highlight);

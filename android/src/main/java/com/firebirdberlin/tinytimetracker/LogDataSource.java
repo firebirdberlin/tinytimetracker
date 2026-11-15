@@ -14,7 +14,6 @@ import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
-import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
@@ -89,29 +88,6 @@ public class LogDataSource {
         return tracker;
     }
 
-    public AccessPoint save(AccessPoint accessPoint) {
-        init();
-
-        if (accessPoint.getTrackerID() == AccessPoint.NOT_SAVED) {
-            return accessPoint;
-        }
-
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_SSID, accessPoint.ssid);
-        values.put(SQLiteHandler.COLUMN_BSSID, accessPoint.bssid);
-        values.put(SQLiteHandler.COLUMN_TRACKER_ID, accessPoint.getTrackerID());
-
-        if (accessPoint.getID() == AccessPoint.NOT_SAVED) {
-            long id = database.insert(SQLiteHandler.TABLE_ACCESS_POINTS, null, values);
-            accessPoint.setID(id);
-        }
-        else {
-            values.put(SQLiteHandler.COLUMN_ID, accessPoint.getID());
-            database.replace(SQLiteHandler.TABLE_ACCESS_POINTS, null, values);
-        }
-
-        return accessPoint;
-    }
 
     public LogEntry save(LogEntry log_entry) {
         init();
@@ -157,27 +133,6 @@ public class LogDataSource {
         return names;
     }
 
-    public Set<String> getTrackedBSSIDs() {
-        init();
-        Cursor cursor = null;
-        Set<String> bssids = new HashSet<String>();
-
-        try {
-            cursor = database.query(SQLiteHandler.TABLE_ACCESS_POINTS, new String[] {"bssid"},
-                                    null, null, null, null, null, null);
-            cursor.moveToFirst();
-
-            while (!cursor.isAfterLast()) {
-                bssids.add(cursor.getString(0));
-                cursor.moveToNext();
-            }
-        }
-        finally {
-            if (cursor != null) cursor.close();
-        }
-
-        return bssids;
-    }
 
     public List<TrackerEntry> getTrackers() {
         init();
@@ -378,30 +333,6 @@ public class LogDataSource {
         return success;
     }
 
-    public boolean delete(AccessPoint accessPoint) {
-        if (accessPoint == null) {
-            return false;
-        }
-
-        long id = accessPoint.getID();
-
-        if (id == AccessPoint.NOT_SAVED) {
-            return false;
-        }
-
-        init();
-        int rows_affected = database.delete(SQLiteHandler.TABLE_ACCESS_POINTS, "_id=?",
-                                            new String[] {String.valueOf(id)});
-        return (rows_affected > 0);
-    }
-
-    public boolean deleteAccessPointWithoutBSSID(long tracker_id, String ssid) {
-        init();
-        int rows_affected = database.delete(SQLiteHandler.TABLE_ACCESS_POINTS,
-                                            "tracker_id=? AND ssid=? AND (bssid is null OR bssid = '' OR bssid = 'ANY')",
-                                            new String[] {String.valueOf(tracker_id), ssid});
-        return (rows_affected > 0);
-    }
 
     public boolean delete(LogEntry logEntry) {
         if (logEntry == null) {
@@ -476,82 +407,6 @@ public class LogDataSource {
         return entries;
     }
 
-    public List<AccessPoint> getAllAccessPoints(long tracker_id) {
-        init();
-        List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
-        Cursor cursor = null;
-        try {
-            cursor = database.rawQuery("SELECT _id, tracker_id, ssid, bssid FROM access_points "
-                                       + "WHERE tracker_id=?",
-                                       new String[] {String.valueOf(tracker_id)});
-            cursor.moveToFirst();
-
-            while (!cursor.isAfterLast()) {
-                AccessPoint ap = getAccessPointFromCursor(cursor);
-                accessPoints.add(ap);
-                cursor.moveToNext();
-            }
-        }
-        finally {
-            if (cursor != null) cursor.close();
-        }
-
-        return accessPoints;
-    }
-
-    public List<AccessPoint> getAllAccessPoints() {
-        init();
-        List<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
-        Cursor cursor = null;
-        try {
-            cursor = database.query(SQLiteHandler.TABLE_ACCESS_POINTS,
-                                    new String[] {"_id", "tracker_id", "ssid", "bssid"},
-                                    null, null, null, null, null, null);
-            cursor.moveToFirst();
-
-            while (!cursor.isAfterLast()) {
-                AccessPoint ap = getAccessPointFromCursor(cursor);
-                accessPoints.add(ap);
-                cursor.moveToNext();
-            }
-        }
-        finally {
-            if (cursor != null) cursor.close();
-        }
-
-        return accessPoints;
-    }
-
-    public AccessPoint getAccessPoint(long tracker_id, String ssid, String bssid) {
-        init();
-        Cursor cursor = null;
-        AccessPoint ap = null;
-        try {
-            cursor = database.query(SQLiteHandler.TABLE_ACCESS_POINTS,
-                                    new String[] {"_id", "tracker_id", "ssid", "bssid"},
-                                    "tracker_id = ? AND ssid = ? AND bssid = ?",
-                                    new String[] {String.valueOf(tracker_id), ssid, bssid},
-                                    null, null, null, null);
-            cursor.moveToFirst();
-
-            while (!cursor.isAfterLast()) {
-                ap = getAccessPointFromCursor(cursor);
-            }
-        }
-        finally {
-            if (cursor != null) cursor.close();
-        }
-
-        return ap;
-    }
-
-    private AccessPoint getAccessPointFromCursor(Cursor cursor) {
-        long id = cursor.getLong(0);
-        long tracker_id = cursor.getLong(1);
-        String ssid = cursor.getString(2);
-        String bssid = cursor.getString(3);
-        return new AccessPoint(id, tracker_id, ssid, bssid);
-    }
 
     public LogEntry getLatestLogEntry(long tracker_id) {
         init();
@@ -700,35 +555,6 @@ public class LogDataSource {
         return createLogEntry(tracker.id, timestamp, timestamp);
     }
 
-    public void addToIgnoreList(AccessPoint accessPoint) {
-        init();
-
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHandler.COLUMN_SSID, accessPoint.ssid);
-        values.put(SQLiteHandler.COLUMN_BSSID, accessPoint.bssid);
-        values.put(SQLiteHandler.COLUMN_TRACKER_ID, accessPoint.getTrackerID());
-
-        database.insert(SQLiteHandler.TABLE_IGNORED_ACCESS_POINTS, null, values);
-    }
-
-    public boolean accessPointIsIgnored(long tracker_id, String ssid, String bssid) {
-        init();
-        Cursor cursor = null;
-        boolean result = false;
-        try {
-            cursor = database.query(SQLiteHandler.TABLE_IGNORED_ACCESS_POINTS,
-                                    new String[] {"tracker_id", "ssid", "bssid"},
-                                    "tracker_id = ? AND ssid = ? AND bssid = ?",
-                                    new String[] {String.valueOf(tracker_id), ssid, bssid},
-                                    null, null, null, null);
-            result = cursor.getCount() > 0;
-        }
-        finally {
-            if (cursor != null) cursor.close();
-        }
-
-        return result;
-    }
 
     public void addTimeBalanceEntry(TrackerEntry tracker, int minutes) {
         init();

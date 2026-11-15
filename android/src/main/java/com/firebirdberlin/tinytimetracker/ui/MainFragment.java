@@ -2,20 +2,15 @@ package com.firebirdberlin.tinytimetracker.ui;
 
 import static com.firebirdberlin.tinytimetracker.TinyTimeTrackerApp.getContext;
 
-import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -24,7 +19,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
@@ -34,15 +28,12 @@ import com.firebirdberlin.tinytimetracker.Settings;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.Utility;
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
-import com.firebirdberlin.tinytimetracker.events.OnLocationModeChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
-import com.firebirdberlin.tinytimetracker.models.AccessPoint;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
@@ -64,7 +55,6 @@ import java.util.Map;
 public class MainFragment extends Fragment implements View.OnClickListener {
     private static String TAG = "MainFragment";
     EventBus bus = EventBus.getDefault();
-    private Button button_toggle_wifi = null;
     private Button button_buy = null;
     private Button button_later = null;
     private Spinner spinner = null;
@@ -73,15 +63,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private TextView textviewSaldo = null;
     private TextView textviewWhen = null;
     private TextView textviewUpgradePro = null;
-    private CardView cardviewLocationProviderOff = null;
-    private CardView cardviewLocationPermission = null;
-    private CardView cardviewBackgroundLocationPermission = null;
     private CardView cardviewProVersion = null;
-    private View trackerToolbar = null;
     private MainView timeView = null;
     private final List<TrackerEntry> trackers = new ArrayList<>();
     private final Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<>();
-    private ArrayList<AccessPoint> accessPoints = new ArrayList<AccessPoint>();
     private FloatingActionButton actionButtonStart;
 
 
@@ -96,19 +81,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         textviewSaldo = v.findViewById(R.id.textview_saldo);
         textviewWhen = v.findViewById(R.id.textview_when);
         textviewCummulatedTime = v.findViewById(R.id.textview_cummulated_time);
-        cardviewLocationProviderOff = v.findViewById(R.id.cardview_warn_gps_off);
-        cardviewLocationPermission = v.findViewById(R.id.cardview_warn_location_permission_not_granted);
-        cardviewBackgroundLocationPermission = v.findViewById(R.id.cardview_warn_background_location_permission_not_granted);
         cardviewProVersion = v.findViewById(R.id.cardview_upgrade_pro);
         textviewUpgradePro = v.findViewById(R.id.textview_upgrade_pro);
-        trackerToolbar = v.findViewById(R.id.tracker_toolbar);
-        button_toggle_wifi = v.findViewById(R.id.button_toggle_wifi);
-        button_toggle_wifi.setOnClickListener(this);
-        button_buy = v.findViewById(R.id.button_update_pro_version);
+            button_buy = v.findViewById(R.id.button_update_pro_version);
         button_buy.setOnClickListener(this);
         button_later = v.findViewById(R.id.button_update_later);
         button_later.setOnClickListener(this);
-        trackerToolbar.setVisibility(View.GONE);
 
         loadTrackers();
         ArrayAdapter<TrackerEntry> adapter = new ArrayAdapter<>(getActivity(),
@@ -137,29 +115,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             return true;
         });
 
-        final Button buttonLocationProviders = v.findViewById(R.id.button_location_providers);
-        buttonLocationProviders.setOnClickListener(v2 -> {
-            Intent viewIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(viewIntent);
-        });
-
-        final Button buttonLocationPermission = v.findViewById(R.id.button_grant_location_permission);
-        buttonLocationPermission.setOnClickListener(
-            v3 -> TinyTimeTracker.checkAndRequestPermission(
-                (AppCompatActivity) getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                1
-            )
-        );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            final Button buttonBackgroundLocationPermission = v.findViewById(R.id.button_grant_background_location_permission);
-                buttonBackgroundLocationPermission.setOnClickListener(
-                    v3 -> TinyTimeTracker.checkAndRequestPermission(
-                        (AppCompatActivity) getActivity(),
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                        1)
-                );
-        }
         return v;
     }
 
@@ -175,50 +130,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.notifyDataSetChanged();
 
-        loadAccessPoints(TinyTimeTracker.currentTracker);
-        setWifiIndicator(TinyTimeTracker.currentTracker);
-
         updateStatisticalValues(TinyTimeTracker.currentTracker);
     }
 
     private void setupWarnings() {
-        boolean shallShowWifiCard = false;
-        for (TrackerEntry tracker : trackers) {
-            if (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC
-                    || tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED) {
-                shallShowWifiCard = true;
-                break;
-            }
-        }
-
-        if (shallShowWifiCard && !TinyTimeTracker.isLocationEnabled(getActivity())) {
-            cardviewLocationProviderOff.setVisibility(View.VISIBLE);
-        } else {
-            cardviewLocationProviderOff.setVisibility(View.GONE);
-        }
-
-
-        if (shallShowWifiCard
-                && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-            cardviewLocationPermission.setVisibility(View.VISIBLE);
-        } else {
-            cardviewLocationPermission.setVisibility(View.GONE);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-            && shallShowWifiCard
-                && TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                && !TinyTimeTracker.hasPermission(getContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-            cardviewBackgroundLocationPermission.setVisibility(View.VISIBLE);
-        } else {
-            cardviewBackgroundLocationPermission.setVisibility(View.GONE);
-        }
-
         TinyTimeTracker mainActivity = (TinyTimeTracker) getActivity();
-        if (cardviewLocationPermission.getVisibility() != View.GONE
-                && cardviewLocationProviderOff.getVisibility() != View.GONE) {
-            cardviewProVersion.setVisibility(View.GONE);
-        } else if (
+        if (
                 mainActivity != null
                 && !(mainActivity.isPurchased(TinyTimeTracker.ITEM_PRO)
                         || mainActivity.isPurchased(TinyTimeTracker.ITEM_DONATION))
@@ -231,6 +148,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             button_buy.setTextColor(textColor);
             button_later.setTextColor(textColor);
             cardviewProVersion.setVisibility(View.VISIBLE);
+        } else {
+            cardviewProVersion.setVisibility(View.GONE);
         }
     }
 
@@ -285,37 +204,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         TrackerEntry tracker = (TrackerEntry) spinner.getSelectedItem();
         if (tracker == null) return;
 
-        if ( v.equals(button_toggle_wifi) ) {
-            Log.i(TAG, "button_toggle_wifi clicked");
-            boolean shallCheckPerms =
-                    (tracker.operation_state == TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED);
-
-            switch (tracker.operation_state) {
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED;
-                    break;
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC:
-                case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                    tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
-                default:
-                    break;
-            }
-
-            LogDataSource datasource = new LogDataSource(getActivity());
-            datasource.save(tracker);
-            datasource.close();
-            setWifiIndicator(tracker);
-
-//            if (shallCheckPerms) {
-//                TinyTimeTracker.checkAndRequestPermission(
-//                        (AppCompatActivity) getActivity(),
-//                        Manifest.permission.ACCESS_FINE_LOCATION,
-//                        1
-//                );
-//            }
-            setupWarnings();
-            Log.i(TAG, "button_toggle_wifi click done ...");
-        } else
         if (v.equals(actionButtonStart)) {
             handleClockinStateChange();
         } else
@@ -338,28 +226,20 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         switch (tracker.operation_state) {
             case TrackerEntry.OPERATION_STATE_AUTOMATIC:
             case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
+            case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
                 // set start timestamp
                 datasource.addTimeStamp(tracker, now, now);
                 tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE;
                 break;
-            case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                // set start timestamp
-                datasource.addTimeStamp(tracker, now, now);
-                tracker.operation_state = TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI;
-                break;
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
-                // set end timestamp and return to previous mode
-                LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
-                logEntry.setTimestampEnd(now);
-                datasource.save(logEntry);
-                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
-                break;
             case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
                 // set end timestamp and return to previous mode
-                LogEntry logEntry2 = datasource.getLatestLogEntry(tracker.id);
-                logEntry2.setTimestampEnd(now);
-                datasource.save(logEntry2);
-                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED;
+                LogEntry logEntry = datasource.getLatestLogEntry(tracker.id);
+                if (logEntry != null) {
+                    logEntry.setTimestampEnd(now);
+                    datasource.save(logEntry);
+                }
+                tracker.operation_state = TrackerEntry.OPERATION_STATE_AUTOMATIC;
                 break;
             default:
                 break;
@@ -368,57 +248,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         datasource.close();
 
         setClockinStateIndicator(tracker);
-        setWifiIndicator(tracker);
     }
-
-    private void setWifiIndicator(TrackerEntry tracker) {
-        boolean visible = accessPoints.size() != 0;
-
-        switch (tracker.operation_state) {
-            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE:
-            case TrackerEntry.OPERATION_STATE_MANUAL_ACTIVE_NO_WIFI:
-                visible = false;
-                break;
-            case TrackerEntry.OPERATION_STATE_AUTOMATIC_PAUSED:
-                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_wifi_blue_24dp, 0, 0, 0);
-                button_toggle_wifi.setText(R.string.label_auto_detection_off);
-                break;
-            case TrackerEntry.OPERATION_STATE_AUTOMATIC:
-            case TrackerEntry.OPERATION_STATE_AUTOMATIC_RESUMED:
-                button_toggle_wifi.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_wifi_blue_24dp, 0, 0, 0);
-                button_toggle_wifi.setText(R.string.label_auto_detection_on);
-            default:
-                break;
-        }
-
-        if (visible) {
-            ViewPropertyAnimator animator = button_toggle_wifi.animate().setStartDelay(300).setDuration(300).alpha(1.f);
-            animator.setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    button_toggle_wifi.setVisibility(View.VISIBLE);
-                }
-            }).start();
-        } else {
-            ViewPropertyAnimator animator = button_toggle_wifi.animate().setDuration(300).alpha(0.f);
-            animator.setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    button_toggle_wifi.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                }
-            }).start();
-        }
-        button_toggle_wifi.invalidate();
-    }
-
 
     private void setClockinStateIndicator(TrackerEntry tracker) {
         switch (tracker.operation_state) {
@@ -455,12 +285,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         setSelection(event.tracker.id);
     }
 
-    private void loadAccessPoints(TrackerEntry tracker) {
-        LogDataSource datasource = new LogDataSource(getContext());
-        accessPoints = (ArrayList<AccessPoint>) datasource.getAllAccessPoints(tracker.id);
-        datasource.close();
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerChanged event) {
         Log.i(TAG, "OnTrackerChanged");
@@ -477,20 +301,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onEvent(OnTrackerSelected event) {
         Log.i(TAG, "OnTrackerSelected");
         if ( event == null || event.newTracker == null) return;
-        trackerToolbar.setVisibility(View.VISIBLE);
 
-        loadAccessPoints(event.newTracker);
-        setWifiIndicator(event.newTracker);
         setClockinStateIndicator(event.newTracker);
         updateStatisticalValues(event.newTracker);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnWifiUpdateCompleted event) {
-        if ( TinyTimeTracker.currentTracker == null ) return;
-        if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
-            updateStatisticalValues(event.tracker);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -503,7 +316,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         textviewWhen.setText("");
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
         adapter.remove(event.tracker);
-        trackerToolbar.setVisibility(View.GONE);
 
         if (adapter.getCount() > 0) {
             spinner.setSelection(0, true);
@@ -534,11 +346,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         loadTrackers();
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
         adapter.notifyDataSetChanged();
-    }
-
-    @Subscribe
-    public void onEvent(OnLocationModeChanged event) {
-        onResume();
     }
 
     private void updateStatisticalValues(TrackerEntry tracker){

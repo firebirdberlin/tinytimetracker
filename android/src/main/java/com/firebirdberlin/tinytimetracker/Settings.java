@@ -16,7 +16,6 @@ public class Settings extends BillingHelperActivity {
     private static final String TAG = "Settings";
     public static final String PREF_KEY_SHOW_NOTIFICATIONS = "pref_key_show_notifications";
     public static final String PREF_KEY_LAST_TRACKER_ID = "last_tracker_id";
-    public static final String PREF_KEY_AUTO_DETECTION = "pref_key_notification_new_access_points";
     public static final String PREF_KEY_THEME = "pref_key_theme";
 
     SettingsFragment fragment;
@@ -61,11 +60,6 @@ public class Settings extends BillingHelperActivity {
     public static boolean showNotifications(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(Settings.PREF_KEY_SHOW_NOTIFICATIONS, false);
-    }
-
-    public static boolean useAutoDetection(Context context) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        return settings.getBoolean(Settings.PREF_KEY_AUTO_DETECTION, true);
     }
 
     public static long getLastTrackerID(Context context) {

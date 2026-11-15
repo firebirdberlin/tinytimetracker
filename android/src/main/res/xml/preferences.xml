@@ -21,18 +21,8 @@
 
     <PreferenceCategory
         android:iconSpaceReserved="false"
-        android:title="@string/pref_wifi_settings"
+        android:title="@string/pref_title_show_notifications"
         android:key="pref_key_worktime_settings">
-        <com.firebirdberlin.tinytimetracker.preference.SeekBarDialogPreference
-            android:key="pref_key_absence_time"
-            android:title="@string/pref_title_seconds_connection_lost"
-            android:summary="@string/pref_summary_seconds_connection_lost"
-            android:defaultValue="20"
-            android:max="60"
-            app:min="15"
-            android:text="@string/pref_unit_notification_interval_minutes"
-            app:dialogLayout="@layout/dialog_seekbar_preference"
-            />
         <CheckBoxPreference
             android:iconSpaceReserved="false"
             android:title="@string/pref_title_show_notifications"
@@ -48,13 +38,6 @@
         android:key="pref_key_buy"
         android:title="@string/purchase_pro_version"
         app:isPreferenceVisible="false" />
-
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:iconSpaceReserved="false"
-        android:key="pref_key_notification_new_access_points"
-        android:summary="@string/pref_summary_notification_new_access_points"
-        android:title="@string/pref_title_notification_new_access_points" />
 
     <PreferenceCategory
         android:iconSpaceReserved="false"

@@ -59,7 +59,6 @@ public class TinyTimeTracker extends BillingHelperActivity
     public static final String TAG = "TinyTimeTracker";
     public static final String NOTIFICATIONCHANNEL_SERVICE_STATUS = "NotificationChannel_Service_Status";
     public static final String NOTIFICATIONCHANNEL_TRACKER_STATUS = "NotificationChannel_Status_Notification";
-    public static final String NOTIFICATIONCHANNEL_NEW_ACCESS_POINT = "NotificationChannel_new_access_point";
     public static TrackerEntry currentTracker = null;
     EventBus bus = EventBus.getDefault();
     private LinearLayout pagerLayout = null;
@@ -81,32 +80,11 @@ public class TinyTimeTracker extends BillingHelperActivity
     };
 
     public static void startService(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            UpdateTrackersJob.start(context);
-        } else {
-            Intent intent = new Intent(context, WiFiService.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent);
-            } else {
-                context.startService(intent);
-            }
-        }
+        UpdateTrackersJob.start(context);
     }
 
     public static void scheduleWiFiService(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            UpdateTrackersJob.schedule(context);
-        } else {
-            Intent intent = new Intent(context, AlarmReceiver.class);
-            PendingIntent sender = Utility.getImmutableBroadcast(context, 0, intent);
-            AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-            if (am != null) {
-                long ONE_MINUTE = 60000;
-                long TWO_MINUTES = 2 * ONE_MINUTE;
-                am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 5000, TWO_MINUTES, sender);
-            }
-        }
+        UpdateTrackersJob.schedule(context);
     }
 
 
@@ -130,19 +108,7 @@ public class TinyTimeTracker extends BillingHelperActivity
         return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
     }
 
-    public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
 
-        try {
-            locationMode = Secure.getInt(context.getContentResolver(), Secure.LOCATION_MODE);
-
-        } catch (SettingNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return locationMode != Secure.LOCATION_MODE_OFF;
-
-    }
 
 
     @Override
@@ -374,19 +340,7 @@ public class TinyTimeTracker extends BillingHelperActivity
                 mNotificationManager.createNotificationChannel(mChannel);
             }
 
-            mChannel = prepareNotificationChannel(
-                    NOTIFICATIONCHANNEL_NEW_ACCESS_POINT,
-                    getString(R.string.channel_name_new_access_points),
-                    getString(R.string.channel_description_new_access_points),
-                    NotificationManager.IMPORTANCE_LOW);
-            mChannel.enableLights(true);
-            mChannel.setLightColor(R.color.highlight);
-            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            mChannel.setSound(uri, new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build());
-            mNotificationManager.createNotificationChannel(mChannel);
+
         }
     }
 

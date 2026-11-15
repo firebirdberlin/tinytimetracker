@@ -31,7 +31,6 @@ import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
-import com.firebirdberlin.tinytimetracker.events.OnWifiUpdateCompleted;
 import com.firebirdberlin.tinytimetracker.models.LogDailySummary;
 import com.firebirdberlin.tinytimetracker.models.LogSummary;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
@@ -198,13 +197,6 @@ public class CardFragment extends Fragment {
         refresh();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnWifiUpdateCompleted event) {
-        if ( TinyTimeTracker.currentTracker == null ) return;
-        if (event.success && TinyTimeTracker.currentTracker.equals(event.tracker)) {
-            updateCurrentWeek();
-        }
-    }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OnTrackerDeleted event) {
