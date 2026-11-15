@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerAdded;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
@@ -40,9 +41,6 @@ import com.firebirdberlin.tinytimetracker.ui.AddTimeBalanceDialogFragment;
 import com.firebirdberlin.tinytimetracker.ui.CardFragment;
 import com.firebirdberlin.tinytimetracker.ui.MainFragment;
 import com.firebirdberlin.tinytimetracker.ui.StatsFragment;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
 import de.firebirdberlin.pageindicator.PageIndicator;
 
@@ -56,6 +54,17 @@ public class TinyTimeTracker extends BillingHelperActivity
     private LinearLayout pagerLayout = null;
     private ViewPager2 pager = null;
     private PageIndicator pageIndicator = null;
+    private final java.util.function.Consumer<OnTrackerSelected> onTrackerSelectedListener = event -> {
+        invalidateOptionsMenu();
+        if (currentTracker != null) {
+            Log.d(TAG, "currentTracker: " + currentTracker);
+        }
+    };
+    private final java.util.function.Consumer<OnTrackerDeleted> onTrackerDeletedListener = event -> {
+        invalidateOptionsMenu();
+        pager.setCurrentItem(0);
+        Log.d(TAG, "OnTrackerDeleted: currentTracker: null");
+    };
 
     private final Handler handler = new Handler();
 
@@ -141,9 +150,17 @@ public class TinyTimeTracker extends BillingHelperActivity
                 pageIndicator.setCurrentPage(position);
             }
         });
-        bus.register(this);
+        bus.register(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.register(OnTrackerDeleted.class, onTrackerDeletedListener);
         enableBootReceiver(this);
         scheduleWiFiService(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        bus.unregister(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.unregister(OnTrackerDeleted.class, onTrackerDeletedListener);
     }
 
     @Override
@@ -295,18 +312,7 @@ public class TinyTimeTracker extends BillingHelperActivity
                                       PackageManager.DONT_KILL_APP);
     }
 
-    @Subscribe
-    public void onEvent(OnTrackerSelected event) {
-        invalidateOptionsMenu();
-        Log.d(TAG, "currentTracker: " + currentTracker.toString());
-    }
 
-    @Subscribe
-    public void onEvent(OnTrackerDeleted event) {
-        invalidateOptionsMenu();
-        pager.setCurrentItem(0);
-        Log.d(TAG, "OnTrackerDeleted: currentTracker: null");
-    }
 
     private void createNotificationChannels() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

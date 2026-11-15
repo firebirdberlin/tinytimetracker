@@ -19,7 +19,7 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 import com.firebirdberlin.tinytimetracker.models.WorkTimeStatistics;
 
-import org.greenrobot.eventbus.EventBus;
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 
 import java.util.ArrayList;
 import java.util.HashSet;

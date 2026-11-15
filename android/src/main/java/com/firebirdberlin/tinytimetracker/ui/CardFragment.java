@@ -19,9 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.LogDataSource;
@@ -39,6 +37,24 @@ public class CardFragment extends Fragment {
     private static String TAG = TinyTimeTracker.TAG + ".CardFragment";
     private Context mContext = null;
     private EventBus bus = EventBus.getDefault();
+    private final java.util.function.Consumer<OnTrackerSelected> onTrackerSelectedListener = event -> {
+        Log.i(TAG, "OnTrackerSelected");
+        refresh();
+    };
+    private final java.util.function.Consumer<OnTrackerDeleted> onTrackerDeletedListener = event -> {
+        refresh();
+    };
+    private final java.util.function.Consumer<OnLogEntryChanged> onLogEntryChangedListener = event -> {
+        if ( TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
+            refresh();
+        }
+    };
+    private final java.util.function.Consumer<OnLogEntryDeleted> onLogEntryDeletedListener = event -> {
+        if ( TinyTimeTracker.currentTracker != null ) {
+            refresh();
+        }
+    };
     private RecyclerView recyclerView = null;
     private LogSummaryAdapter logSummaryAdapter = null;
 
@@ -94,7 +110,10 @@ public class CardFragment extends Fragment {
         super.onResume();
 
         Log.i(TAG, "onResume()");
-        bus.register(this);
+        bus.register(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.register(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.register(OnLogEntryChanged.class, onLogEntryChangedListener);
+        bus.register(OnLogEntryDeleted.class, onLogEntryDeletedListener);
 
         refresh();
     }
@@ -110,7 +129,10 @@ public class CardFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        bus.unregister(this);
+        bus.unregister(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.unregister(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.unregister(OnLogEntryChanged.class, onLogEntryChangedListener);
+        bus.unregister(OnLogEntryDeleted.class, onLogEntryDeletedListener);
     }
 
     private List<LogSummary> getData() {
@@ -191,30 +213,5 @@ public class CardFragment extends Fragment {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerSelected event) {
-        Log.i(TAG, "OnTrackerSelected");
-        refresh();
-    }
 
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerDeleted event) {
-        refresh();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryChanged event) {
-        if ( TinyTimeTracker.currentTracker != null &&
-                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
-            refresh();
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryDeleted event) {
-        if ( TinyTimeTracker.currentTracker != null ) {
-            refresh();
-        }
-    }
 }

@@ -27,6 +27,7 @@ import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.Settings;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.Utility;
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
@@ -39,10 +40,6 @@ import com.firebirdberlin.tinytimetracker.models.TrackerEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 import com.firebirdberlin.tinytimetracker.models.WorkTimeStatistics;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +65,63 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private final List<TrackerEntry> trackers = new ArrayList<>();
     private final Map<Long, Integer> trackerIDToSelectionIDMap = new HashMap<>();
     private FloatingActionButton actionButtonStart;
+
+    private final java.util.function.Consumer<OnTrackerAdded> onTrackerAddedListener = event -> {
+        Log.d(TAG, "OnTrackerAdded: a tracker was added: " + event.tracker.verbose_name);
+        handleOnTrackerAdded(event);
+        bus.removeStickyEvent(OnTrackerAdded.class);
+    };
+    private final java.util.function.Consumer<OnTrackerChanged> onTrackerChangedListener = event -> {
+        Log.i(TAG, "OnTrackerChanged");
+        loadTrackers();
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        adapter.notifyDataSetChanged();
+        if (TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.tracker.id) {
+            updateStatisticalValues(TinyTimeTracker.currentTracker);
+        }
+    };
+    private final java.util.function.Consumer<OnTrackerSelected> onTrackerSelectedListener = event -> {
+        Log.i(TAG, "OnTrackerSelected");
+        if ( event == null || event.newTracker == null) return;
+
+        setClockinStateIndicator(event.newTracker);
+        updateStatisticalValues(event.newTracker);
+    };
+    @SuppressWarnings("unchecked")
+    private final java.util.function.Consumer<OnTrackerDeleted> onTrackerDeletedListener = event -> {
+        Log.i(TAG, "OnTrackerDeleted");
+        textviewCummulatedTime.setText("");
+        textviewMeanDuration.setText("");
+        textviewSaldo.setText("");
+        textviewWhen.setText("");
+        ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
+        adapter.remove(event.tracker);
+
+        if (adapter.getCount() > 0) {
+            spinner.setSelection(0, true);
+            TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
+            postTrackerSelected(tracker);
+        }
+
+        adapter.notifyDataSetChanged();
+    };
+    private final java.util.function.Consumer<OnLogEntryDeleted> onLogEntryDeletedListener = event -> {
+        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.tracker_id ) {
+            updateStatisticalValues(TinyTimeTracker.currentTracker);
+        }
+    };
+    private final java.util.function.Consumer<OnLogEntryChanged> onLogEntryChangedListener = event -> {
+        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
+            updateStatisticalValues(TinyTimeTracker.currentTracker);
+        }
+    };
+    private final java.util.function.Consumer<OnDatabaseImported> onDatabaseImportedListener = event -> {
+        Log.i(TAG, "OnDatabaseImported");
+        loadTrackers();
+        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
+        adapter.notifyDataSetChanged();
+    };
 
 
     @Override
@@ -122,7 +176,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume()");
-        bus.register(this);
+        bus.register(OnTrackerAdded.class, onTrackerAddedListener);
+        bus.register(OnTrackerChanged.class, onTrackerChangedListener);
+        bus.register(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.register(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.register(OnLogEntryDeleted.class, onLogEntryDeletedListener);
+        bus.register(OnLogEntryChanged.class, onLogEntryChangedListener);
+        bus.register(OnDatabaseImported.class, onDatabaseImportedListener);
 
         setupWarnings();
         loadTrackers();
@@ -156,7 +216,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         super.onPause();
-        bus.unregister(this);
+        bus.unregister(OnTrackerAdded.class, onTrackerAddedListener);
+        bus.unregister(OnTrackerChanged.class, onTrackerChangedListener);
+        bus.unregister(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.unregister(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.unregister(OnLogEntryDeleted.class, onLogEntryDeletedListener);
+        bus.unregister(OnLogEntryChanged.class, onLogEntryChangedListener);
+        bus.unregister(OnDatabaseImported.class, onDatabaseImportedListener);
     }
 
     private void setSelection(long trackerID) {
@@ -268,14 +334,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    // UI updates must run on MainThread
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerAdded event) {
-        Log.d(TAG, "OnTrackerAdded: a tracker was added: " + event.tracker.verbose_name);
-        handleOnTrackerAdded(event);
-        bus.removeStickyEvent(OnTrackerAdded.class);
-    }
-
     @SuppressWarnings("unchecked")
     private void handleOnTrackerAdded(OnTrackerAdded event) {
         ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
@@ -283,69 +341,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         sortTrackers();
         adapter.notifyDataSetChanged();
         setSelection(event.tracker.id);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerChanged event) {
-        Log.i(TAG, "OnTrackerChanged");
-        loadTrackers();
-        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
-        adapter.notifyDataSetChanged();
-        if (TinyTimeTracker.currentTracker != null &&
-                TinyTimeTracker.currentTracker.id == event.tracker.id) {
-            updateStatisticalValues(TinyTimeTracker.currentTracker);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerSelected event) {
-        Log.i(TAG, "OnTrackerSelected");
-        if ( event == null || event.newTracker == null) return;
-
-        setClockinStateIndicator(event.newTracker);
-        updateStatisticalValues(event.newTracker);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerDeleted event) {
-        Log.i(TAG, "OnTrackerDeleted");
-        textviewCummulatedTime.setText("");
-        textviewMeanDuration.setText("");
-        textviewSaldo.setText("");
-        textviewWhen.setText("");
-        ArrayAdapter<TrackerEntry> adapter = (ArrayAdapter<TrackerEntry>) spinner.getAdapter();
-        adapter.remove(event.tracker);
-
-        if (adapter.getCount() > 0) {
-            spinner.setSelection(0, true);
-            TrackerEntry tracker = (TrackerEntry) spinner.getItemAtPosition(0);
-            postTrackerSelected(tracker);
-        }
-
-        adapter.notifyDataSetChanged();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryDeleted event) {
-        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.tracker_id ) {
-            updateStatisticalValues(TinyTimeTracker.currentTracker);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryChanged event) {
-        if ( TinyTimeTracker.currentTracker != null && TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
-            updateStatisticalValues(TinyTimeTracker.currentTracker);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnDatabaseImported event) {
-        Log.i(TAG, "OnDatabaseImported");
-        loadTrackers();
-        ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
-        adapter.notifyDataSetChanged();
     }
 
     private void updateStatisticalValues(TrackerEntry tracker){

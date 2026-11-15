@@ -22,10 +22,9 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 import com.firebirdberlin.tinytimetracker.events.OnDatabaseImported;
 import com.firebirdberlin.tinytimetracker.preference.SeekBarDialogPreference;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;

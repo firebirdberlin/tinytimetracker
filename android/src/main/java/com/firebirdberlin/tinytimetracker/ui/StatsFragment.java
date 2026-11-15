@@ -29,6 +29,7 @@ import com.firebirdberlin.tinytimetracker.MonthYearPickerDialog;
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
 import com.firebirdberlin.tinytimetracker.Utility;
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryAdded;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
@@ -37,14 +38,11 @@ import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.LogEntry;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 public class StatsFragment extends ListFragment implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
@@ -56,6 +54,24 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
     private Button btnAddEntry = null;
     private Context mContext = null;
     private EventBus bus = EventBus.getDefault();
+
+    private final Consumer<OnTrackerSelected> onTrackerSelectedListener = event -> {
+        Log.i(TAG, "OnTrackerSelected");
+        refresh();
+    };
+    private final Consumer<OnTrackerDeleted> onTrackerDeletedListener = event -> refresh();
+    private final Consumer<OnLogEntryChanged> onLogEntryChangedListener = event -> {
+        if (TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id) {
+            refresh(event.entry);
+        }
+    };
+    private final Consumer<OnLogEntryDeleted> onLogEntryDeletedListener = event -> {
+        if (TinyTimeTracker.currentTracker != null) {
+            refresh();
+        }
+    };
+    private final Consumer<OnLogEntryAdded> onLogEntryAddedListener = event -> refresh();
 
     private long startTime = 0L;
     private long endTime = 0L;
@@ -129,8 +145,11 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
     @Override
     public void onPause() {
         super.onPause();
-        bus.unregister(this);
-
+        bus.unregister(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.unregister(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.unregister(OnLogEntryChanged.class, onLogEntryChangedListener);
+        bus.unregister(OnLogEntryDeleted.class, onLogEntryDeletedListener);
+        bus.unregister(OnLogEntryAdded.class, onLogEntryAddedListener);
     }
 
     @Override
@@ -138,7 +157,11 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
         super.onResume();
 
         Log.i(TAG, "onResume()");
-        bus.register(this);
+        bus.register(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.register(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.register(OnLogEntryChanged.class, onLogEntryChangedListener);
+        bus.register(OnLogEntryDeleted.class, onLogEntryDeletedListener);
+        bus.register(OnLogEntryAdded.class, onLogEntryAddedListener);
 
         refresh();
     }
@@ -322,34 +345,5 @@ public class StatsFragment extends ListFragment implements View.OnClickListener,
     }
 
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerSelected event) {
-        Log.i(TAG, "OnTrackerSelected");
-        refresh();
-    }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerDeleted event) {
-        refresh();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryChanged event) {
-        if (TinyTimeTracker.currentTracker != null &&
-                TinyTimeTracker.currentTracker.id == event.entry.tracker_id) {
-            refresh(event.entry);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryDeleted event) {
-        if (TinyTimeTracker.currentTracker != null) {
-            refresh();
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryAdded event) {
-        refresh();
-    }
 }

@@ -16,19 +16,18 @@ import android.view.View;
 
 import androidx.core.content.ContextCompat;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import com.firebirdberlin.tinytimetracker.LogDataSource;
 import com.firebirdberlin.tinytimetracker.R;
 import com.firebirdberlin.tinytimetracker.TinyTimeTracker;
+import com.firebirdberlin.tinytimetracker.events.EventBus;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryChanged;
 import com.firebirdberlin.tinytimetracker.events.OnLogEntryDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerChanged;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerDeleted;
 import com.firebirdberlin.tinytimetracker.events.OnTrackerSelected;
 import com.firebirdberlin.tinytimetracker.models.UnixTimestamp;
+
+import java.util.function.Consumer;
 
 
 public class MainView extends View {
@@ -39,23 +38,58 @@ public class MainView extends View {
     private int textColor;
     private boolean activated = false;
     private int workingHoursInSeconds = 8 * 3600;
-    EventBus bus = EventBus.getDefault();
+    private EventBus bus = EventBus.getDefault();
+
+    private final Consumer<OnTrackerSelected> onTrackerSelectedListener = event -> invalidate();
+    private final Consumer<OnTrackerChanged> onTrackerChangedListener = event -> {
+        if (TinyTimeTracker.currentTracker == null || event == null || event.tracker == null) {
+            return;
+        }
+
+        if (TinyTimeTracker.currentTracker.id == event.tracker.id) {
+            invalidate();
+        }
+    };
+    private final Consumer<OnTrackerDeleted> onTrackerDeletedListener = event -> invalidate();
+    private final Consumer<OnLogEntryDeleted> onLogEntryDeletedListener = event -> invalidate();
+    private final Consumer<OnLogEntryChanged> onLogEntryChangedListener = event -> {
+        if (TinyTimeTracker.currentTracker != null &&
+                TinyTimeTracker.currentTracker.id == event.entry.tracker_id) {
+            invalidate();
+        }
+    };
 
     public MainView(Context context) {
         super(context);
-        bus.register(this);
         mContext = context;
         init();
     }
 
     public MainView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        bus.register(this);
         mContext = context;
-
         init();
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        bus.register(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.register(OnTrackerChanged.class, onTrackerChangedListener);
+        bus.register(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.register(OnLogEntryDeleted.class, onLogEntryDeletedListener);
+        bus.register(OnLogEntryChanged.class, onLogEntryChangedListener);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        bus.unregister(OnTrackerSelected.class, onTrackerSelectedListener);
+        bus.unregister(OnTrackerChanged.class, onTrackerChangedListener);
+        bus.unregister(OnTrackerDeleted.class, onTrackerDeletedListener);
+        bus.unregister(OnLogEntryDeleted.class, onLogEntryDeletedListener);
+        bus.unregister(OnLogEntryChanged.class, onLogEntryChangedListener);
+    }
 
     private void init(){
         highlightColor = ContextCompat.getColor(mContext, R.color.highlight);
@@ -64,39 +98,7 @@ public class MainView extends View {
         textColor = ContextCompat.getColor(mContext, R.color.textColor);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerSelected event) {
-        invalidate();
-    }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerChanged event) {
-        if (TinyTimeTracker.currentTracker == null || event == null || event.tracker == null) {
-            return;
-        }
-
-        if (TinyTimeTracker.currentTracker.id == event.tracker.id) {
-            invalidate();
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnTrackerDeleted event) {
-        invalidate();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryDeleted event) {
-        invalidate();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(OnLogEntryChanged event) {
-        if ( TinyTimeTracker.currentTracker != null &&
-                TinyTimeTracker.currentTracker.id == event.entry.tracker_id ) {
-            invalidate();
-        }
-    }
 
     public void setActivated() {
         activated = true;

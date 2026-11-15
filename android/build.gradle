@@ -37,7 +37,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.14.0'
 
     // Third-party
-    implementation 'org.greenrobot:eventbus:3.3.1'
     implementation 'com.github.firebirdberlin:android-page-indicator:36.0.2'
     implementation 'com.github.firebirdberlin:android-preferences:36.0.5'
 }
