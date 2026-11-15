@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.text.format.DateFormat;
-import android.util.Log;
 
 import androidx.core.content.res.ResourcesCompat;
 
@@ -101,13 +100,11 @@ public class Utility {
     }
 
     public static int getContrastColor(int color) {
-        double y = (299 * Color.red(color) + 587 * Color.green(color) + 114 * Color.blue(color)) / 1000;
+        double y = (double) (299 * Color.red(color) + 587 * Color.green(color) + 114 * Color.blue(color)) / 1000;
         return y >= 128 ? Color.BLACK : Color.WHITE;
     }
     static public PendingIntent getImmutableBroadcast(Context context, int requestCode, Intent intent, int flags) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            flags |= PendingIntent.FLAG_IMMUTABLE;
-        }
+        flags |= PendingIntent.FLAG_IMMUTABLE;
         return PendingIntent.getBroadcast(
                 context,
                 requestCode,
@@ -117,9 +114,7 @@ public class Utility {
     }
 
     static public PendingIntent getImmutableService(Context context, int requestCode, Intent intent, int flags) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            flags |= PendingIntent.FLAG_IMMUTABLE;
-        }
+        flags |= PendingIntent.FLAG_IMMUTABLE;
         return PendingIntent.getService(
                 context,
                 requestCode,
@@ -130,10 +125,7 @@ public class Utility {
 
     static public PendingIntent getImmutableBroadcast(Context context, int requestCode, Intent intent) {
         //https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
-        int flag = 0;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            flag = PendingIntent.FLAG_IMMUTABLE;
-        }
+        int flag = PendingIntent.FLAG_IMMUTABLE;
 
         return PendingIntent.getBroadcast(
                 context,
@@ -145,10 +137,7 @@ public class Utility {
 
     static public PendingIntent getImmutableActivity(Context context, int requestCode, Intent intent) {
         //https://developer.android.com/about/versions/12/behavior-changes-12#pending-intent-mutability
-        int flag = 0;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            flag = PendingIntent.FLAG_IMMUTABLE;
-        }
+        int flag = PendingIntent.FLAG_IMMUTABLE;
 
         return PendingIntent.getActivity(
                 context,

@@ -18,34 +18,26 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# --- Performance & Build Speed ---
+# Remove heavy optimization passes and forceprocessing to speed up builds
+-optimizationpasses 1
 
--dontskipnonpubliclibraryclasses
--forceprocessing
--optimizationpasses 5
--optimizations !field/removal/writeonly,!field/marking/private,!class/merging/*,!code/allocation/variable
-
--keep class * extends android.app.Activity
-
+# --- Logging Optimization ---
+# Strip out debug/verbose logs in release builds safely
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
-    public static int i(...);
-    public static int w(...);
     public static int d(...);
-    public static int e(...);
 }
 
--keepattributes *Annotation*
+# --- Keep Annotations ---
+-keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
 
--dontwarn android.support.v7.**
--keep class android.support.v7.** { *; }
--keep interface android.support.v7.** { *; }
+# --- Activities ---
+# Keep only public activities declared or implied by the manifest
+-keep public class * extends android.app.Activity
 
--dontwarn androidx.**
--keep class androidx.** { *; }
--keep interface androidx.** { *; }
-
-# BadParcelableException
+# --- Parcelable Safety (Prevents BadParcelableException) ---
 -keep class * implements android.os.Parcelable {
-   public static final android.os.Parcelable$Creator *;
+    public static final android.os.Parcelable$Creator *;
 }
