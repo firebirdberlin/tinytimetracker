@@ -2,24 +2,16 @@ package com.firebirdberlin.tinytimetracker;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.AudioAttributes;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings.Global;
-import android.provider.Settings.Secure;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -88,14 +80,12 @@ public class TinyTimeTracker extends BillingHelperActivity
     }
 
 
-    public static boolean checkAndRequestPermission(
+    public static void checkAndRequestPermission(
             AppCompatActivity activity, String permission, int requestCode
     ) {
         if (!hasPermission(activity, permission)) {
             ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
-            return false;
         }
-        return true;
     }
 
     public static boolean hasPermission(Context context, String permission) {
@@ -243,8 +233,8 @@ public class TinyTimeTracker extends BillingHelperActivity
                 )
                 .setMessage(this.getResources().getString(R.string.confirm_delete_question))
                 .setIcon(R.drawable.ic_delete)
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
                     LogDataSource datasource = new LogDataSource(mContext);
                     datasource.delete(currentTracker);
 
@@ -364,15 +354,11 @@ public class TinyTimeTracker extends BillingHelperActivity
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            switch (position) {
-                case 1:
-                    return new CardFragment();
-                case 2:
-                    return new StatsFragment();
-                case 0:
-                default:
-                    return new MainFragment();
-            }
+            return switch (position) {
+                case 1 -> new CardFragment();
+                case 2 -> new StatsFragment();
+                default -> new MainFragment();
+            };
         }
 
         @Override
