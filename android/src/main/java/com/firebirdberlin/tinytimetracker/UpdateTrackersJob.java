@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
-import androidx.work.OutOfQuotaPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.Worker;
@@ -50,7 +49,6 @@ public class UpdateTrackersJob extends Worker {
         OneTimeWorkRequest request =
                 new OneTimeWorkRequest.Builder(UpdateTrackersJob.class)
                         .addTag(TAG)
-                        .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                         .build();
 
         WorkManager.getInstance(context).enqueue(request);

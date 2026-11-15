@@ -21,20 +21,20 @@ apply plugin: 'com.android.application'
 
 dependencies {
     // AndroidX
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0"
-    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0"
+    implementation 'androidx.appcompat:appcompat:1.8.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'androidx.work:work-multiprocess:2.11.0'
-    implementation 'androidx.work:work-runtime-ktx:2.11.0'
+    implementation 'androidx.work:work-multiprocess:2.12.0'
+    implementation 'androidx.work:work-runtime-ktx:2.12.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
 
     // Google
-    implementation 'com.google.guava:guava:33.5.0-android'
+    implementation 'com.google.guava:guava:33.8.0-android'
     implementation 'com.android.billingclient:billing:8.1.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
-    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'com.google.android.material:material:1.14.0'
 
     // Third-party
     implementation 'org.greenrobot:eventbus:3.3.1'
