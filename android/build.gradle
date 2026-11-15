@@ -32,7 +32,7 @@ dependencies {
 
     // Google
     implementation 'com.google.guava:guava:33.8.0-android'
-    implementation 'com.android.billingclient:billing:8.1.0'
+    implementation 'com.android.billingclient:billing:9.1.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
     implementation 'com.google.android.material:material:1.14.0'
 
@@ -64,7 +64,7 @@ android {
         }
     }
     defaultConfig {
-        minSdk 23
+        minSdk 24
         targetSdk 36
         versionCode 82
         versionName "1.8.1"
