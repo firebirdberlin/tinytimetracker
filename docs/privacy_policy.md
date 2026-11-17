@@ -20,7 +20,14 @@ otherwise defined in this Privacy Policy.
 All data processed and stored by the TinyTimeTracker app is kept exclusively on your device. I do
 not collect, store, or transmit any of your personal data or usage information on my servers.
 
-For a better experience, while using my Service, I may request access to necessary device permissions.
+**Location Data Access and Use**
+
+The TinyTimeTracker app accesses **Location Data** (including precise location, approximate location, and background location permissions).
+
+* **Why Location Data is Accessed:** Under Android OS requirements, accessing Wi-Fi network details—such as the Basic Service Set Identifier (BSSID) and Service Set Identifier (SSID)—requires location permissions. TinyTimeTracker accesses location data solely to scan and match connected Wi-Fi access points (SSID/BSSID) to enable automatic time tracking features (e.g., automatically starting or stopping tracker timers when you connect to or disconnect from specific Wi-Fi networks).
+* **Storage and Processing:** All location data and Wi-Fi access point information (SSID/BSSID) are processed exclusively on your device. TinyTimeTracker does not collect, record, transmit, or upload location data or Wi-Fi information to any external server or remote database.
+* **Sharing:** Location data is never shared with third parties, advertisers, or external services.
+* **User Control:** Access to location permissions (including background location) is optional and requested only when Wi-Fi-based automatic time tracking features are used. You can grant, deny, or revoke location permissions at any time through your device's Android settings.
 
 The only way to share data from the TinyTimeTracker app is through the explicit "Share"
 functionality within the app, which is entirely under the user's control.
