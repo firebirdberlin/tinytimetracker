@@ -20,11 +20,7 @@ otherwise defined in this Privacy Policy.
 All data processed and stored by the TinyTimeTracker app is kept exclusively on your device. I do
 not collect, store, or transmit any of your personal data or usage information on my servers.
 
-For a better experience, while using my Service, I may request access to fine and background
-location permissions. This is exclusively for BSSID (Basic Service Set Identifier) matching to
-enable certain app functionalities (e.g., automatic time tracking based on Wi-Fi networks) and is *
-*not used to track your actual geographical location**. Any BSSID information and other data related
-to these permissions will be retained solely on your device and is not collected by me in any way.
+For a better experience, while using my Service, I may request access to necessary device permissions.
 
 The only way to share data from the TinyTimeTracker app is through the explicit "Share"
 functionality within the app, which is entirely under the user's control.

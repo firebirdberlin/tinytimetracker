@@ -20,17 +20,17 @@ Effortless time tracking for your projects! TinyTimeTracker is your simple, mini
 *   **Multiple Accounts:** Manage different projects or clients separately.
 *   **Full Control:** Edit entries or add time manually whenever you need to.
 *   **Data Export:** Export your time logs as a CSV file for easy processing.
-*   **Automatic Wi-Fi Tracking:** Let the app track your time automatically when you're connected to a specific Wi-Fi network (like at the office). Clocking in and out has never been easier!
 
 ## Your Privacy Matters
 
-*   100% Open Source
-*   No Ads & No User Tracking
-*   All your data stays exclusively on your device.
+TinyTimeTracker is a privacy-friendly app. Unless manually exported or shared by the user, your information never leaves your device.
+
+*   **100% Open Source:** Fully transparent code.
+*   **No Ads & No User Tracking:** Your usage habits are your own.
+*   **Local-First Storage:** All your data stays exclusively on your device.
 
 ## Permissions Required & Why
 
-*   **Location (`ACCESS_FINE_LOCATION`):** Android requires this permission to read the name (SSID) of your connected Wi-Fi network. Your location is **never** read, tracked, or stored. This permission is used exclusively for the optional Wi-Fi tracking feature.
 *   **In-App Purchases (`com.android.vending.BILLING`):** Required to handle optional in-app purchases that support the app's development.
 
 ## Build Instructions

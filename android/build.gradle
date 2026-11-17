@@ -1,23 +1,14 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:9.5.1'
-    }
+plugins {
+    id 'com.android.application'
 }
 
 allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://jitpack.io' }
     }
 }
-
-apply plugin: 'com.android.application'
 
 dependencies {
     // AndroidX
@@ -42,35 +33,35 @@ dependencies {
 }
 
 android {
-    compileSdk 37
-    namespace "com.firebirdberlin.tinytimetracker"
+    compileSdk = 37
+    namespace = "com.firebirdberlin.tinytimetracker"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildTypes {
         release {
             lintOptions {
-                checkReleaseBuilds false
+                checkReleaseBuilds = false
                 disable 'MissingTranslation'
-                abortOnError true
+                abortOnError = true
             }
-            minifyEnabled true
-            shrinkResources true
-            proguardFile 'proguard-project.txt'
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles(getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-project.txt')
         }
     }
     defaultConfig {
-        minSdk 24
-        targetSdk 37
-        versionCode 83
-        versionName "1.8.2"
+        minSdk = 24
+        targetSdk = 37
+        versionCode = 83
+        versionName = "1.8.2"
     }
     buildFeatures {
-        buildConfig true
-        renderScript true
-        aidl true
+        buildConfig = true
+        renderScript = true
+        aidl = true
     }
 }
